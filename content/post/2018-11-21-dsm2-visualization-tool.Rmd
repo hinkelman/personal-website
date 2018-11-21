@@ -1,0 +1,111 @@
+---
+title: "DSM2 HYDRO Visualization Tool"
+author: "Travis Hinkelman"
+date: '2018-11-21'
+editor_options:
+  chunk_output_type: console
+slug: DSM2-Viz-Tool
+categories:
+  - R
+  - Shiny
+tags:
+  - DSM2
+  - Electron
+---
+```{r include=FALSE}
+# this is just a convenience for future reference to nuke these up front vs
+# add to individual chunk options
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+```
+## Background
+
+The [Sacramento-San Joaquin Delta](https://sacdeltaguide.atavist.com/) is an inland freshwater estuary subject to intensive management. The [Delta Simulation Model II (DSM2)](http://baydeltaoffice.water.ca.gov/modeling/deltamodeling/models/dsm2/dsm2.cfm) is one of the most commonly used hydrodynamic models for Delta planning and management with modules for hydrodynamics (HYDRO), water quality (QUAL), and particle tracking (PTM). The California Department of Water Resources uses DSM2 for planning and operation of the State Water Project (SWP) and Central Valley Project (CVP) diversion pumping as well as for management and satisfaction of stringent water quality standards. Despite the widespread use of DSM2, we are not aware of any tools for interactively visualizing DSM2 HYDRO output. An easy-to-use visualization tool expands the accessibility of DSM2 output beyond hydrodynamic modelers to include biologists, water managers, and water users.
+
+Our initial work focused on visualizing the effects of inflow and exports on large-scale hydrodynamic patterns across numerous Delta channels. One of our motivating questions was how to identify the ‘footprint’ of diversion pumping at the SWP and CVP facilities. Those interests led us to an interactive, map-based approach where the map both displays large-scale patterns and allows for navigation among channels to display channel-level details. We used the [Shiny](https://shiny.rstudio.com/) web framework to build a [Delta Hydrodynamics](https://fishsciences.shinyapps.io/delta-hydrodynamics/) app that provides interactivity with our analysis of outputs from a set of DSM2 runs. The DSM2 HYDRO Visualization Tool (DSM2 Viz Tool) is a general tool that allows for uploading DSM2 output files to create the same visualizations used in the Delta Hydrodynamics app. 
+
+## DSM2 HYDRO Visualization Tool
+
+As alluded to above, we did not set out to build a general DSM2 visualization tool. Rather, we were following our usual workflow of using R to analyze data and Shiny to make our analysis interactive and accessible. The use of R and Shiny to make a general DSM2 visualization tool is arguably a case of [Maslow's hammer](https://en.wikipedia.org/wiki/Law_of_the_instrument) because a web application is an unusual choice for a tool that involves interaction with the typically large files produced by DSM2. However, [Electron](https://electronjs.org/) allows us to turn our Shiny app into a standalone desktop application. I first heard about the possibility of using Electron with Shiny in this [talk by Katie Sasso](https://www.youtube.com/watch?v=ARrbbviGvjc), but it wasn't until I discovered the [R Shiny Electron (RSE) template](https://github.com/dirkschumacher/r-shiny-electron) that I decided to take the plunge. 
+![](/img/DSM2-Viz-Tool.png)
+In the rest of this post, I will mostly focus on how I used Electron to package a Shiny app as a desktop application. If you want to learn more about the DSM2 Viz Tool, you can [install it](https://github.com/fishsciences/DSM2-Viz-Tool) and play around with the example files. If you just want a quick peek at the core ideas, then take a look at the [Delta Hydrodynamics app](https://fishsciences.shinyapps.io/delta-hydrodynamics/). We are currently working on a short manuscript that describes the DSM2 Viz Tool, which will become the natural starting point for learning about the tool.
+
+### File formats
+
+DSM2 produces output in two file formats: [HEC-DSS](http://www.hec.usace.army.mil/software/hec-dss/) and [HDF5](https://portal.hdfgroup.org/display/HDF5/HDF5). The HEC-DSS format is the older and more commonly used format, but the R package ([DSS-Rip](https://github.com/eheisman/dssrip)) for working with HEC-DSS files only works with 32-bit R on a Windows machine. The R packages ([hdf5r](https://github.com/hhoeflin/hdf5r) and [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html)) for working with HDF5 files don't have the same constraints as DSS-Rip. We chose to use rhdf5 for the DSM2 Viz Tool because the HDF5 libaries are provided as an R package ([Rhdf5lib](https://bioconductor.org/packages/release/bioc/html/Rhdf5lib.html)) rather than requiring installation.  
+
+## R Shiny Electron Build Process
+
+The [R Shiny Electron (RSE) template](https://github.com/dirkschumacher/r-shiny-electron) includes only very basic instructions for how to get started with this process (and they clearly specify that it is not ready for production). There were considerable gaps in my understanding that left me flailing while trying to get things to work (especially on Windows). Below I am describing what I did to get up and running but I make no argument that this process represents best practices.
+
+### Basic setup
+
+The RSE template doesn't mention anything about the arguably obvious steps of installing [Node](https://nodejs.org/), [Electron](https://electronjs.org/), and [Electron Forge](https://electronforge.io/). Node can be installed with pre-built installers from the Node website. After installing Node, Electron and Electron Forge are installed using `npm` from the command line. On Windows, Node installs a Node.js command prompt that I used for any `npm` and `electron-forge` commands (rather than the default Windows command prompt).
+
+Run the following command to install Electron globally.
+```
+npm install -g electron
+```
+Then run this command to install Electron Forge globally.
+```
+npm install -g electron-forge
+```
+Next, clone or download the GitHub repository for the RSE template.
+
+### Build process on Mac
+
+The RSE template repository includes a simple Shiny app. As a first step, I recommend following the steps below to confirm that you can build the executable with the simple app before trying your own app. At the end of this post, I will write more about extra steps required to build the executable for the DSM2 Viz Tool. 
+
+1. Open the terminal and change the directory to the location of `r-shiny-electron` or `r-shiny-electron-master` (see [how to use terminal](https://macpaw.com/how-to/use-terminal-on-mac)).
+
+2. Run `npm install` in the terminal to set up the project in the `r-shiny-electron` directory.
+
+You will get lots of warnings about outdated packages. I played around a bit with trying to update dependencies but was quickly out of my depths and broke the RSE template (but easy enough to start over).
+
+3. Download R binary for Mac by running `./get-r-mac.sh`.
+
+4. Identify and download packages used in Shiny app by running `Rscript add-cran-binary-pkgs.R`.
+
+5. Run `npm start` to test if app launches (and works correctly).
+
+6. If the app works correctly, run `electron-forge make` to build the Mac executable.
+
+The build process will create a folder called `Out` in the `r-shiny-electron` directory. In `Out/r-shiny-electron-darwin-x64`, you will have an executable (`r-shiny-electron.app`) that you can run to test that the app is working correctly. In `Out/make`, you will have a zip file that contains the executable but is better for distributing because of the smaller file size.
+
+It is possible to [build a Windows installer on a Mac](https://github.com/dirkschumacher/r-shiny-electron/issues/25), but it "takes forever." I tried going down this road, but bailed after the process had run for 2 hours without finishing because I had access to a Windows machine for building the app.
+
+### Build process on Windows
+
+If you haven't picked up on it yet, I'm a Mac user. I struggled to figure out how to get set up on a Windows machine and I might not be remembering correctly a few of the details. Hopefully, these instructions are close enough to help you figure it out for yourself.
+
+1. Install [Cygwin](https://cygwin.com/) and the [wget package](https://superuser.com/questions/693284/wget-command-not-working-in-cygwin), which is not installed by default. 
+
+The `wget` function is used in `./get-r-win.sh`. If you have `wget` from another installation process, then you might be able to skip this step. The Cygwin installer asks if you want to install [Chocolatey](https://chocolatey.org/). It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn't install Chocolately as part of the Cygwin installation, you can download an installer from the Chocolatey website.
+
+2. Install `innoextract` with Chocolatey by running `choco install innoextract`
+
+As it turns out, the Chocolatey version of `innoextract` (for unpacking installers created by Inno Setup) will not work with the R installer. We need the development version: [innoextract-1.8-dev-2018-09-09-windows.zip](http://constexpr.org/innoextract/files/snapshots/innoextract-1.8-dev-2018-09-09/). After extracting the development version of `innoextract` from the zip file, you can move it to [where Chocolatey installs packages](https://chocolatey.org/faq#where-does-chocolatey-install-by-default). The main point of Chocolatey for me was that it made it easy to find the location of `innoextract` (and `./get-r-win.sh` found it, too).
+
+3. Open the Node.js command prompt and change the directory to the location of `r-shiny-electron` or `r-shiny-electron-master`.
+
+4. Run `npm install` in the Node.js command prompt to set up the project in the `r-shiny-electron` directory.
+
+5. Download R binary for Windows by running `./get-r-win.sh` in the Cygwin Terminal.
+
+6. Identify and download packages used in Shiny app by running `Rscript add-cran-binary-pkgs.R`.
+
+I unsuccessfully tried to run this line in the default command prompt, the Node.js command prompt, and the Cygwin Terminal. I don't know what I was missing to make that work and I didn't try very hard because I was able to successfully run this line in the [RStudio Terminal](https://support.rstudio.com/hc/en-us/articles/115010737148-Using-the-RStudio-Terminal). Remember to change the directory to `r-shiny-electron`.
+
+7. Run `npm start` in the Node.js command prompt to test if the app launches (and works correctly).
+
+8. If the app works correctly, run `electron-forge make` in the Node.js command prompt to build the Windows executable.
+
+The build process will create a folder called `Out` in the `r-shiny-electron` directory. In `Out/make/squirrel.windows/x64`, you will have an installer executable called `r-shiny-electron-1.0.0 Setup.exe`.
+
+### Customizing build process for DSM2 Viz Tool
+
+After working through the build process on the r-shiny-electron example app, I downloaded a fresh version of the RSE template, renamed the `r-shiny-electron` directory to `DSM2-Viz-Tool`, removed the `app.R` file from `DSM2-Viz-Tool/shiny`, and replaced it with the files for the [DSM2 Viz Tool Shiny app](https://github.com/fishsciences/DSM2-Viz-Tool/tree/master/shiny). I also opened `package.json` in a text editor and changed a [few fields](https://github.com/fishsciences/DSM2-Viz-Tool/blob/master/package.json) (e.g., name, productName, version, description, author). 
+
+Next, I started working through the build process described above. However, before running `npm start` I needed to add the binary files for the `rhdf5` and `Rhdf5lib` packages because `Rscript add-cran-binary-pkgs.R` doesn't find Bioconductor packages. The binary files for Mac and Windows are available at the package websites (linked above) and need to be placed in [`DSM2-Viz-Tool/r-mac/library`](https://github.com/fishsciences/DSM2-Viz-Tool/tree/master/r-mac/library) and [`DSM2-Viz-Tool/r-win/library`](https://github.com/fishsciences/DSM2-Viz-Tool/tree/master/r-win/library), respectively. Then, I was able to finish the build process.
+
+Working through this process involved plenty of frustration (because of my knowledge gaps), but it was extremely satisfying to arrive at the end goal of packaging the DSM2 Viz Tool as a standalone desktop application.
+
