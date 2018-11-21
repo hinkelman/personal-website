@@ -107,7 +107,7 @@ enableGitInfo = false
   font_size = "small"
 
   # Description for social sharing and search engines. If undefined, author role is used in place.
-  description = "Professional website of Travis Hinkelman."
+  description = "Personal website of Travis Hinkelman"
 
   # Default image for social sharing and search engines. Place image in `static/img/` folder and specify image name here.
   sharing_image = ""
