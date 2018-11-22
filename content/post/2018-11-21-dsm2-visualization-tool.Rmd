@@ -39,7 +39,7 @@ The [R Shiny Electron (RSE) template](https://github.com/dirkschumacher/r-shiny-
 
 ### Basic setup
 
-The RSE template doesn't mention anything about the arguably obvious steps of installing [Node](https://nodejs.org/), [Electron](https://electronjs.org/), and [Electron Forge](https://electronforge.io/). Node can be installed with pre-built installers from the Node website. After installing Node, Electron and Electron Forge are installed using `npm` from the command line. On Windows, Node installs a Node.js command prompt that I used for any `npm` and `electron-forge` commands (rather than the default Windows command prompt).
+The RSE template doesn't mention anything about the arguably obvious steps of installing [Node](https://nodejs.org/), [Electron](https://electronjs.org/), and [Electron Forge](https://electronforge.io/). Node can be installed with pre-built installers from the Node website. After installing Node, Electron and Electron Forge are installed using `npm` from the command line. On Windows, Node installs a Node.js command prompt that I used for any `npm` and `electron-forge` commands (rather than the default Windows command prompt). On Windows, the Node installer asks if you want to install [Chocolatey](https://chocolatey.org/). It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn't install Chocolately as part of the Node installation, you can download an installer from the Chocolatey website.
 
 Run the following command to install Electron globally.
 ```
@@ -77,9 +77,7 @@ It is possible to [build a Windows installer on a Mac](https://github.com/dirksc
 
 If you haven't picked up on it yet, I'm a Mac user. I struggled to figure out how to get set up on a Windows machine and I might not be remembering correctly a few of the details. Hopefully, these instructions are close enough to help you figure it out for yourself.
 
-1. Install [Cygwin](https://cygwin.com/) and the [wget package](https://superuser.com/questions/693284/wget-command-not-working-in-cygwin), which is not installed by default. 
-
-The `wget` function is used in `./get-r-win.sh`. If you have `wget` from another installation process, then you might be able to skip this step. The Cygwin installer asks if you want to install [Chocolatey](https://chocolatey.org/). It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn't install Chocolately as part of the Cygwin installation, you can download an installer from the Chocolatey website.
+1. Install [Cygwin](https://cygwin.com/) and the [wget package](https://superuser.com/questions/693284/wget-command-not-working-in-cygwin), which is not installed by default. The `wget` function is used in `./get-r-win.sh`. If you have `wget` from another installation process, then you might be able to skip this step. 
 
 2. Install `innoextract` with Chocolatey by running `choco install innoextract`
 
