@@ -46,7 +46,7 @@ I really enjoy making the bits and bobs move around on the screen. When I starte
 
 ### 3.) Scientific computing libraries
 
-We are primarily an R shop at Cramer Fish Sciences but I have some latitude to choose a different language for a new project. Languages with existing libraries for scientific computing increase the likelihood that I would be able to use a new language at work. Languages that are faster than R^[Yes, yes, I know that performance is not a property of the language per se.] would allow me to more easily^[By more easily, I'm thinking about languages that might have similar expressiveness to R but better performance without dropping down to C/C++.] tackle larger computations (e.g., explore larger parameter space of model, increase number of replications).  
+We are primarily an R shop at Cramer Fish Sciences but I have some latitude to choose a different language for a new project. Languages with existing libraries for scientific computing increase the likelihood that I would be able to use a new language at work. Languages that are faster than R^[Yes, yes, I know that performance is not a property of the language per se.] would allow me to more easily^[By more easily, I'm thinking about languages that might have similar expressiveness to R but better performance without dropping down to C/C++.] tackle larger computations (e.g., explore larger parameter space, increase number of replications, etc.).  
 
 ### 4.) Broaden my programming experience
 
@@ -62,7 +62,7 @@ Professionally, Julia is a really obvious choice for me. Julia is designed for n
 
 ### [Red](https://www.red-lang.org)
 
-When I first learned about Red a few months ago, I was blown away by how easy it is to create [GUI apps](https://redprogramming.com/Short%20Red%20Code%20Examples.html). I was also intrigued by the [high priority](https://www.red-lang.org/p/about.html) the Red team places on effective cross-compilation, small executables, and zero dependencies. Red also strives to be a "full-stack" programming language by including a dialect of Red called Red/System for C-level performance. Red scores off the charts on GUI capabilities and meets my criteria of being friendly and approachable. And, through Red/System, performance should be a non-issue. However, Red is arguably a strange choice for scientific computing so my potential uses at work are limited. Mostly, though, Red is in the alpha phase of development and I'm reluctant to invest too much time in it at this point. But I definitely plan to keep an eye on it.
+When I first learned about Red a few months ago, I was blown away by how easy it makes [GUI programming](https://redprogramming.com/Short%20Red%20Code%20Examples.html). I was also intrigued by the [high priority](https://www.red-lang.org/p/about.html) the Red team places on effective cross-compilation, small executables, and zero dependencies. Red also strives to be a "full-stack" programming language by including a dialect of Red called Red/System for C-level performance. Red scores off the charts on GUI capabilities and meets my criteria of being friendly and approachable. And, through Red/System, performance should be a non-issue. However, Red is arguably a strange choice for scientific computing so my potential uses at work are limited. Mostly, though, Red is in the alpha phase of development and I'm reluctant to invest too much time in it at this point. But I definitely plan to keep an eye on it.
 
 ### [Elm](https://elm-lang.org)
 
