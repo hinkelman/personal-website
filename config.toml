@@ -13,7 +13,7 @@ title = "Travis Hinkelman"
 
 # Your copyright notice - appears in site footer.
 # To display a copyright symbol, type `&copy;`.
-copyright = "&copy; 2018 Travis Hinkelman"
+copyright = "&copy; 2019 Travis Hinkelman"
 
 theme = "hugo-academic"
 enableEmoji = true
@@ -217,7 +217,7 @@ enableGitInfo = false
     #   0 = Simple
     #   1 = Detailed
     #   2 = Stream
-    post_format = 2
+    post_format = 0
 
     # Publication list format.
     #   0 = Simple
@@ -225,13 +225,13 @@ enableGitInfo = false
     #   2 = APA
     #   3 = MLA
     #   4 = Stream
-    publication_format = 4
+    publication_format = 0
 
     # Talk list format.
     #   0 = Simple
     #   1 = Detailed
     #   2 = Stream
-    talk_format = 2
+    talk_format = 0
 
   # Social/Academic Networking
   #
@@ -298,23 +298,23 @@ enableGitInfo = false
   align_right = true
 
 [[menu.main]]
-  name = "Home"
+  name = "About"
   url = "#about"
   weight = 1
 
 [[menu.main]]
-  name = "Publications"
-  url = "#publications"
-  weight = 2
-
-#[[menu.main]]
-#  name = "Projects"
-#  url = "#projects"
-#  weight = 4
-  
-[[menu.main]]
   name = "Posts"
   url = "#posts"
+  weight = 2
+
+[[menu.main]]
+  name = "Projects"
+  url = "#projects"
+  weight = 3
+  
+[[menu.main]]
+  name = "Publications"
+  url = "#publications"
   weight = 4
 
 #[[menu.main]]
