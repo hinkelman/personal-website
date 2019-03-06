@@ -24,6 +24,9 @@ paginate = 10
 
 # Enable comments by entering your Disqus shortname
 disqusShortname = ""
+# followed instructions here to enable Disqus (https://notes.peter-baumgartner.net/tutorial/how-to-install-disqus-on-hugo/)
+# totally forgot about doing that and wasted a ton of time trying to figure out how to get disqus to stop trying to display on my site
+# needed to change comments.html back to original
 
 # Enable analytics by entering your Google Analytics tracking ID
 googleAnalytics = "UA-129874255-1"
