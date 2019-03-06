@@ -1,0 +1,137 @@
+---
+title: "Shiny Scorekeeper: DataTables from the DT package as CRUD app interface"
+author: "Travis Hinkelman"
+date: '2019-03-03'
+draft: true
+editor_options:
+  chunk_output_type: console
+slug: shiny-scorekeeper-datatable-crud
+categories:
+  - R
+  - Shiny
+tags:
+  - basketball
+  - DataTables
+  - DT package
+  - CRUD
+---
+
+
+
+<p><a href="https://github.com/hinkelman/Shiny-Scorekeeper">Shiny Scorekeeper</a> is a basketball scorekeeper app built with the <a href="https://shiny.rstudio.com">Shiny</a> web framework for <a href="https://www.r-project.org">R</a>. I’ve written about the motivation for creating Shiny Scorekeeper on my <a href="https://www.travishinkelman.com/project/shiny-scorekeeper/">projects page</a>. The short version is that I needed a new app for scoring video of my son’s basketball games and decided it would be a good learning experience to try to build my own. In this post, I describe using <a href="https://rstudio.github.io/DT/">DataTables from the DT package</a> as the interface to the CRUD (create-read-update-delete) features in Shiny Scorekeeper.</p>
+<p>As with many decisions when building Shiny Scorekeeper, I decided to bumble through creating my own CRUD components rather than follow <a href="https://github.com/bborgesr/wsds2017/tree/master/app">existing</a> <a href="https://ipub.com/shiny-crud-app/">examples</a>. Eventually, I settled on a spreadsheet interface as a familiar, intuitive, and compact approach for creating teams and rosters in Shiny Scorekeeper. I had some previous experience using <a href="https://jrowen.github.io/rhandsontable/">rhandsontables</a> as spreadsheets in Shiny apps but the DT package also provides the option to <a href="https://blog.rstudio.com/2018/03/29/dt-0-4/">edit Datatables</a> and I decided it would be fun to learn more about the capabilities of the DT package.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></p>
+<p>Shiny Scorekeeper uses a homemade database comprised of a set of CSV files linked with ID columns. The Teams table includes columns for TeamID, Season, League, and Coach; the Players table includes PlayerID, FirstName, and LastName; and, the Rosters table includes TeamID, PlayerID, and Number (i.e., jersey number).</p>
+<p>Teams.csv is read from file, stored as a reactive value, and rendered as a DataTable (with custom display options). The proxy object (<code>proxyTeams</code>) allows for manipulation of the DataTable.</p>
+<pre><code>  output$teamsTable = renderDT(
+    rv[[&quot;teams&quot;]], selection = &quot;single&quot;, editable = TRUE, 
+    style = &quot;bootstrap&quot;, rownames = FALSE,
+    options = list(searching = FALSE, bPaginate = FALSE, info = FALSE,
+                   columnDefs = list(list(visible = FALSE, targets = 0)))) # hide TeamID column
+  
+  proxyTeams = dataTableProxy(&quot;teamsTable&quot;)</code></pre>
+<p>When the <code>teamsTable</code> is edited, the edited value replaces the previous value in <code>rv[[&quot;teams&quot;]]</code> and the new <code>rv[[&quot;teams&quot;]]</code> object replaces <code>proxyTeams</code>. The <code>coerceValue</code> function coerces the edited value (passed as character string) to the type of the value that it is replacing.</p>
+<pre><code>  observeEvent(input$teamsTable_cell_edit, {
+    info = input$teamsTable_cell_edit
+    i = info$row
+    j = info$col + 1L  # column index offset by 1 b/c TeamID column hidden
+    v = info$value
+    rv[[&quot;teams&quot;]][i, j] = coerceValue(v, rv[[&quot;teams&quot;]][i, j])
+    replaceData(proxyTeams, rv[[&quot;teams&quot;]], resetPaging = FALSE, rownames = FALSE) 
+  })</code></pre>
+<pre><code>  observe({
+    toggle(&quot;delete_teams_row&quot;, condition = nrow(rv[[&quot;teams&quot;]]) &gt; 1 &amp; !is.null(input$teamsTable_rows_selected))
+  })
+  
+  observeEvent(input$delete_teams_row,{
+    req(input$teamsTable_rows_selected)
+    i = input$teamsTable_rows_selected
+    rv[[&quot;rosters&quot;]] = rv[[&quot;rosters&quot;]] %&gt;% 
+      filter(TeamID != rv[[&quot;teams&quot;]]$TeamID[i])  # drop old roster
+    rv[[&quot;players&quot;]] = rv[[&quot;players&quot;]] %&gt;% 
+      filter(PlayerID %in% rv[[&quot;rosters&quot;]][[&quot;PlayerID&quot;]]) # drop players not on any rosters
+    rv[[&quot;teams&quot;]] &lt;- rv[[&quot;teams&quot;]][-i,]  # needs to come last b/c rv$rosters uses rv$teams
+    replaceData(proxyTeams, rv[[&quot;teams&quot;]], resetPaging = FALSE, rownames = FALSE)  # important
+  })</code></pre>
+<p>Adding a row to the teams table</p>
+<pre><code>  observeEvent(input$add_teams_row,{
+    # addRow() only works when server = FALSE
+    req(rv[[&quot;teams&quot;]])
+    
+    # update master list of team IDs
+    tid = nrow(teamIDs) + 1L # ID and row number are the same
+    teamIDs[tid,] &lt;&lt;- tid
+    write.csv(teamIDs, paste0(data_fldr, &quot;TeamIDs.csv&quot;), row.names = FALSE)
+    
+    # update master list of player IDs
+    pid = nrow(playerIDs) + 1L # ID and row number are the same
+    playerIDs[pid,] &lt;&lt;- pid
+    write.csv(playerIDs, paste0(data_fldr, &quot;PlayerIDs.csv&quot;), row.names = FALSE)
+    
+    # update all of the relevant tables
+    ti = nrow(rv[[&quot;teams&quot;]]) + 1L
+    rv[[&quot;teams&quot;]][ti,] = list(tid, sample(ex_seasons, 1), sample(ex_leagues, 1), sample(ex_coaches, 1))
+    ri = nrow(rv[[&quot;rosters&quot;]]) + 1L
+    rv[[&quot;rosters&quot;]][ri,] = list(tid, pid, sample(ex_nums, 1))
+    pi = nrow(rv[[&quot;players&quot;]]) + 1L
+    rv[[&quot;players&quot;]][pi,] = list(pid, sample(ex_names, 1), &quot;&quot;)
+    replaceData(proxyTeams, rv[[&quot;teams&quot;]], resetPaging = FALSE, rownames = FALSE)  # important
+  })</code></pre>
+<p>For many years, I’ve had intentions of learning another programming language. I would guess that I’ve done 70-80% of my programming work in <a href="https://www.r-project.org">R</a> and 20-30% in <a href="https://ccl.northwestern.edu/netlogo/">NetLogo</a>. Those two languages have served me well and I haven’t yet been in a position where I was required to learn a new language for work. Lately, I’ve been thinking about my professional development goals and how learning a new programming language might fit into those goals.</p>
+<p><a href="https://www.python.org">Python</a> is the language that has lingered longest on my list of things I should learn. I’ve poked at Python over the years but never made a serious effort to learn it because I was generally able to find an R-based solution to the problems that I was trying to solve. At various times, I’ve also thought that <a href="https://www.javascript.com">Javascript</a> was a promising choice for me, but then <a href="https://shiny.rstudio.com">Shiny</a> came along and mostly removed any pressing need to learn Javascript.</p>
+<p>In my current role, arguably, the most obvious professional development choices are to deepen my knowledge of R (still lots to learn even after 10+ years), learn enough C++ (via <a href="http://www.rcpp.org">Rcpp</a>) to speed up my simulation models, and learn enough Javascript to extend my Shiny apps. My primary reason for not investing in learning C++ and Javascript at this time is their reputations as big, messy languages.</p>
+<p>Lately, I’ve spent a lot of time reading about different programming languages. The number of options is overwhelming and I was paralyzed by the thought of making the wrong choice. Then, I came across the following comment on learning programming languages<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>:</p>
+<blockquote>
+<p>I’ve dabbled and tinkered in a lot of other languages, always looking for what fits best in my brain, is pleasant to use, and (subjectively) makes me most effective.</p>
+</blockquote>
+<p>This struck me as a much healthier perspective on learning new programming languages. No need to go all-in on a programming language based solely on reading other peoples’ opinions. Instead, I should take several languages for a quick test drive and trust my own assessment about whether any of those languages fit me well. Rather than just trusting my gut, though, I decided to identify the features that I thought were most important for my current goals and interests.</p>
+<div id="friendly-accessible-high-level" class="section level3">
+<h3>1.) Friendly, accessible, high-level</h3>
+<p>I have no computer science background and only domain-specific programming experience. I don’t want to struggle with a language that is finicky to get up and running. I want to have access to an IDE that is easy to set up. I’ve been spoiled by the <a href="https://www.rstudio.com/products/rstudio/">RStudio IDE</a> and NetLogo’s development environment. Mostly, I want to reduce the initial friction to get me to actually start learning the language.</p>
+</div>
+<div id="gui-capabilities" class="section level3">
+<h3>2.) GUI capabilities</h3>
+<p>I really enjoy making the bits and bobs move around on the screen. When I started learning Shiny 5+ yrs ago, I was convinced that web applications were the future. Now, I find myself more interested in learning how to develop desktop applications, preferably without the bloat and baggage of <a href="https://electronjs.org">Electron</a> (but see my previous <a href="https://www.travishinkelman.com/post/dsm2-viz-tool/">post</a>).</p>
+</div>
+<div id="scientific-computing-libraries" class="section level3">
+<h3>3.) Scientific computing libraries</h3>
+<p>We are primarily an R shop at Cramer Fish Sciences but I have some latitude to choose a different language for a new project. Languages with existing libraries for scientific computing increase the likelihood that I would be able to use a new language at work. Languages that are faster than R<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> would allow me to more easily<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> tackle larger computations (e.g., explore larger parameter space, increase number of replications, etc.).</p>
+</div>
+<div id="broaden-my-programming-experience" class="section level3">
+<h3>4.) Broaden my programming experience</h3>
+<p>I tend to think in an imperative programming style. ‘For’ loops make frequent appearances in my code. I’ve not yet strongly embraced the functional features in R or NetLogo. Clearly, there is plenty of room to expand my programming horizons. Because of the apparent benefits of functional programming in data science, I have prioritized learning functional programming concepts over object-oriented programming concepts but I have the intention to eventually make a serious effort to learn an object-oriented programming language. From an educational standpoint, I’m drawn to learning languages that wholly embrace a single paradigm (e.g., <a href="https://elm-lang.org">Elm</a>, <a href="https://en.wikipedia.org/wiki/Smalltalk">Smalltalk</a>). For work, though, it seems most pragmatic to focus on languages that are multi-paradigm. I also want to embrace the idea that learning a new language won’t necessarily lead to that language replacing R but perhaps allow me to use R more effectively through a deeper understanding of programming in general.</p>
+<hr />
+<p>With those features in mind, here are my preliminary thoughts on the languages that I’ve spent the most time reading about (and even writing a few lines of code).</p>
+</div>
+<div id="julia" class="section level3">
+<h3><a href="https://www.julialang.org">Julia</a></h3>
+<p>Professionally, Julia is a really obvious choice for me. Julia is designed for numerical and scientific programming with the goal of pairing high-level syntax with performance on par with C. Julia definitely scores well on my scientific computing and performance criteria and I think it fairs reasonably well on the friendly and accessible front. However, I’m not sure if Julia is the obvious choice to expand my programming horizons and my understanding is that it is not yet a very obvious choice for building desktop GUI applications.</p>
+</div>
+<div id="red" class="section level3">
+<h3><a href="https://www.red-lang.org">Red</a></h3>
+<p>When I first learned about Red a few months ago, I was blown away by how easy it makes <a href="https://redprogramming.com/Short%20Red%20Code%20Examples.html">GUI programming</a>. I was also intrigued by the <a href="https://www.red-lang.org/p/about.html">high priority</a> the Red team places on effective cross-compilation, small executables, and zero dependencies. Red also strives to be a “full-stack” programming language by including a dialect of Red called Red/System for C-level performance. Red scores off the charts on GUI capabilities and meets my criteria of being friendly and approachable. And, through Red/System, performance should be a non-issue. However, Red is arguably a strange choice for scientific computing so my potential uses at work are limited. Mostly, though, Red is in the alpha phase of development and I’m reluctant to invest too much time in it at this point. But I definitely plan to keep an eye on it.</p>
+</div>
+<div id="elm" class="section level3">
+<h3><a href="https://elm-lang.org">Elm</a></h3>
+<p>Elm is described as a delightful language for reliable web apps. In my limited experience with it, I definitely found it delightful. I was drawn to Elm for its reputation as one of the best languages for learning functional programming. The compiler error messages in Elm are amazing; very helpful to a beginner. Elm scores well on my first and fourth criteria. Obviously, because it is a front-end language, it would also scratch my itch to control the pixels on my screen but it doesn’t scratch my growing itch to learn about desktop GUI programming. More obviously, Elm isn’t positioned as a tool for scientific computing. I’m not sure if I will swing back around to trying to learn Elm. I guess it depends on my oscillating interest in web development (currently on a down cycle).</p>
+</div>
+<div id="pharo" class="section level3">
+<h3><a href="https://pharo.org">Pharo</a></h3>
+<p>Pharo is a modern implementation of Smalltalk; a pure, object-oriented programming languge. Smalltalk is lauded for its simple syntax and live-coding environment. It is considered beginner friendly but, honestly, I found it intimidating because it is so different from the type of programming that I’ve done. In fairness, though, I was just flailing around on my own and not following any tutorials. When I decide to take the plunge and learn object-oriented programming, I will definitely pick up Pharo as my language of choice.</p>
+</div>
+<div id="clojure" class="section level3">
+<h3><a href="https://clojure.org">Clojure</a></h3>
+<p>Clojure is the language on this list that I spent the least time investigating. I had identified Racket (see below) as a prime candidate language to learn early in my process. As I browsed Racket materials, I became concerned that the community was too academic (with emphasis on programming language theory). I eventually identified Clojure as a language similar to Racket but with a community that was more focused on production than research. Arguably, there is a trade-off between my first and third criteria. Emphasizing the 1st criteria favors Racket whereas the 3rd favors Clojure. I decided that the 1st criteria was more important for me at this stage and re-upped on my commitment to learn Racket.</p>
+</div>
+<div id="racket" class="section level3">
+<h3><a href="https://www.racket-lang.org">Racket</a></h3>
+<p>Racket managed to stay at the top of my list of “next programming languages to learn” despite my flirtation with several other languages. Racket started as a Scheme implementation but has grown to include the “best of Scheme and Lisp.” The killer feature of Racket is being able to easily implement your own programming languages in Racket. Honestly, that is not a feature that stirs much interest for me but maybe I will grow to appreciate it later. Mostly, I was drawn to Racket because it has a reputation as beginner friendly with a good IDE (<a href="https://docs.racket-lang.org/drracket/index.html">DrRacket</a>). It is dead simple to install Racket and get started with DrRacket. On my short list here, only Pharo is comparable. The Scheme heritage means that Racket has simple syntax. Thus, Racket fully meets my first criteria. Racket is a general-purpose language that comes “batteries included” with an extensive standard library, including a GUI toolkit, which ticks my second box. On the face of it, Racket is a reasonable choice for scientific computing but <a href="https://github.com/racket/racket/wiki/Scientific-Computing">has not been widely embraced in that domain</a>. Nonetheless, Racket has decent performance and generally outperforms Python in the <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/faster/racket-python3.html">benchmarks game.</a> I’m not sure if Racket will expand my programming horizons as much as languages like Elm and Pharo but I expect the ways that it expands my programming experience to be highly relevant to my work in R because both Racket and R have a Scheme and Lisp heritage.</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>For a fancier interface to editable DataTables, check out the <a href="https://www.bryer.org/post/2018-22-26-dtedit/">DTEdit package.</a><a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p><a href="https://www.quora.com/Why-is-using-a-GUI-in-most-of-all-programming-languages-such-a-hassle-given-that-Rebol-and-Red-have-such-elegant-solutions">Quora answer by Gregg Irwin</a><a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Yes, yes, I know that performance is not a property of the language per se.<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>By more easily, I’m thinking about languages that might have similar expressiveness to R but better performance without dropping down to C/C++.<a href="#fnref4">↩</a></p></li>
+</ol>
+</div>
