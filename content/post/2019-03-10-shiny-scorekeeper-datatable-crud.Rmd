@@ -1,7 +1,7 @@
 ---
 title: "Shiny Scorekeeper: DataTables from the DT package as CRUD app interface"
 author: "Travis Hinkelman"
-date: '2019-03-03'
+date: '2019-03-10'
 draft: true
 editor_options:
   chunk_output_type: console
@@ -21,7 +21,7 @@ tags:
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
 
-[Shiny Scorekeeper](https://github.com/hinkelman/Shiny-Scorekeeper) is a basketball scorekeeper app built with the [Shiny](https://shiny.rstudio.com) web framework for [R](https://www.r-project.org). I've written about the motivation for creating Shiny Scorekeeper on my [projects page](https://www.travishinkelman.com/project/shiny-scorekeeper/). The short version is that I needed a new app for scoring video of my son's basketball games and decided it would be a good learning experience to try to build my own. In this post, I describe using [DataTables from the DT package](https://rstudio.github.io/DT/) as the interface to the CRUD (create-read-update-delete) features in Shiny Scorekeeper.
+[Shiny Scorekeeper](https://github.com/hinkelman/Shiny-Scorekeeper) is a basketball scorekeeper app built with the [Shiny](https://shiny.rstudio.com) web framework for [R](https://www.r-project.org). I've written about the motivation for creating Shiny Scorekeeper on my [projects page](/project/shiny-scorekeeper/). The short version is that I needed a new app for scoring video of my son's basketball games and decided it would be a good learning experience to try to build my own. In this post, I describe using [DataTables from the DT package](https://rstudio.github.io/DT/) as the interface to the CRUD (create-read-update-delete) features in Shiny Scorekeeper.
 
 As with many decisions when building Shiny Scorekeeper, I decided to bumble through creating my own CRUD components rather than follow [existing](https://github.com/bborgesr/wsds2017/tree/master/app) [examples](https://ipub.com/shiny-crud-app/). Eventually, I settled on a spreadsheet interface as a familiar, intuitive, and compact approach for creating teams and rosters in Shiny Scorekeeper. I had some previous experience using [rhandsontables](https://jrowen.github.io/rhandsontable/) as spreadsheets in Shiny apps but the DT package also provides the option to [edit Datatables](https://blog.rstudio.com/2018/03/29/dt-0-4/) and I decided it would be fun to learn more about the capabilities of the DT package.^[For a fancier interface to editable DataTables, check out the [DTEdit package.](https://www.bryer.org/post/2018-22-26-dtedit/)] 
 

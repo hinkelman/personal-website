@@ -60,7 +60,7 @@ The following is a list of missing features that I decided not to pursue. Some i
 * Presenting confirmation message when trying to close app with unsaved changes.
 * Including win-loss record in team-level summary statistics.
 
-### Package Dependencies
+### Dependencies
 * [shiny](http://shiny.rstudio.com)
 * [shinydashboard](https://rstudio.github.io/shinydashboard/)
 * [shinyWidgets](https://dreamrs.github.io/shinyWidgets/index.html)

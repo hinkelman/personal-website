@@ -1,0 +1,4 @@
+# A basic redirect rule
+[[redirects]]
+  from = "/post/dsm2-viz-tool/"
+  to = "/post/deploy-shiny-electron/"
