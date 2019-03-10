@@ -13,7 +13,7 @@ title = "Travis Hinkelman"
 
 # Your copyright notice - appears in site footer.
 # To display a copyright symbol, type `&copy;`.
-copyright = "&copy; 2019 Travis Hinkelman"
+copyright = "&copy; 2018-2019 Travis Hinkelman"
 
 theme = "hugo-academic"
 enableEmoji = true
@@ -214,7 +214,7 @@ enableGitInfo = false
   # Configuration of project pages.
   [params.projects]
     # List publications and talks related to the project?
-    list_children = true
+    list_children = false
 
     # Post list format.
     #   0 = Simple
