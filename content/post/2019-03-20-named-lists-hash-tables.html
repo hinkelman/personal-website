@@ -1,0 +1,62 @@
+---
+title: "Storing parameters in named lists and hash tables in R and Racket"
+author: "Travis Hinkelman"
+date: '2019-03-20'
+editor_options:
+  chunk_output_type: console
+slug: named-lists-hash-tables
+categories:
+  - R
+  - Racket
+tags:
+  - named list
+  - hash tables
+  - data structures
+---
+
+
+
+<p>When building a simulation model in R, I might want to group related input parameters into a data structure. For example, in a life cycle model with resident and anadromous fish, you might use different fecundity parameters for each life history type. One option is to create different objects for each fecundity parameter.</p>
+<pre><code>fecundity_resident = 1000
+fecundity_anadromous = 4000</code></pre>
+<p>That option is not unreasonable with only two fecundity parameters but it becomes cluttered with many values. You can combine these values into a named vector.</p>
+<pre><code># create named vector
+fecundity = c(&quot;resident&quot; = 1000,
+              &quot;anadromous&quot; = 4000)</code></pre>
+<p>The fecundity value is then looked up by name, which is safer than by position, e.g., <code>fecundity[[&quot;resident&quot;]]</code> returns <code>1000</code>.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></p>
+<p>When a parameter differs across multiple groups, a nested named list fits the bill. In the next example, the spawning probability parameter is different between sexes and across age classes. The nested list structure is easy to read and indexing is similar to using a named vector.</p>
+<pre><code># create nested named list
+spawn_prob = list(&quot;female&quot; = list(&quot;0-1&quot; = 0, 
+                                  &quot;1-2&quot; = 0,
+                                  &quot;2-3&quot; = 0.15,
+                                  &quot;3-4&quot; = 0.4,
+                                  &quot;4+&quot; = 0.8),
+                  &quot;male&quot; = list(&quot;0-1&quot; = 0, 
+                                &quot;1-2&quot; = 0.1,
+                                &quot;2-3&quot; = 0.4,
+                                &quot;3-4&quot; = 0.6,
+                                &quot;4+&quot; = 0.9))
+# index nested named list
+spawn_prob[[&quot;male&quot;]][[&quot;3-4&quot;]]</code></pre>
+<p>I am currently <a href="/post/programming-horizons/">learning Racket</a> by trying to <a href="/post/for-loop-r-racket">translate small examples of R code</a> into Racket code. A big part of that translation is understanding the differences between the data structures in <a href="http://adv-r.had.co.nz/Data-structures.html">R</a> and <a href="https://beautifulracket.com/explainer/data-structures.html">Racket</a>.</p>
+<p>Racket has a <a href="https://docs.racket-lang.org/reference/pairs.html">list data structure</a> but values can only be referenced by position, not name. However, Racket’s hash tables provide a similar structure to R’s named lists, which allows for an easy translation.</p>
+<pre><code>; create nested hash table
+(define spawn-prob
+  (hash &quot;female&quot; (hash &quot;0-1&quot; 0
+                       &quot;1-2&quot; 0
+                       &quot;2-3&quot; 0.15
+                       &quot;3-4&quot; 0.4
+                       &quot;4+&quot; 0.8)
+        &quot;male&quot; (hash &quot;0-1&quot; 0
+                     &quot;1-2&quot; 0.1
+                     &quot;2-3&quot; 0.4
+                     &quot;3-4&quot; 0.6
+                     &quot;4+&quot; 0.9)))
+; index nested hash table
+(hash-ref (hash-ref spawn-prob &quot;male&quot;) &quot;3-4&quot;)</code></pre>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Note that indexing with <code>[</code> returns the name and the value. Using <code>[[</code> returns the value only.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>

@@ -42,7 +42,7 @@ I have no computer science background and only domain-specific programming exper
 
 ### 2.) GUI capabilities
 
-I really enjoy making the bits and bobs move around on the screen. When I started learning Shiny 5+ yrs ago, I was convinced that web applications were the future. Now, I find myself more interested in learning how to develop desktop applications, preferably without the bloat and baggage of [Electron](https://electronjs.org) (but see my previous [post](https://www.travishinkelman.com/post/dsm2-viz-tool/)).
+I really enjoy making the bits and bobs move around on the screen. When I started learning Shiny 5+ yrs ago, I was convinced that web applications were the future. Now, I find myself more interested in learning how to develop desktop applications, preferably without the bloat and baggage of [Electron](https://electronjs.org) (but see my previous [post](/post/deploy-shiny-electron/)).
 
 ### 3.) Scientific computing libraries
 

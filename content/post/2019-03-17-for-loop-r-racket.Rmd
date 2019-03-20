@@ -18,7 +18,7 @@ tags:
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
 
-I have recently started [learning Racket](post/programming-horizons/). For a first task, I tried to build a simple age-structured population model. I hit a stumbling block and reached out to the helpful folks on the [Racket mailing list](https://groups.google.com/forum/#!topic/racket-users/IqM-bm42Ecw). In this post, I recap the mailing list exchange with a target audience of R programmers that are interested in learning more about Racket.
+I have recently started [learning Racket](/post/programming-horizons/). For a first task, I tried to build a simple age-structured population model. I hit a stumbling block and reached out to the helpful folks on the [Racket mailing list](https://groups.google.com/forum/#!topic/racket-users/IqM-bm42Ecw). In this post, I recap the mailing list exchange with a target audience of R programmers that are interested in learning more about Racket.
 
 The simple model used for this exercise is a deterministic [multistage Beverton-Holt model](https://www.nrcresearchpress.com/doi/abs/10.1139/f06-056#.XIVDhi2ZPOQ). In this example, we consider a hypothetical population with five annual age classes. 
 
