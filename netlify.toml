@@ -2,3 +2,7 @@
 [[redirects]]
   from = "/post/dsm2-viz-tool/"
   to = "/post/deploy-shiny-electron/"
+  
+[[redirects]]
+  from = "/post/shiny-scorekeeper-datatable-crud/"
+  to = "/post/dt-datatable-crud/"
