@@ -1,0 +1,53 @@
+---
+title: "DSM2 interactive map"
+author: "Travis Hinkelman"
+draft: true
+date: '2019-03-24'
+editor_options:
+  chunk_output_type: console
+slug: dsm2-interactive-map
+categories:
+  - R
+  - Shiny
+tags:
+  - DSM2
+  - leaflet
+---
+```{r include=FALSE}
+# this is just a convenience for future reference to nuke these up front vs
+# add to individual chunk options
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+```
+The [Delta Simulation Model II (DSM2)](http://baydeltaoffice.water.ca.gov/modeling/deltamodeling/models/dsm2/dsm2.cfm) is a hydrodynamic model used for [Sacramento-San Joaquin Delta](https://sacdeltaguide.atavist.com/) planning and management. When working with DSM2 output, I frequently need to look up the location of channels and nodes in the model. A map of all of the channels and nodes (and more) is provided with DSM2 as a [PDF file](/pdf/DSM2_Grid2.0.pdf), but that file is not easy to search.
+
+Fortunately, I have [shapefiles](https://github.com/fishsciences/dsm2-map/tree/master/shapefiles) of DSM2 channels and nodes.^[The original source of those shapefiles is unknown to me.] With the power of [Shiny](https://shiny.rstudio.com/) and the [leaflet package](https://rstudio.github.io/leaflet/), it is relatively simple to build an interactive map of DSM2 channels and nodes (embedded below).^[Shiny app is hosted on [shinyapps.io](https://fishsciences.shinyapps.io/dsm2-map/) and code is available through [GitHub.](https://github.com/fishsciences/dsm2-map)]
+
+The central challenge is keeping the map markers and dropdown menus synchronized when the map is clicked or the dropdown selection is changed.^[The code in the DSM2 map app is derived from this [example](https://www.r-bloggers.com/r-shiny-leaflet-using-observers/)]. Unfortunately, as currently written, adding more map layers involves adding quite a bit more code. The following code block is a good example of messy nested `if{}else{}` statements. 
+
+```
+# update the location selectInput on map clicks
+observeEvent(input$Map_shape_click, {
+  p <- input$Map_shape_click
+  if(!is.null(p$id)){
+    if (p$group == "channels"){
+      if (p$id != "SelectedChannel"){  # 'SelectedChannel' layer placed on top of channel layer; don't want to update when 'Channel' layer clicked
+        if(is.null(input$selected_channel) || input$selected_channel != p$id){
+          updateSelectInput(session, "selected_channel", selected = p$id)
+        }
+      }else{
+        updateSelectInput(session, "selected_channel", selected = "")
+      }
+    }else{
+      if (p$id != "SelectedNode"){ 
+        if(is.null(input$selected_node) || input$selected_node != p$id){
+          updateSelectInput(session, "selected_node", selected = p$id)
+        }
+      }else{
+        updateSelectInput(session, "selected_node", selected = "")
+      }
+    }
+  }
+})
+```
+
+<iframe width="725" height="800" scrolling="no" frameborder="no" src="https://fishsciences.shinyapps.io/dsm2-map/"> </iframe>

@@ -1,0 +1,54 @@
+---
+title: "DSM2 interactive map"
+author: "Travis Hinkelman"
+draft: true
+date: '2019-03-24'
+editor_options:
+  chunk_output_type: console
+slug: dsm2-interactive-map
+categories:
+  - R
+  - Shiny
+tags:
+  - DSM2
+  - leaflet
+---
+
+
+
+<p>The <a href="http://baydeltaoffice.water.ca.gov/modeling/deltamodeling/models/dsm2/dsm2.cfm">Delta Simulation Model II (DSM2)</a> is a hydrodynamic model used for <a href="https://sacdeltaguide.atavist.com/">Sacramento-San Joaquin Delta</a> planning and management. When working with DSM2 output, I frequently need to look up the location of channels and nodes in the model. A map of all of the channels and nodes (and more) is provided with DSM2 as a <a href="/pdf/DSM2_Grid2.0.pdf">PDF file</a>, but that file is not easy to search.</p>
+<p>Fortunately, I have <a href="https://github.com/fishsciences/dsm2-map/tree/master/shapefiles">shapefiles</a> of DSM2 channels and nodes.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> With the power of <a href="https://shiny.rstudio.com/">Shiny</a> and the <a href="https://rstudio.github.io/leaflet/">leaflet package</a>, it is relatively simple to build an interactive map of DSM2 channels and nodes (embedded below).<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a></p>
+<p>The central challenge is keeping the map markers and dropdown menus synchronized when the map is clicked or the dropdown selection is changed.<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>. Unfortunately, as currently written, adding more map layers involves adding quite a bit more code. The following code block is a good example of messy nested <code>if{}else{}</code> statements.</p>
+<pre><code># update the location selectInput on map clicks
+observeEvent(input$Map_shape_click, {
+  p &lt;- input$Map_shape_click
+  if(!is.null(p$id)){
+    if (p$group == &quot;channels&quot;){
+      if (p$id != &quot;SelectedChannel&quot;){  # &#39;SelectedChannel&#39; layer placed on top of channel layer; don&#39;t want to update when &#39;Channel&#39; layer clicked
+        if(is.null(input$selected_channel) || input$selected_channel != p$id){
+          updateSelectInput(session, &quot;selected_channel&quot;, selected = p$id)
+        }
+      }else{
+        updateSelectInput(session, &quot;selected_channel&quot;, selected = &quot;&quot;)
+      }
+    }else{
+      if (p$id != &quot;SelectedNode&quot;){ 
+        if(is.null(input$selected_node) || input$selected_node != p$id){
+          updateSelectInput(session, &quot;selected_node&quot;, selected = p$id)
+        }
+      }else{
+        updateSelectInput(session, &quot;selected_node&quot;, selected = &quot;&quot;)
+      }
+    }
+  }
+})</code></pre>
+<iframe width="725" height="800" scrolling="no" frameborder="no" src="https://fishsciences.shinyapps.io/dsm2-map/">
+</iframe>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The original source of those shapefiles is unknown to me.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Shiny app is hosted on <a href="https://fishsciences.shinyapps.io/dsm2-map/">shinyapps.io</a> and code is available through <a href="https://github.com/fishsciences/dsm2-map">GitHub.</a><a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>The code in the DSM2 map app is derived from this <a href="https://www.r-bloggers.com/r-shiny-leaflet-using-observers/">example</a><a href="#fnref3">↩</a></p></li>
+</ol>
+</div>

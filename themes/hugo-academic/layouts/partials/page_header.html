@@ -15,7 +15,7 @@
 {{end}}
 
 {{/* Header image */}}
-{{ if and .Params.header.image (not $featured) }}
+{{ if and .Params.header.image (not (and $featured (not .Params.image.preview_only))) }}
 <div class="article-header">
   {{ $img_src := urls.Parse .Params.header.image }}
   {{ if $img_src.Scheme }}
@@ -29,10 +29,10 @@
 {{end}}
 
 {{/* Featured image */}}
-{{ if and $featured (not $.Params.image.preview_only) }}
-{{ $image := $featured.Fill (printf "1600x400 q90 %s" $anchor) }}
+{{ if and $featured (not .Params.image.preview_only) }}
+{{ $image := $featured.Resize "800x" }}
 <div class="article-header d-xl-none">
-  <img src="{{ $image.RelPermalink }}" class="article-banner" itemprop="image" alt="">
+  <div class="featured-image" style="background-image: url('{{ $image.RelPermalink }}');"></div>
   {{ with $.Params.image.caption }}<span class="article-header-caption">{{ . | markdownify | emojify }}</span>{{ end }}
 </div>
 
@@ -47,7 +47,7 @@
         <p class="page-subtitle">{{ . | markdownify | emojify }}</p>
         {{end}}
 
-        {{ partial "page_metadata" (dict "content" $page "is_list" 1) }}
+        {{ partial "page_metadata" (dict "content" $page "is_list" 0) }}
 
         {{ partial "page_links_div.html" $page }}
 
@@ -70,8 +70,7 @@
   <p class="page-subtitle">{{ . | markdownify | emojify }}</p>
   {{end}}
 
-  {{ partial "page_metadata" (dict "content" $page "is_list" 0) }}
-
+  {{ partial "page_metadata" (dict "content" $page "is_list" 0 "share" true) }}
   {{ partial "page_links_div.html" $page }}
 </div>
 {{else}}
@@ -90,7 +89,7 @@
   {{end}}
 
   {{ if not .IsNode }}
-    {{ partial "page_metadata" (dict "content" $page "is_list" 0) }}
+    {{ partial "page_metadata" (dict "content" $page "is_list" 0 "share" true) }}
     {{ partial "page_links_div.html" $page }}
   {{end}}
 </div>
