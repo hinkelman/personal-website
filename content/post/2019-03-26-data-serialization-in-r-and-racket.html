@@ -1,0 +1,97 @@
+---
+title: Data serialization in R and Racket
+author: Travis Hinkelman
+date: '2019-03-26'
+slug: data-serialization-in-r-and-racket
+categories:
+  - R
+  - Racket
+tags:
+  - data structures
+  - matrix
+  - hash table
+  - nested list
+  - saveRDS
+  - readRDS
+  - serialize
+image:
+  caption: ''
+  focal_point: ''
+---
+
+
+
+<p>When programming in R, I generally pass data around by reading and writing text files (typically, CSV files). The ubiquity of CSV files means that many different types of software will open them easily (e.g., Notepad, Excel, TextEdit, etc.). However, if the data structure is not flat or contains other attributes, then writing to CSV requires flattening and/or dropping attributes. The general solution to writing data to a file while retaining structure and attributes is <a href="https://en.wikipedia.org/wiki/Serialization">serialization</a>.</p>
+<p>In R, I use <code>readRDS</code> and <code>saveRDS</code> for reading and writing serialized objects. Let’s pull a nested list from a <a href="/post/named-lists-hash-tables/">recent post</a> as an example.</p>
+<pre><code>nested_list = list(&quot;female&quot; = list(&quot;0-1&quot; = 0, 
+                                   &quot;1-2&quot; = 0,
+                                   &quot;2-3&quot; = 0.15,
+                                   &quot;3-4&quot; = 0.4,
+                                   &quot;4+&quot; = 0.8),
+                   &quot;male&quot; = list(&quot;0-1&quot; = 0, 
+                                 &quot;1-2&quot; = 0.1,
+                                 &quot;2-3&quot; = 0.4,
+                                 &quot;3-4&quot; = 0.6,
+                                 &quot;4+&quot; = 0.9))
+
+saveRDS(nested_list, &quot;list.rds&quot;)                # write list object to file
+identical(nested_list, readRDS(&quot;list.rds&quot;))     # read list object from file and compare to original</code></pre>
+<p>Even with a flat object, serialization can be useful. For example, we could write a matrix to CSV with <code>write.table</code> but it won’t be exactly the same when reading from the CSV file.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> The approach with <code>saveRDS</code>/<code>readRDS</code> is more straightforward.</p>
+<pre><code>mat = matrix(data = 0, nrow = 10, ncol = 5)
+
+write.table(mat, &quot;matrix.csv&quot;, row.names = FALSE, col.names = FALSE)
+mat_csv = as.matrix(read.table(&quot;matrix.csv&quot;))
+identical(mat, mat_csv)
+
+saveRDS(mat, &quot;matrix.rds&quot;)
+mat_rds = readRDS(&quot;matrix.rds&quot;)
+identical(mat, mat_rds)</code></pre>
+<p>Racket has a <a href="https://docs.racket-lang.org/reference/serialization.html">serialization library</a> for handling this type of task. The following code is based on this <a href="https://stackoverflow.com/a/35357586/2912447">Stack Overflow answer</a> and uses a hash table from the <a href="/post/named-lists-hash-tables/">same post</a> as the nested list above.</p>
+<pre><code>#lang racket
+
+(require racket/serialize)
+
+(define nested-hash
+  (hash &quot;female&quot; (hash &quot;0-1&quot; 0
+                       &quot;1-2&quot; 0
+                       &quot;2-3&quot; 0.15
+                       &quot;3-4&quot; 0.4
+                       &quot;4+&quot; 0.8)
+        &quot;male&quot; (hash &quot;0-1&quot; 0
+                     &quot;1-2&quot; 0.1
+                     &quot;2-3&quot; 0.4
+                     &quot;3-4&quot; 0.6
+                     &quot;4+&quot; 0.9)))
+
+; define function for saving data to a rkdt file                     
+(define (save-rktd data path)
+  (if (serializable? data)
+      (with-output-to-file path
+        (lambda () (write (serialize data)))
+        #:exists &#39;replace)                       
+      (error &quot;Data is not serializable&quot;)))
+      
+; define function for reading data from a rkdt file      
+(define (read-rktd path)
+  (with-input-from-file path
+    (lambda () (deserialize (read)))))
+    
+(save-rktd nested-hash &quot;hash.rktd&quot;)            ; write hash table to file
+(equal? nested-hash (read-rktd &quot;hash.rktd&quot;))   ; read hash table from file and compare to original</code></pre>
+<p>The <code>save-rktd</code> function first checks if the data structure is serializable and returns an error if it is not.<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> The <code>with-output-to-file</code> handles opening and closing a port to the file. While the port is open, the anonymous function (specified with <code>(lambda)</code>) indicates that the data should first be serialized and then written to the output port. The default argument <code>#:exists</code> is set to <code>'replace</code> because overwriting the existing file is familiar to me from <code>saveRDS</code>.</p>
+<p>In <code>read-rktd</code>, a port is opened and closed with <code>with-input-from-file</code> and the anonymous function first reads the file and then deserializes the data. The <code>save-rktd</code> and <code>read-rktd</code> functions are then applied in the same way as <code>saveRDS</code> and <code>readRDS</code>.</p>
+<p><code>save-rktd</code> and <code>read-rktd</code> should work on any data structures that are serializable. Here is an example with a “matrix” comprised of a vector of vectors.</p>
+<pre><code>(define matrix
+  (for/vector ([i (in-range 10)])
+    (make-vector 5 0)))
+
+(save-rktd matrix &quot;matrix.rktd&quot;)
+(equal? matrix (read-rktd &quot;matrix.rktd&quot;))</code></pre>
+<p>One key difference between the R functions and my Racket versions is that the R functions apply compression by default and no compression is applied in the Racket functions. In fact, relative to writing/reading CSV files, using <code>saveRDS</code> and <code>readRDS</code> also provides the benefits of small size on disk and fast read/write operations in addition to retaining data structure and attributes.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>I didn’t spend much time trying to work through how the objects are different or how to make them the same.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Racket’s <code>if</code> is similar to <code>ifelse</code> in R.<a href="#fnref2">↩</a></p></li>
+</ol>
+</div>
