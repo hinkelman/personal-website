@@ -90,7 +90,7 @@ apply: contract violation
   (if (and (real? mean) (real? sd))
       (flnormal-sample (real-&gt;double-flonum mean) (real-&gt;double-flonum sd) n)
       (error &quot;mean and sd arguments must be real numbers&quot;)))</code></pre>
-<p>The function, <code>flnormal-sample</code>, requires that the mean and standard deviation are passed as floating-point numbers (and returns a <code>flvector</code>). In <code>rnorm-2</code>, we check if the <code>mean</code> and <code>sd</code> arguments are real numbers and, if so, convert them to floating-point numbers (<code>real-&gt;double-flonum</code>) before calling <code>flnormal-sample</code>, which is otherwise similar to R’s <code>runif</code> function.</p>
+<p>The function, <code>flnormal-sample</code>, requires that the mean and standard deviation are passed as floating-point numbers (and returns <code>flvector</code>). In <code>rnorm-2</code>, we check if the <code>mean</code> and <code>sd</code> arguments are real numbers and, if so, convert them to floating-point numbers (<code>real-&gt;double-flonum</code>) before calling <code>flnormal-sample</code>, which is otherwise similar to R’s <code>runif</code> function.</p>
 <pre><code>&gt; (define norm-2 (rnorm-2 1000 2 0.5))
 &gt; (mean norm-2)
 2.024086073688603
@@ -104,7 +104,7 @@ apply: contract violation
 &gt; (statistics-stddev s)
 0.4974799838849746</code></pre>
 <p><code>empty-statistics</code> is an empty statistics object. <code>update-statistics*</code> populates the statistics object by iterating through <code>norm-2</code> to compute summary statistics, which are extracted with accessor functions, e.g., <code>statistics-min</code>, <code>statistics-mean</code>, <code>statistics-skewness</code>.</p>
-<p>The question is why would you use the more verbose statistics object. One reason is that <code>statistics-min</code> and <code>statistics-max</code> is actually less verbose than using <code>for/fold</code> with <code>min</code> and <code>max</code>. Also, if you are computing several summary statistics on a large sequence, then <code>update-statistics*</code> is faster than the other assorted functions.</p>
+<p>The question is why would you use the more verbose statistics object. One reason is that <code>statistics-min</code> and <code>statistics-max</code> are actually less verbose than using <code>for/fold</code> with <code>min</code> and <code>max</code>. Also, if you are computing several summary statistics on a large sequence, then <code>update-statistics*</code> is faster than the other assorted functions.</p>
 <pre><code>&gt; (define norm-3 (rnorm-2 10000000 1000 100))
 &gt; (time
    (mean norm-3)
