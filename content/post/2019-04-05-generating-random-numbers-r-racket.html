@@ -1,0 +1,129 @@
+---
+title: Generating random numbers in R and Racket
+author: Travis Hinkelman
+date: '2019-04-05'
+slug: generating-random-numbers-r-racket
+categories:
+  - R
+  - Racket
+tags:
+  - runif
+  - rnorm
+  - rpois
+  - flnormal-sample
+  - flvector
+  - distributions
+---
+
+
+
+<p>R makes it easy to generate random numbers from a wide variety of distributions with a consistent interface. For example, <code>runif</code>, <code>rnorm</code>, and <code>rpois</code> generate random numbers from uniform, normal, and Poisson distributions, respectively.</p>
+<pre><code>&gt; x = runif(n = 1000, min = 4.6, max = 9.3)
+&gt; min(x)
+[1] 4.60374
+&gt; max(x)
+[1] 9.288063
+&gt; 
+&gt; y = rnorm(n = 1000, mean = 81, sd = 9)
+&gt; mean(y)
+[1] 81.2548
+&gt; sd(y)
+[1] 9.179427
+&gt; 
+&gt; z = rpois(n = 1000, lambda = 7.11)
+&gt; mean(z)
+[1] 7.187
+&gt; var(z)
+[1] 6.954986</code></pre>
+<p>The Racket <code>math</code> library provides much of the same functionality as the base R functions, but I first want to work through a couple of examples without using the <code>math</code> library because I think it is useful for better understanding Racket.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></p>
+<p>Let’s create a Racket function that is similar to <code>runif</code> in R.</p>
+<pre><code>#lang racket/base
+
+(define (runif n [min 0] [max 1])
+  (for/list ([i (in-range n)])
+    (+ (* (- max min) (random)) min)))</code></pre>
+<p>The <code>random</code> function draws a random number from a uniform distribution between 0 and 1. A list of <code>n</code> random samples is drawn by looping through a sequence with <code>for/list</code>. To draw a random number within a specified interval, we multiply the random number by the specified range <code>(- max min)</code> and shift by the <code>min</code>.</p>
+<pre><code>&gt; (define unif (runif 1000 -7 33))
+&gt; (apply min unif)  ; check that min is about -7
+-6.987705647350004
+&gt; (apply max unif)  ; check that max is about 33
+32.97250528872971</code></pre>
+<p>The need to use <code>apply</code> to calculate the <code>min</code> of a list was a surprise to me. The <code>min</code> function takes any number of real numbers as arguments but not a list. <code>apply</code> uses the contents of the list as the arguments for <code>min</code>.</p>
+<pre><code>&gt; (min 3 1 2)
+1
+&gt; (min &#39;(3 1 2))
+min: contract violation
+  expected: real?
+  given: &#39;(3 1 2)</code></pre>
+<p>Another wrinkle is introduced if you want to generate a vector (with <code>for/vector</code>) of random numbers rather than a list.</p>
+<pre><code>(define (runif-vec n [min 0] [max 1])
+  (for/vector ([i (in-range n)])
+    (+ (* (- max min) (random)) min)))</code></pre>
+<p>We can’t use <code>apply</code> with a vector.</p>
+<pre><code>&gt; (define unif-vec (runif-vec 1000 0.5 1.5))
+&gt; (apply min unif-vec)
+apply: contract violation
+  expected: list?
+  given: &#39;#(1.3465423772765357 1.0623864994795045 1.3437265664094888 1.1048441535810904 0.7861090566755002 0.6470981723620602 0.5546597487687198 0.552946824350613 0.5251621516034304 1.3568612624022975 1.1217164560959263 1.3334770245391927 0.890117942389224...
+  argument position: 2nd
+  other arguments...:</code></pre>
+<p>StackOverflow provides a <a href="https://stackoverflow.com/a/52917481/2912447">solution</a> based on <code>for/fold</code>.</p>
+<pre><code>&gt; (for/fold ([m +inf.0]) ([x (in-vector unif-vec)]) (min m x))
+0.5014616191163698
+&gt; (for/fold ([m -inf.0]) ([x (in-vector unif-vec)]) (max m x))
+1.4994848021056595</code></pre>
+<p>In <code>for/fold</code>, <code>m</code> is an accumulator that is initialized as positive (<code>+inf.0</code>) or negative infinity (<code>-inf.0</code>) for min and max, respectively. When iterating through <code>unif-vec</code>, <code>m</code> is compared to <code>x</code> and the value of <code>m</code> is updated with the output of <code>min</code> or <code>max</code>.</p>
+<p>Random values can also be drawn from a normal distribution using draws from the standard uniform distribution with <code>random</code> and a formula from <a href="https://rosettacode.org/wiki/Random_numbers#Racket">Rosetta Code</a></p>
+<pre><code>&gt; (define (rnorm n [mean 0] [sd 1])
+   (for/list ([i (in-range n)])
+    (+ mean (* (sqrt (* -2 (log (random)))) (cos (* 2 pi (random))) sd))))
+&gt; (define norm (rnorm 1000 2 0.5))
+&gt; (require math)      ; need math library for mean and standard deviation
+&gt; (mean norm)         ; check that mean is about 2
+1.9797112583083123
+&gt; (stddev norm)       ; check that sd is about 0.5
+0.5022756727111091</code></pre>
+<p>Now, let’s simplify our life and use the functions provided by the <code>math</code> library.</p>
+<pre><code>(require math) 
+
+(define (rnorm-2 n [mean 0] [sd 1])
+  (if (and (real? mean) (real? sd))
+      (flnormal-sample (real-&gt;double-flonum mean) (real-&gt;double-flonum sd) n)
+      (error &quot;mean and sd arguments must be real numbers&quot;)))</code></pre>
+<p>The function, <code>flnormal-sample</code>, requires that the mean and standard deviation are passed as floating-point numbers (and returns a <code>flvector</code>). In <code>rnorm-2</code>, we check if the <code>mean</code> and <code>sd</code> arguments are real numbers and, if so, convert them to floating-point numbers (<code>real-&gt;double-flonum</code>) before calling <code>flnormal-sample</code>, which is otherwise similar to R’s <code>runif</code> function.</p>
+<pre><code>&gt; (define norm-2 (rnorm-2 1000 2 0.5))
+&gt; (mean norm-2)
+2.024086073688603
+&gt; (stddev norm-2)
+0.5039448247564015</code></pre>
+<p>The <code>math</code> library contains similar sample functions for numerous types of distributions, including uniform, Poisson, beta, binomial, gamma, and more.</p>
+<p>Finally, let’s take a look at the <code>statistics</code> object provided by the <code>math</code> library.</p>
+<pre><code>&gt; (define s (update-statistics* empty-statistics norm-2))
+&gt; (statistics-mean s)
+1.9947322187693184
+&gt; (statistics-stddev s)
+0.4974799838849746</code></pre>
+<p><code>empty-statistics</code> is an empty statistics object. <code>update-statistics*</code> populates the statistics object by iterating through <code>norm-2</code> to compute summary statistics, which are extracted with accessor functions, e.g., <code>statistics-min</code>, <code>statistics-mean</code>, <code>statistics-skewness</code>.</p>
+<p>The question is why would you use the more verbose statistics object. One reason is that <code>statistics-min</code> and <code>statistics-max</code> is actually less verbose than using <code>for/fold</code> with <code>min</code> and <code>max</code>. Also, if you are computing several summary statistics on a large sequence, then <code>update-statistics*</code> is faster than the other assorted functions.</p>
+<pre><code>&gt; (define norm-3 (rnorm-2 10000000 1000 100))
+&gt; (time
+   (mean norm-3)
+   (stddev norm-3)
+   (variance norm-3)
+   (for/fold ([m +inf.0]) ([x (in-flvector norm-3)]) (min m x))
+   (for/fold ([m -inf.0]) ([x (in-flvector norm-3)]) (max m x)))
+cpu time: 72618 real time: 108130 gc time: 34828
+&gt; (time
+   (define s2 (update-statistics* empty-statistics norm-3))
+   (statistics-mean s2)
+   (statistics-stddev s2)
+   (statistics-variance s2)
+   (statistics-min s2)
+   (statistics-max s2))
+cpu time: 12478 real time: 22668 gc time: 5512</code></pre>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Welcome back, Future Me.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
