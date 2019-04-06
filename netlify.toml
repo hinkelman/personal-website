@@ -6,3 +6,7 @@
 [[redirects]]
   from = "/post/shiny-scorekeeper-datatable-crud/"
   to = "/post/dt-datatable-crud/"
+  
+[[redirects]]
+  from = "/post/generate-random-numbers-r-racket/"
+  to = "/post/generating-random-numbers-r-racket/"
