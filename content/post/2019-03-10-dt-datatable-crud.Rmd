@@ -158,7 +158,7 @@ observeEvent(input$rosterTable_cell_edit, {
 ```
 The code for adding and deleting rows in the `rosterTable` is very similar to the code for the `teamsTable`. Interested readers can find that code in the [server.R file in the GitHub repository](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/server.R).
 
-When filling out a new roster, a dropdown menu^[I don't remember why I opted for [`pickerInput`](https://www.rdocumentation.org/packages/shinyWidgets/versions/0.4.5/topics/pickerInput) from the [shinyWidgets package](https://dreamrs.github.io/shinyWidgets/index.html) over the default `selectInput` widget.] allows for selecting from previously entered players. The dropdown is dynamically created with `renderUI()` because the contents of the dropdown depend on previous selections.
+When filling out a new roster, a dropdown menu allows for selecting from previously entered players. The dropdown is dynamically created with `renderUI()` because the contents of the dropdown depend on previous selections.
 ```
 output$previousPlayers <- renderUI({
   req(rv[["roster"]], rv[["players"]])

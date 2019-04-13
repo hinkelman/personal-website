@@ -136,7 +136,7 @@ observeEvent(input$teamsTable_rows_selected,{
   replaceData(proxyRoster, rv[[&quot;roster&quot;]], resetPaging = FALSE, rownames = FALSE)  # important
 })</code></pre>
 <p>The code for adding and deleting rows in the <code>rosterTable</code> is very similar to the code for the <code>teamsTable</code>. Interested readers can find that code in the <a href="https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/server.R">server.R file in the GitHub repository</a>.</p>
-<p>When filling out a new roster, a dropdown menu<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> allows for selecting from previously entered players. The dropdown is dynamically created with <code>renderUI()</code> because the contents of the dropdown depend on previous selections.</p>
+<p>When filling out a new roster, a dropdown menu allows for selecting from previously entered players. The dropdown is dynamically created with <code>renderUI()</code> because the contents of the dropdown depend on previous selections.</p>
 <pre><code>output$previousPlayers &lt;- renderUI({
   req(rv[[&quot;roster&quot;]], rv[[&quot;players&quot;]])
   
@@ -205,6 +205,5 @@ observeEvent(input$save_teams_roster_changes,{
 <ol>
 <li id="fn1"><p>For a fancier interface to editable DataTables, check out the <a href="https://www.bryer.org/post/2018-22-26-dtedit/">DTEdit package.</a><a href="#fnref1">↩</a></p></li>
 <li id="fn2"><p>I should have chosen better names. I found the plural/singular distinction intuitive but it does make a small typo more likely to create a problem than if the names were longer.<a href="#fnref2">↩</a></p></li>
-<li id="fn3"><p>I don’t remember why I opted for <a href="https://www.rdocumentation.org/packages/shinyWidgets/versions/0.4.5/topics/pickerInput"><code>pickerInput</code></a> from the <a href="https://dreamrs.github.io/shinyWidgets/index.html">shinyWidgets package</a> over the default <code>selectInput</code> widget.<a href="#fnref3">↩</a></p></li>
 </ol>
 </div>
