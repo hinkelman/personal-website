@@ -1,0 +1,44 @@
+---
+title: Vectorized conditional statement in R and Racket
+author: Travis Hinkelman
+date: '2019-04-15'
+slug: vectorized-conditional-statement-r-racket
+categories:
+  - R
+  - Racket
+tags:
+  - conditional
+  - if
+  - ifelse
+  - map
+  - sapply
+---
+
+
+
+<p>In a <a href="/post/for-loop-r-racket/">previous post</a>, I wrote that Racket’s <code>if</code> is similar to <code>ifelse</code> in R. That’s not quite right. This is a short post to clarify the comparison. The more accurate description is that this Racket code</p>
+<pre><code>(if (test-expr)
+    true-expr
+    false-expr)</code></pre>
+<p>is the same as this R code.</p>
+<pre><code>if (test_expr){
+  true_expr
+}else{
+  false_expr
+}</code></pre>
+<p>In contrast, R’s <code>ifelse</code> function is vectorized meaning that the same operation is applied to multiple elements of a vector. Below, we use <code>ifelse</code> to return a vector of the same length as the original vector with all negative values replaced by zero.</p>
+<pre><code>&gt; a = c(-999, 2, -999, 4, 5, 6, 7, -999, 9, 10)
+&gt; ifelse(a &lt; 0, 0, a)
+ [1]  0  2  0  4  5  6  7  0  9 10</code></pre>
+<p>In Racket, we use <code>map</code> and an <a href="https://en.wikipedia.org/wiki/Anonymous_function">anonymous function</a>, specified with <code>lambda</code>, to apply <code>if</code> to the elements of a list.</p>
+<pre><code>&gt; (define a &#39;(-999 2 -999 4 5 6 7 -999 9 10))
+&gt; (map (lambda (x) (if (&lt; x 0) 0 x)) a)
+&#39;(0 2 0 4 5 6 7 0 9 10)</code></pre>
+<p>To apply <code>if</code> to a vector, we use <code>vector-map</code>.</p>
+<pre><code>&gt; (define b #(-999 2 -999 4 5 6 7 -999 9 10))
+&gt; (vector-map (lambda (x) (if (&lt; x 0) 0 x)) b)
+&#39;#(0 2 0 4 5 6 7 0 9 10)</code></pre>
+<p>It is also possible to write similar code in R using <code>sapply</code>. The curly braces can be omitted when <code>if else</code> is written inline.</p>
+<pre><code>&gt; sapply(a, function(x) if (x &lt; 0) 0 else x)
+ [1]  0  2  0  4  5  6  7  0  9 10</code></pre>
+<p>R and Racket have a shared heritage in Scheme and Lisp that can yield some strinkingly similar code.</p>

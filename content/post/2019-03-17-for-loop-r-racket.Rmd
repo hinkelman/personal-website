@@ -150,7 +150,7 @@ In Racket, nested for loops are specified with `for*`. My Racket code using nest
   (vector-set! results (add1 i) Nt)
   )
 ```
-A couple of other differences from the R code involve `if` and indexing. `when` replaces `if` because Racket's `if` is similar to `ifelse` in R. A vector is indexed with `vector-ref` and Racket uses 0-based indexing. For example, if we have `(define x #(1 3 9))` and `x = c(1, 3, 9)` in Racket and R, respectively, then `(vector-ref x 1)` and `x[2]` both return `3`.
+A couple of other differences from the R code involve `if` and indexing. `when` replaces `if` because Racket's `if` is similar to `ifelse` in R.^[Well, not exactly. See [this post](/post/vectorized-conditional-statement-r-racket/) for clarification.] A vector is indexed with `vector-ref` and Racket uses 0-based indexing. For example, if we have `(define x #(1 3 9))` and `x = c(1, 3, 9)` in Racket and R, respectively, then `(vector-ref x 1)` and `x[2]` both return `3`.
 
 ### Idiomatic Racket Version
 In my initial post to the Racket mailing list, I asked both for help fixing my broken Racket code and suggestions for more idiomatic Racket alternatives. [Daniel Prager](https://github.com/danprager) offered the following alternative based on recursion.

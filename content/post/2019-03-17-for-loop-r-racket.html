@@ -126,7 +126,7 @@ for (i in 1:(nrow(results) - 1)){
     )
   (vector-set! results (add1 i) Nt)
   )</code></pre>
-<p>A couple of other differences from the R code involve <code>if</code> and indexing. <code>when</code> replaces <code>if</code> because Racket’s <code>if</code> is similar to <code>ifelse</code> in R. A vector is indexed with <code>vector-ref</code> and Racket uses 0-based indexing. For example, if we have <code>(define x #(1 3 9))</code> and <code>x = c(1, 3, 9)</code> in Racket and R, respectively, then <code>(vector-ref x 1)</code> and <code>x[2]</code> both return <code>3</code>.</p>
+<p>A couple of other differences from the R code involve <code>if</code> and indexing. <code>when</code> replaces <code>if</code> because Racket’s <code>if</code> is similar to <code>ifelse</code> in R.<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> A vector is indexed with <code>vector-ref</code> and Racket uses 0-based indexing. For example, if we have <code>(define x #(1 3 9))</code> and <code>x = c(1, 3, 9)</code> in Racket and R, respectively, then <code>(vector-ref x 1)</code> and <code>x[2]</code> both return <code>3</code>.</p>
 </div>
 <div id="idiomatic-racket-version" class="section level3">
 <h3>Idiomatic Racket Version</h3>
@@ -194,5 +194,6 @@ for (i in 1:(nrow(results) - 1)){
 <li id="fn3"><p>Square brackets can be used in place of parantheses to improve readability. Iterating through a sequence is one of the contexts where the convention is to use square brackets.<a href="#fnref3">↩</a></p></li>
 <li id="fn4"><p>Just as <code>for/list</code> produces a list.<a href="#fnref4">↩</a></p></li>
 <li id="fn5"><p>I subsequently wrote a <a href="https://gist.github.com/hinkelman/2efcf106b7ca4d1defaed1cf4078f852">version</a> using <code>math/array</code> that is a more direct translation of the R code<a href="#fnref5">↩</a></p></li>
+<li id="fn6"><p>Well, not exactly. See <a href="/post/vectorized-conditional-statement-r-racket/">this post</a> for clarification.<a href="#fnref6">↩</a></p></li>
 </ol>
 </div>
