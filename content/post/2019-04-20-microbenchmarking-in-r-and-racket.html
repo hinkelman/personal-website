@@ -62,9 +62,9 @@ Unit: milliseconds
  rnorm(10000) 0.575444 0.618125 0.7051323 0.6259115 0.6549435  4.466793   100
  rnorm(1e+05) 5.741617 6.131754 6.3758384 6.1757695 6.4165000 11.183758   100</code></pre>
 <p>First, we are going to modify <code>time-apply-cpu-old</code> to return a list of <code>cpu-time</code> rather than displaying the <code>min</code>, <code>mean</code>, and <code>max</code> cpu time.</p>
-<pre><code>(define (time-apply-cpu procs args reps)
+<pre><code>(define (time-apply-cpu proc args reps)
   (for/list ([i (in-range reps)])
-    (define-values (results cpu-time real-time gc-time) (time-apply procs args))
+    (define-values (results cpu-time real-time gc-time) (time-apply proc args))
     cpu-time))</code></pre>
 <p>My new Racket function, <code>microbenchmark</code>, requires similar arguments as <code>time-apply-cpu</code>, but <code>procs</code> is a list, <code>args</code> is a list of lists, and reps has a default value of 100. <code>microbenchmark</code> starts with an expression to check that the lengths of <code>procs</code> and <code>args</code> match. <code>(unless (equal? (length procs) (length args))</code> is similar to <code>if (length(procs) != length(args))</code> in R. I don’t yet have a good sense for how much effort I should put into checking inputs, but my preliminary impression is that Racket is less likely than R to run successfully with unexpected inputs.</p>
 <pre><code>(define (microbenchmark procs args [reps 100])

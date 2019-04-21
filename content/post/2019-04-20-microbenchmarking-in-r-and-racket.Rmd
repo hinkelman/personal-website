@@ -78,9 +78,9 @@ Unit: milliseconds
 First, we are going to modify `time-apply-cpu-old` to return a list of `cpu-time` rather than displaying the `min`, `mean`, and `max` cpu time.
 
 ```
-(define (time-apply-cpu procs args reps)
+(define (time-apply-cpu proc args reps)
   (for/list ([i (in-range reps)])
-    (define-values (results cpu-time real-time gc-time) (time-apply procs args))
+    (define-values (results cpu-time real-time gc-time) (time-apply proc args))
     cpu-time))
 ```
 
