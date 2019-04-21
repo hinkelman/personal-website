@@ -74,7 +74,7 @@ tags:
         (list y)
         (cons y (loop (calc y) (add1 i)))))
   (loop y 1))</code></pre>
-<p>We need to make a quick digression to talk about the code that I wrote to get sample timings for the different functions. <code>time-apply-cpu</code> is a simple wrapper function to <code>time-apply</code> that runs <code>time-apply</code> repeatedly and prints the <code>min</code>, <code>mean</code>, and <code>max</code> cpu time to the interactions pane. <code>time-apply</code> produces multiple output values that are not contained in a data structure. <code>define-values</code> allows you to capture those outputs and bind them to names (in this case, <code>results</code>, <code>cpu-time</code>, <code>real-time</code>, <code>gc-time</code>). <code>string-append</code> is similar to <code>paste</code> in R, but <code>string-append</code> requires that all arguments are strings and, thus, requires some conversion (e.g., <code>number-&gt;string</code>).<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a></p>
+<p>We need to make a quick digression to talk about the code<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> that I wrote to get sample timings for the different functions. <code>time-apply-cpu</code> is a simple wrapper function to <code>time-apply</code> that runs <code>time-apply</code> repeatedly and prints the <code>min</code>, <code>mean</code>, and <code>max</code> cpu time to the interactions pane. <code>time-apply</code> produces multiple output values that are not contained in a data structure. <code>define-values</code> allows you to capture those outputs and bind them to names (in this case, <code>results</code>, <code>cpu-time</code>, <code>real-time</code>, <code>gc-time</code>). <code>string-append</code> is similar to <code>paste</code> in R, but <code>string-append</code> requires that all arguments are strings and, thus, requires some conversion (e.g., <code>number-&gt;string</code>).<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a></p>
 <pre><code>(define (time-apply-cpu proc lst reps)
   (define out
     (for/list ([i (in-range reps)])
@@ -136,6 +136,7 @@ Unit: milliseconds
 <li id="fn1"><p>All of the Racket code is a available in this <a href="https://gist.github.com/hinkelman/a97a9c1491d829b1f4ba148ed1712ee4">gist</a>.<a href="#fnref1">↩</a></p></li>
 <li id="fn2"><p>See the <a href="https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html">original blog post</a> for the R code.<a href="#fnref2">↩</a></p></li>
 <li id="fn3"><p>Throughout this post, we are using <code>flnormal-sample</code> to draw random numbers. I wrote about generating random numbers in this <a href="/post/generating-random-numbers-r-racket/">post</a>.<a href="#fnref3">↩</a></p></li>
-<li id="fn4"><p>The <a href="https://docs.racket-lang.org/reference/strings.html?q=string-append#%28part._format%29"><code>racket/format</code></a> library provides functions for formatting strings with more compact code.<a href="#fnref4">↩</a></p></li>
+<li id="fn4"><p>See <a href="/post/microbenchmarking-in-r-and-racket/">this post</a> for an improved version.<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>The <a href="https://docs.racket-lang.org/reference/strings.html?q=string-append#%28part._format%29"><code>racket/format</code></a> library provides functions for formatting strings with more compact code.<a href="#fnref5">↩</a></p></li>
 </ol>
 </div>

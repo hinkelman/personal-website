@@ -1,0 +1,112 @@
+---
+title: A simple microbenchmarking function in Racket
+author: Travis Hinkelman
+date: '2019-04-20'
+slug: microbenchmarking-in-r-and-racket
+categories:
+  - R
+  - Racket
+tags:
+  - timing
+  - rnorm
+  - flnormal-sample
+  - recursion
+  - raart
+  - table
+  - time-apply
+---
+
+
+
+<p>In a <a href="/post/stochastic-population-model-r-racket/">previous post</a>, I wrote a function to perform repeated timings of untyped and typed versions of the same Racket functions.</p>
+<pre><code>#lang racket
+
+(require math)
+
+(define (time-apply-cpu-old proc lst reps)
+  (define out
+    (for/list ([i (in-range reps)])
+      (define-values (results cpu-time real-time gc-time) (time-apply proc lst))
+      cpu-time))
+  (displayln (string-append &quot;min: &quot; (number-&gt;string (apply min out))
+                            &quot; mean: &quot; (number-&gt;string (round (mean out)))
+                            &quot; max: &quot; (number-&gt;string (apply max out))
+                            &quot;    function: &quot;
+                            (symbol-&gt;string (object-name proc)))))</code></pre>
+<p><code>time-apply-cpu-old</code> is a wrapper function for <code>time-apply</code> from <code>racket/base</code> that runs <code>time-apply</code> repeatedly and prints the <code>min</code>, <code>mean</code>, and <code>max</code> cpu time. <code>time-apply</code> produces multiple output values that are not contained in a data structure. <code>define-values</code> allows you to capture those outputs and bind them to names (in this case, <code>results</code>, <code>cpu-time</code>, <code>real-time</code>, <code>gc-time</code>). <code>string-append</code> is similar to <code>paste</code> in R, but <code>string-append</code> requires that all arguments are strings and, thus, requires some conversion (e.g., <code>number-&gt;string</code>).</p>
+<pre><code>&gt; (time-apply-cpu-old flnormal-sample (list 0.0 1.0 10000) 50)
+min: 1 mean: 2 max: 22    function: flnormal-sample
+&gt; (time-apply-cpu-old flnormal-sample (list 0.0 1.0 100000) 50)
+min: 14 mean: 17 max: 45    function: flnormal-sample</code></pre>
+<p><code>time-apply-cpu-old</code> only allows for evaluation of a single function at a time and the display of the output is ugly. I thought it would be a good exercise to try to address those two deficiencies. There was a <a href="https://groups.google.com/forum/#!topic/racket-users/7MCIp7RmTh8">recent discussion on the Racket mailing list</a> that provided several options to allow for pretty printing of the timing output. I opted for a suggestion involving the <code>table</code> function from the <a href="https://docs.racket-lang.org/raart/index.html?q=raart">raart module</a>.</p>
+<pre><code>&gt; (require raart/draw)
+&gt; (define example-list (list (list &quot;col1&quot; &quot;col2&quot; &quot;col3&quot;)
+                             (list 1.001 2.002 3.003)
+                             (list 4.004 5.005 6.006)))
+&gt; (draw-here
+   (table
+    (text-rows example-list)
+    #:frames? #f
+    #:inset-dw 1
+    #:halign &#39;right))
+    
+  col1   col2   col3 
+ 1.001  2.002  3.003 
+ 4.004  5.005  6.006 </code></pre>
+<p>In this example, I only changed a few of the default arguments to the <code>table</code> function. I dropped the table borders, increased the horizontal spacing from 0 to 1, and changed the horizontal alignmental from <code>'left</code> to <code>'right</code>.</p>
+<p>I’m modeling the format for my target output on the <code>microbenchmark</code> function in the <a href="https://cran.r-project.org/web/packages/microbenchmark/index.html">microbenchmark package</a> for R.</p>
+<pre><code>&gt; library(microbenchmark)
+&gt; microbenchmark(rnorm(10000), rnorm(100000), unit = &quot;ms&quot;)
+Unit: milliseconds
+         expr      min       lq      mean    median        uq       max neval
+ rnorm(10000) 0.575444 0.618125 0.7051323 0.6259115 0.6549435  4.466793   100
+ rnorm(1e+05) 5.741617 6.131754 6.3758384 6.1757695 6.4165000 11.183758   100</code></pre>
+<p>First, we are going to modify <code>time-apply-cpu-old</code> to return a list of <code>cpu-time</code> rather than displaying the <code>min</code>, <code>mean</code>, and <code>max</code> cpu time.</p>
+<pre><code>(define (time-apply-cpu procs args reps)
+  (for/list ([i (in-range reps)])
+    (define-values (results cpu-time real-time gc-time) (time-apply procs args))
+    cpu-time))</code></pre>
+<p>My new Racket function, <code>microbenchmark</code>, requires similar arguments as <code>time-apply-cpu</code>, but <code>procs</code> is a list, <code>args</code> is a list of lists, and reps has a default value of 100. <code>microbenchmark</code> starts with an expression to check that the lengths of <code>procs</code> and <code>args</code> match. <code>(unless (equal? (length procs) (length args))</code> is similar to <code>if (length(procs) != length(args))</code> in R. I don’t yet have a good sense for how much effort I should put into checking inputs, but my preliminary impression is that Racket is less likely than R to run successfully with unexpected inputs.</p>
+<pre><code>(define (microbenchmark procs args [reps 100])
+  (unless (equal? (length procs) (length args))
+    (error &quot;List of procedures is not same length as list of arguments.&quot;))
+  (define (create-timing-table procs args [result (list (list &quot;expr&quot; &quot;args&quot; &quot;min&quot; &quot;lq&quot; &quot;mean&quot; &quot;median&quot; &quot;uq&quot; &quot;max&quot; &quot;neval&quot;))])
+    (cond
+      [(null? procs) (reverse result)]
+      [else
+       (define tmp (time-apply-cpu (first procs) (first args) reps))
+       (create-timing-table
+        (rest procs)
+        (rest args)
+        (cons (list (symbol-&gt;string (object-name (first procs)))
+                    (first args)
+                    (apply min tmp)
+                    (quantile 0.25 &lt; tmp)
+                    (round (mean tmp))
+                    (quantile 0.5 &lt; tmp)
+                    (quantile 0.75 &lt; tmp)
+                    (apply max tmp)
+                    reps)
+              result))]))
+  (displayln &quot;Units: milliseconds&quot;)
+  (draw-here (table
+              (text-rows (create-timing-table procs args))
+              #:frames? #f
+              #:inset-dw 1
+              #:halign &#39;right)))</code></pre>
+<p>Within the <code>microbenchmark</code> function, a recursive function, <code>create-timing-table</code>, repeatedly calls <code>time-apply-cpu</code> to build up a table of results. The results table is initialized as a list of lists where the first list contains the column headings. <code>create-timing-table</code> is a list-eater function that passes the first item from <code>procs</code> and <code>args</code> to <code>time-apply-cpu</code> and then uses <code>cons</code> to add the latest output to the front of the list, which is why the list needs to be reversed when the function exits.</p>
+<p>To demonstrate the <code>microbenchmark</code> output, I will compare two different functions for drawing random numbers from a normal distribution based on <a href="/post/generating-random-numbers-r-racket/">this post</a>.</p>
+<pre><code>&gt; (microbenchmark (list flnormal-sample
+                        rnorm
+                        flnormal-sample
+                        rnorm)
+                  (list (list 0.0 1.0 10000)
+                        (list 0.0 1.0 10000)
+                        (list 0.0 1.0 100000)
+                        (list 0.0 1.0 100000)))
+Units: milliseconds
+            expr              args  min  lq  mean  median  uq   max  neval 
+ flnormal-sample   (0.0 1.0 10000)    1   1     2       1   2     8    100 
+           rnorm   (0.0 1.0 10000)    4   5     7       5   9    34    100 
+ flnormal-sample  (0.0 1.0 100000)   14  15    15      15  16    21    100 
+           rnorm  (0.0 1.0 100000)   62  67    93      73  84  1772    100 </code></pre>
