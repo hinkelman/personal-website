@@ -94,7 +94,7 @@ Unit: milliseconds
               #:frames? #f
               #:inset-dw 1
               #:halign &#39;right)))</code></pre>
-<p>Within the <code>microbenchmark</code> function, a recursive function, <code>create-timing-table</code>, repeatedly calls <code>time-apply-cpu</code> to build up a table of results. The results table is initialized as a list of lists where the first list contains the column headings. <code>create-timing-table</code> is a list-eater function that passes the first item from <code>procs</code> and <code>args</code> to <code>time-apply-cpu</code> and then uses <code>cons</code> to add the latest output to the front of the list, which is why the list needs to be reversed when the function exits.</p>
+<p>Within the <code>microbenchmark</code> function, a recursive function, <code>create-timing-table</code>, repeatedly calls <code>time-apply-cpu</code> to build up a table of results. The results table is initialized as a list of lists where the first list contains the column headings. <code>create-timing-table</code> is a list-eater function that passes the first item from <code>procs</code> and <code>args</code> to <code>time-apply-cpu</code> and then uses <code>cons</code> to add the latest output to the front of the results list, which is why the results list needs to be reversed when the function exits.</p>
 <p>To demonstrate the <code>microbenchmark</code> output, I will compare two different functions for drawing random numbers from a normal distribution based on <a href="/post/generating-random-numbers-r-racket/">this post</a>.</p>
 <pre><code>&gt; (microbenchmark (list flnormal-sample
                         rnorm

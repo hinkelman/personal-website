@@ -116,7 +116,7 @@ My new Racket function, `microbenchmark`, requires similar arguments as `time-ap
               #:halign 'right)))
 ```
 
-Within the `microbenchmark` function, a recursive function, `create-timing-table`, repeatedly calls `time-apply-cpu` to build up a table of results. The results table is initialized as a list of lists where the first list contains the column headings. `create-timing-table` is a list-eater function that passes the first item from `procs` and `args` to `time-apply-cpu` and then uses `cons` to add the latest output to the front of the list, which is why the list needs to be reversed when the function exits. 
+Within the `microbenchmark` function, a recursive function, `create-timing-table`, repeatedly calls `time-apply-cpu` to build up a table of results. The results table is initialized as a list of lists where the first list contains the column headings. `create-timing-table` is a list-eater function that passes the first item from `procs` and `args` to `time-apply-cpu` and then uses `cons` to add the latest output to the front of the results list, which is why the results list needs to be reversed when the function exits. 
 
 To demonstrate the `microbenchmark` output, I will compare two different functions for drawing random numbers from a normal distribution based on [this post](/post/generating-random-numbers-r-racket/).
 
