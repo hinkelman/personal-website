@@ -10,3 +10,16 @@
 [[redirects]]
   from = "/post/generate-random-numbers-r-racket/"
   to = "/post/generating-random-numbers-r-racket/"
+  
+# section below from https://github.com/rbind/apreshill/blob/master/netlify.toml  
+[build]
+  publish = "public"
+  command = "hugo"
+
+[context.production.environment]
+  HUGO_VERSION = "0.55.4"
+  HUGO_ENV = "production"
+  HUGO_ENABLEGITINFO = "true"
+  
+[context.branch-deploy.environment]
+  HUGO_VERSION = "0.55.4"

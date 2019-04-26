@@ -84,7 +84,7 @@ First, we are going to modify `time-apply-cpu-old` to return a list of `cpu-time
     cpu-time))
 ```
 
-My new Racket function, `microbenchmark`, requires similar arguments as `time-apply-cpu`, but `procs` is a list, `args` is a list of lists, and reps has a default value of 100. `microbenchmark` starts with an expression to check that the lengths of `procs` and `args` match. `(unless (equal? (length procs) (length args))` is similar to `if (length(procs) != length(args))` in R. I don't yet have a good sense for how much effort I should put into checking inputs, but my preliminary impression is that Racket is less likely than R to run successfully with unexpected inputs.
+My new Racket function, `microbenchmark`, requires similar arguments as `time-apply-cpu`, but `procs` is a list, `args` is a list of lists, and reps has a default value of 100. `microbenchmark` starts with an expression to check that the lengths of `procs` and `args` match. `(unless (equal? (length procs) (length args))` is similar to `if (length(procs) != length(args))` in R. I don't yet have a good sense for how much effort I should put into checking inputs, but my preliminary impression is that Racket is less likely than R to run successfully with unexpected inputs (and with potentially incorrect outputs).
 
 ```
 (define (microbenchmark procs args [reps 100])
