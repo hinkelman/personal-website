@@ -66,11 +66,11 @@ for (i in 1:(nrow(results) - 1)){
 (define survival #(0.2 0.4 0.6 0.8 0)) 
 (define capacity #(1e6 1e5 1e4 1e3 1e2))</code></pre>
 <p>A Racket vector is more like a list in R because it can contain heterogenous data types, e.g., <code>#(1 &quot;cat&quot; #(2 &quot;dog&quot;))</code>. But Racket also has a <a href="https://docs.racket-lang.org/reference/pairs.html">list data structure</a>. Needless to say, I still don’t have a good grasp of the similarities and differences between data structures in <a href="http://adv-r.had.co.nz/Data-structures.html">R</a> and <a href="https://beautifulracket.com/explainer/data-structures.html">Racket</a>.</p>
-<p>The Beverton-Holt function definition illustrates Racket’s use of prefix operators. Operations are read from inside out<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<p>The Beverton-Holt function definition illustrates Racket’s use of prefix operators. Operations are read from inside out<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
 <pre><code>;; multistage Beverton-Holt model 
 (define (beverton-holt N p c)
   (/ N (+ (/ 1 p) (/ N c))))</code></pre>
-<p>Lisp-family languages have the reputation of being hard to read because of all the parentheses. I don’t really mind the parentheses. In fact, I tend to overuse them in my R code because I find it more readable. My R version of the Beverton-Holt function includes 8 parentheses<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> and 2 curly braces. The Racket version has 12 parantheses.</p>
+<p>Lisp-family languages have the reputation of being hard to read because of all the parentheses. I don’t really mind the parentheses. In fact, I tend to overuse them in my R code because I find it more readable. My R version of the Beverton-Holt function includes 8 parentheses<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> and 2 curly braces. The Racket version has 12 parantheses.</p>
 <p>If you read through the mailing list thread, you would see that this next piece of code was the source of my problem. I was trying to make a results matrix out of a vector of vectors.</p>
 <pre><code>(define results (make-vector years (make-vector (vector-length fecundity) 0)))</code></pre>
 <p>The <a href="https://docs.racket-lang.org/reference/vectors.html#%28def._%28%28quote._~23~25kernel%29._make-vector%29%29"><code>make-vector</code></a> function seemed similar to <code>vector</code> in R and printing the initialized results “matrix” produced something that looked like the expected result. However, <a href="https://alex-hhh.github.io/index.html">Alex Harsanyi</a> explained…</p>
@@ -83,7 +83,7 @@ for (i in 1:(nrow(results) - 1)){
 (define results
   (for/vector ([i (in-range years)])
     (make-vector (vector-length fecundity) 0)))</code></pre>
-<p>The <code>in-range</code> function creates a sequence; comparable to <code>seq</code> in R. Iterating through a sequence with <code>for/vector</code><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> produces a vector<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>. For example, <code>(for/vector ([i (in-range 5)]) i)</code> produces <code>'#(0 1 2 3 4)</code>. By replacing <code>i</code> in that simple example with <code>(make-vector (vector-length fecundity) 0)</code>, we get a “matrix.”</p>
+<p>The <code>in-range</code> function creates a sequence; comparable to <code>seq</code> in R. Iterating through a sequence with <code>for/vector</code><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> produces a vector<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>. For example, <code>(for/vector ([i (in-range 5)]) i)</code> produces <code>'#(0 1 2 3 4)</code>. By replacing <code>i</code> in that simple example with <code>(make-vector (vector-length fecundity) 0)</code>, we get a “matrix.”</p>
 <pre><code>&#39;#(#(0 0 0 0 0)
    #(0 0 0 0 0)
    #(0 0 0 0 0)
@@ -92,7 +92,7 @@ for (i in 1:(nrow(results) - 1)){
 <p>Next, we use <code>vector-set!</code> to set the first “row” to a vector with abundances for each age class set to 10.</p>
 <pre><code>;; initialize abundances in first year to arbitrary non-zero value
 (vector-set! results 0 (make-vector (vector-length fecundity) 10))</code></pre>
-<p>In Racket, nested for loops are specified with <code>for*</code>. My Racket code using nested for loops is a bit more verbose than the R version because it wasn’t obvious to me how to write the equivalent of <code>results[i,j]</code> with a vector of vectors<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>. Instead, on every iteration, I created a vector <code>Nt</code> to hold the next year abundances, updated the <code>Nt</code> vector with <code>vector-set!</code>, and replaced that row in <code>results</code> with <code>Nt</code> (using <code>vector-set!</code> again).</p>
+<p>In Racket, nested for loops are specified with <code>for*</code>. My Racket code using nested for loops is a bit more verbose than the R version because it wasn’t obvious to me how to write the equivalent of <code>results[i,j]</code> with a vector of vectors<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>. Instead, on every iteration, I created a vector <code>Nt</code> to hold the next year abundances, updated the <code>Nt</code> vector with <code>vector-set!</code>, and replaced that row in <code>results</code> with <code>Nt</code> (using <code>vector-set!</code> again).</p>
 <pre><code>;; iterate over results to fill &quot;matrix&quot;
 (for* ([i (in-range (sub1 years))]
        [j (in-range (vector-length fecundity))])
@@ -126,7 +126,7 @@ for (i in 1:(nrow(results) - 1)){
     )
   (vector-set! results (add1 i) Nt)
   )</code></pre>
-<p>A couple of other differences from the R code involve <code>if</code> and indexing. <code>when</code> replaces <code>if</code> because Racket’s <code>if</code> is similar to <code>ifelse</code> in R.<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> A vector is indexed with <code>vector-ref</code> and Racket uses 0-based indexing. For example, if we have <code>(define x #(1 3 9))</code> and <code>x = c(1, 3, 9)</code> in Racket and R, respectively, then <code>(vector-ref x 1)</code> and <code>x[2]</code> both return <code>3</code>.</p>
+<p>A couple of other differences from the R code involve <code>if</code> and indexing. <code>when</code> replaces <code>if</code> because Racket’s <code>if</code> is similar to <code>ifelse</code> in R.<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a> A vector is indexed with <code>vector-ref</code> and Racket uses 0-based indexing. For example, if we have <code>(define x #(1 3 9))</code> and <code>x = c(1, 3, 9)</code> in Racket and R, respectively, then <code>(vector-ref x 1)</code> and <code>x[2]</code> both return <code>3</code>.</p>
 </div>
 <div id="idiomatic-racket-version" class="section level3">
 <h3>Idiomatic Racket Version</h3>
@@ -189,11 +189,11 @@ for (i in 1:(nrow(results) - 1)){
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>The <a href="http://lexi-lambda.github.io/threading/threading.html">threading module</a> allows for writing Racket code in “pipelines” to reduce deeply nested code.<a href="#fnref1">↩</a></p></li>
-<li id="fn2"><p>Admittedly, four of those parantheses are superfluous but I find it more readable to make the order of operations explicit.<a href="#fnref2">↩</a></p></li>
-<li id="fn3"><p>Square brackets can be used in place of parantheses to improve readability. Iterating through a sequence is one of the contexts where the convention is to use square brackets.<a href="#fnref3">↩</a></p></li>
-<li id="fn4"><p>Just as <code>for/list</code> produces a list.<a href="#fnref4">↩</a></p></li>
-<li id="fn5"><p>I subsequently wrote a <a href="https://gist.github.com/hinkelman/2efcf106b7ca4d1defaed1cf4078f852">version</a> using <code>math/array</code> that is a more direct translation of the R code<a href="#fnref5">↩</a></p></li>
-<li id="fn6"><p>Well, not exactly. See <a href="/post/vectorized-conditional-statement-r-racket/">this post</a> for clarification.<a href="#fnref6">↩</a></p></li>
+<li id="fn1"><p>The <a href="http://lexi-lambda.github.io/threading/threading.html">threading module</a> allows for writing Racket code in “pipelines” to reduce deeply nested code.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>Admittedly, four of those parantheses are superfluous but I find it more readable to make the order of operations explicit.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>Square brackets can be used in place of parantheses to improve readability. Iterating through a sequence is one of the contexts where the convention is to use square brackets.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>Just as <code>for/list</code> produces a list.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p>I subsequently wrote a <a href="https://gist.github.com/hinkelman/2efcf106b7ca4d1defaed1cf4078f852">version</a> using <code>math/array</code> that is a more direct translation of the R code<a href="#fnref5" class="footnote-back">↩</a></p></li>
+<li id="fn6"><p>Well, not exactly. See <a href="/post/vectorized-conditional-statement-r-racket/">this post</a> for clarification.<a href="#fnref6" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

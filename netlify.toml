@@ -22,4 +22,4 @@
   HUGO_ENABLEGITINFO = "true"
   
 [context.branch-deploy.environment]
-  HUGO_VERSION = "0.55.4"
+  HUGO_VERSION = "0.55.5"

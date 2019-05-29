@@ -66,7 +66,7 @@ Unit: milliseconds
   (for/list ([i (in-range reps)])
     (define-values (results cpu-time real-time gc-time) (time-apply proc args))
     cpu-time))</code></pre>
-<p>My new Racket function, <code>microbenchmark</code>, requires similar arguments as <code>time-apply-cpu</code>, but <code>procs</code> is a list, <code>args</code> is a list of lists, and reps has a default value of 100. <code>microbenchmark</code> starts with an expression to check that the lengths of <code>procs</code> and <code>args</code> match. <code>(unless (equal? (length procs) (length args))</code> is similar to <code>if (length(procs) != length(args))</code> in R. I don’t yet have a good sense for how much effort I should put into checking inputs, but my preliminary impression is that Racket is less likely than R to run successfully with unexpected inputs.</p>
+<p>My new Racket function, <code>microbenchmark</code>, requires similar arguments as <code>time-apply-cpu</code>, but <code>procs</code> is a list, <code>args</code> is a list of lists, and reps has a default value of 100. <code>microbenchmark</code> starts with an expression to check that the lengths of <code>procs</code> and <code>args</code> match. <code>(unless (equal? (length procs) (length args))</code> is similar to <code>if (length(procs) != length(args))</code> in R. I don’t yet have a good sense for how much effort I should put into checking inputs, but my preliminary impression is that Racket is less likely than R to run successfully with unexpected inputs (and with potentially incorrect outputs).</p>
 <pre><code>(define (microbenchmark procs args [reps 100])
   (unless (equal? (length procs) (length args))
     (error &quot;List of procedures is not same length as list of arguments.&quot;))

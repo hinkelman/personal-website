@@ -38,7 +38,7 @@ npm install -g electron-forge
 ```
 Next, clone or download the GitHub repository for the RSE template.
 
-### Build process on Mac
+### Build process on macOS
 
 The RSE template repository includes a simple Shiny app. As a first step, I recommend following the steps below to confirm that you can build the executable with the simple app before trying your own app. At the end of this post, I will write more about extra steps required to build the executable for the DSM2 Viz Tool. 
 
@@ -46,19 +46,19 @@ The RSE template repository includes a simple Shiny app. As a first step, I reco
 
 2. Run `npm install` in the terminal to set up the project in the `r-shiny-electron` directory.
 
-You will get lots of warnings about outdated packages. I played around a bit with trying to update dependencies but was quickly out of my depths and broke the RSE template (but easy enough to start over).
+You will get lots of warnings about outdated packages.^[You can hopefully reduce some of the warnings by updating the version numbers of the dependencies in `package.json` before running `nmp install`. I searched for each dependency package in `package.json` via the [npm website](https://www.npmjs.com) and updated version numbers to the latest version found in the npm package search. I personally find all the security warnings alarming, but [this article](https://www.voitanos.io/blog/don-t-be-alarmed-by-vulnerabilities-after-running-npm-install) suggests that I shouldn't worry about it.] I tried to fix the warnings with `npm audit fix`, but ran into problems and started over with a fresh clone of the RSE template.
 
-3. Download R binary for Mac by running `./get-r-mac.sh`.
+3. Download R binary for macOS by running `./get-r-mac.sh`.^[The R version specified in this shell script should be the same R version that was used to build the shiny app.]
 
 4. Identify and download packages used in Shiny app by running `Rscript add-cran-binary-pkgs.R`.
 
 5. Run `npm start` to test if app launches (and works correctly).
 
-6. If the app works correctly, run `electron-forge make` to build the Mac executable.
+6. If the app works correctly, run `electron-forge make` to build the macOS executable.
 
 The build process will create a folder called `Out` in the `r-shiny-electron` directory. In `Out/r-shiny-electron-darwin-x64`, you will have an executable (`r-shiny-electron.app`) that you can run to test that the app is working correctly. In `Out/make`, you will have a zip file that contains the executable but is better for distributing because of the smaller file size.
 
-It is possible to [build a Windows installer on a Mac](https://github.com/dirkschumacher/r-shiny-electron/issues/25), but it "takes forever." I tried going down this road, but bailed after the process had run for 2 hours without finishing because I had access to a Windows machine for building the app.
+It is possible to [build a Windows installer on macOS](https://github.com/dirkschumacher/r-shiny-electron/issues/25), but it "takes forever." I tried going down this road, but bailed after the process had run for 2 hours without finishing because I had access to a Windows machine for building the app.
 
 ### Build process on Windows
 
@@ -90,7 +90,7 @@ The build process will create a folder called `Out` in the `r-shiny-electron` di
 
 After working through the build process on the r-shiny-electron example app, I downloaded a fresh version of the RSE template, renamed the `r-shiny-electron` directory to `DSM2-Viz-Tool`, removed the `app.R` file from `DSM2-Viz-Tool/shiny`, and replaced it with the files for the [DSM2 Viz Tool Shiny app](https://github.com/fishsciences/DSM2-Viz-Tool/tree/master/shiny). I also opened `package.json` in a text editor and changed a [few fields](https://github.com/fishsciences/DSM2-Viz-Tool/blob/master/package.json) (e.g., name, productName, version, description, author). 
 
-Next, I started working through the build process described above. However, before running `npm start` I needed to add the binary files for the `rhdf5` and `Rhdf5lib` packages because `Rscript add-cran-binary-pkgs.R` doesn't find Bioconductor packages. The binary files for Mac and Windows are available at the package websites (linked above) and need to be placed in [`DSM2-Viz-Tool/r-mac/library`](https://github.com/fishsciences/DSM2-Viz-Tool/tree/master/r-mac/library) and [`DSM2-Viz-Tool/r-win/library`](https://github.com/fishsciences/DSM2-Viz-Tool/tree/master/r-win/library), respectively. Then, I was able to finish the build process.
+Next, I started working through the build process described above. However, before running `npm start` I needed to add the binary files for the `rhdf5` and `Rhdf5lib` packages because `Rscript add-cran-binary-pkgs.R` doesn't find Bioconductor packages. You can find where R packages are installed on your machine by running `.libPaths()` from the R console. I copied and pasted the `rhdf5` and `Rhdf5lib` folders from the location indicated by the output of `.libPaths()` to `DSM2-Viz-Tool/r-mac/library` and `DSM2-Viz-Tool/r-win/library` on macOS and Windows, respectively. Then, I was able to finish the build process.
 
 Working through this process involved plenty of frustration (because of my knowledge gaps), but it was extremely satisfying to arrive at the end goal of packaging the DSM2 Viz Tool as a standalone desktop application.
 

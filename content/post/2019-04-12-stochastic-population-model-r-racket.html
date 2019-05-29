@@ -17,7 +17,7 @@ tags:
 <p>On my journey to <a href="/categories/racket/">learn Racket</a>, I look for small pieces of R code to try to implement in Racket. A <a href="https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html">blog post</a> about speeding up population simulations in R with the <a href="http://www.rcpp.org">Rcpp package</a> seemed like a good candidate for implementing in Racket. I was particularly interested in the (superficial?) parallels between R/Rcpp and Racket/<a href="https://docs.racket-lang.org/ts-guide/">Typed Racket</a>.</p>
 <div id="running-a-single-simulation" class="section level3">
 <h3>Running a single simulation</h3>
-<p>First, let’s get some of the setup code<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> out of the way.<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> In this chunk of code, we are loading the <code>math</code> library and <code>stochastic-logistic-typed.rkt</code>, which contains the typed versions of the functions. Using <code>require</code> with a file is similar to loading a script with <code>source</code> in R. Racket is a programming language laboratory with the nice feature that it is easy to use code from different languages (#langs) in the same file.</p>
+<p>First, let’s get some of the setup code<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> out of the way.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> In this chunk of code, we are loading the <code>math</code> library and <code>stochastic-logistic-typed.rkt</code>, which contains the typed versions of the functions. Using <code>require</code> with a file is similar to loading a script with <code>source</code> in R. Racket is a programming language laboratory with the nice feature that it is easy to use code from different languages (#langs) in the same file.</p>
 <pre><code>#lang racket
 
 (require math
@@ -43,7 +43,7 @@ tags:
         (list y)
         (cons y (loop (calc y) (add1 i)))))
   (loop y 1))</code></pre>
-<p>My clunky version had calc and loop as separate functions and I struggled to figure out how to pass the extra function arguments (i.e., <code>r</code>, <code>k</code>, and <code>thetasd</code>) to the standalone loop function. Several solutions were suggested on the mailing list. I gravitated to the nested functions approach shown above,<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> but, as I write this, I’m having trouble articulating why I liked that option the best. Check out the thread on the mailing list and decide for yourself.</p>
+<p>My clunky version had calc and loop as separate functions and I struggled to figure out how to pass the extra function arguments (i.e., <code>r</code>, <code>k</code>, and <code>thetasd</code>) to the standalone loop function. Several solutions were suggested on the mailing list. I gravitated to the nested functions approach shown above,<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> but, as I write this, I’m having trouble articulating why I liked that option the best. Check out the thread on the mailing list and decide for yourself.</p>
 <p>I also wrote a version, <code>logmod-vec</code>, that is a direct translation of the R code in the <code>logmodr</code> function. This version was easy to write because I had already invested time in <a href="/post/for-loop-r-racket/">learning about <code>for</code> loops in Racket.</a>.</p>
 <pre><code>(define (logmod-vec t y r k thetasd)
   (define y-vec (make-vector t))
@@ -74,7 +74,7 @@ tags:
         (list y)
         (cons y (loop (calc y) (add1 i)))))
   (loop y 1))</code></pre>
-<p>We need to make a quick digression to talk about the code<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> that I wrote to get sample timings for the different functions. <code>time-apply-cpu</code> is a simple wrapper function to <code>time-apply</code> that runs <code>time-apply</code> repeatedly and prints the <code>min</code>, <code>mean</code>, and <code>max</code> cpu time to the interactions pane. <code>time-apply</code> produces multiple output values that are not contained in a data structure. <code>define-values</code> allows you to capture those outputs and bind them to names (in this case, <code>results</code>, <code>cpu-time</code>, <code>real-time</code>, <code>gc-time</code>). <code>string-append</code> is similar to <code>paste</code> in R, but <code>string-append</code> requires that all arguments are strings and, thus, requires some conversion (e.g., <code>number-&gt;string</code>).<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a></p>
+<p>We need to make a quick digression to talk about the code<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> that I wrote to get sample timings for the different functions. <code>time-apply-cpu</code> is a simple wrapper function to <code>time-apply</code> that runs <code>time-apply</code> repeatedly and prints the <code>min</code>, <code>mean</code>, and <code>max</code> cpu time to the interactions pane. <code>time-apply</code> produces multiple output values that are not contained in a data structure. <code>define-values</code> allows you to capture those outputs and bind them to names (in this case, <code>results</code>, <code>cpu-time</code>, <code>real-time</code>, <code>gc-time</code>). <code>string-append</code> is similar to <code>paste</code> in R, but <code>string-append</code> requires that all arguments are strings and, thus, requires some conversion (e.g., <code>number-&gt;string</code>).<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a></p>
 <pre><code>(define (time-apply-cpu proc lst reps)
   (define out
     (for/list ([i (in-range reps)])
@@ -141,10 +141,10 @@ min: 14 mean: 15 max: 16    function: repeat-logmod-vec</code></pre>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>All of the Racket code is a available in this <a href="https://gist.github.com/hinkelman/a97a9c1491d829b1f4ba148ed1712ee4">gist</a>.<a href="#fnref1">↩</a></p></li>
-<li id="fn2"><p>See the <a href="https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html">original blog post</a> for the R code.<a href="#fnref2">↩</a></p></li>
-<li id="fn3"><p>Throughout this post, we are using <code>flnormal-sample</code> to draw random numbers. I wrote about generating random numbers in this <a href="/post/generating-random-numbers-r-racket/">post</a>.<a href="#fnref3">↩</a></p></li>
-<li id="fn4"><p>See <a href="/post/microbenchmarking-in-r-and-racket/">this post</a> for an improved version.<a href="#fnref4">↩</a></p></li>
-<li id="fn5"><p>The <a href="https://docs.racket-lang.org/reference/strings.html?q=string-append#%28part._format%29"><code>racket/format</code></a> library provides functions for formatting strings with more compact code.<a href="#fnref5">↩</a></p></li>
+<li id="fn1"><p>All of the Racket code is a available in this <a href="https://gist.github.com/hinkelman/a97a9c1491d829b1f4ba148ed1712ee4">gist</a>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>See the <a href="https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html">original blog post</a> for the R code.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>Throughout this post, we are using <code>flnormal-sample</code> to draw random numbers. I wrote about generating random numbers in this <a href="/post/generating-random-numbers-r-racket/">post</a>.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>See <a href="/post/microbenchmarking-in-r-and-racket/">this post</a> for an improved version.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p>The <a href="https://docs.racket-lang.org/reference/strings.html?q=string-append#%28part._format%29"><code>racket/format</code></a> library provides functions for formatting strings with more compact code.<a href="#fnref5" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

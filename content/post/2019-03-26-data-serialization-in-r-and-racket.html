@@ -36,7 +36,7 @@ image:
 
 saveRDS(nested_list, &quot;list.rds&quot;)                # write list object to file
 identical(nested_list, readRDS(&quot;list.rds&quot;))     # read list object from file and compare to original</code></pre>
-<p>Even with a flat object, serialization can be useful. For example, we could write a matrix to CSV with <code>write.table</code> but it won’t be exactly the same when reading from the CSV file.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> The approach with <code>saveRDS</code>/<code>readRDS</code> is more straightforward.</p>
+<p>Even with a flat object, serialization can be useful. For example, we could write a matrix to CSV with <code>write.table</code> but it won’t be exactly the same when reading from the CSV file.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> The approach with <code>saveRDS</code>/<code>readRDS</code> is more straightforward.</p>
 <pre><code>mat = matrix(data = 0, nrow = 10, ncol = 5)
 
 write.table(mat, &quot;matrix.csv&quot;, row.names = FALSE, col.names = FALSE)
@@ -78,7 +78,7 @@ identical(mat, mat_rds)</code></pre>
     
 (save-rktd nested-hash &quot;hash.rktd&quot;)            ; write hash table to file
 (equal? nested-hash (read-rktd &quot;hash.rktd&quot;))   ; read hash table from file and compare to original</code></pre>
-<p>The <code>save-rktd</code> function first checks if the data structure is serializable and returns an error if it is not.<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> The <code>with-output-to-file</code> function handles opening and closing a port to the file. While the port is open, the anonymous function (specified with <code>(lambda)</code>) indicates that the data should first be serialized and then written to the output port. The default argument <code>#:exists</code> is set to <code>'replace</code> because overwriting the existing file is familiar to me from <code>saveRDS</code>.</p>
+<p>The <code>save-rktd</code> function first checks if the data structure is serializable and returns an error if it is not.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> The <code>with-output-to-file</code> function handles opening and closing a port to the file. While the port is open, the anonymous function (specified with <code>(lambda)</code>) indicates that the data should first be serialized and then written to the output port. The keyword argument <code>#:exists</code> is set to <code>'replace</code> because overwriting the existing file is familiar to me from <code>saveRDS</code>.</p>
 <p>In <code>read-rktd</code>, a port is opened and closed with <code>with-input-from-file</code> and the anonymous function first reads the file and then deserializes the data. The <code>save-rktd</code> and <code>read-rktd</code> functions are then applied in the same way as <code>saveRDS</code> and <code>readRDS</code>.</p>
 <p><code>save-rktd</code> and <code>read-rktd</code> should work on any data structures that are serializable. Here is an example with a “matrix” comprised of a vector of vectors.</p>
 <pre><code>(define matrix
@@ -91,7 +91,7 @@ identical(mat, mat_rds)</code></pre>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>I didn’t spend much time trying to work through how the objects are different or how to make them the same.<a href="#fnref1">↩</a></p></li>
-<li id="fn2"><p>Racket’s <code>if</code> is similar to <code>ifelse</code> in R.<a href="#fnref2">↩</a></p></li>
+<li id="fn1"><p>I didn’t spend much time trying to work through how the objects are different or how to make them the same.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>Racket’s <code>if</code> is similar to <code>ifelse</code> in R.<a href="#fnref2" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
