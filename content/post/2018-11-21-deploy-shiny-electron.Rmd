@@ -74,7 +74,7 @@ As it turns out, the Chocolatey version of `innoextract` (for unpacking installe
 
 4. Run `npm install` in the Node.js command prompt to set up the project in the `r-shiny-electron` directory.
 
-5. Download R binary for Windows by running `./get-r-win.sh` in the Cygwin Terminal.
+5. Download R binary for Windows by running `./get-r-win.sh` in Cygwin.^[If you change the R version in this shell script (or make other changes), don't make the same mistake that I did by using Notepad to edit the file because it will introduce an issue with end of line characters. But that issue is easily [fixed](https://learningintheopen.org/2013/03/07/microsoft-windows-cygwin-error-r-command-not-found/).]
 
 6. Identify and download packages used in Shiny app by running `Rscript add-cran-binary-pkgs.R`.
 
