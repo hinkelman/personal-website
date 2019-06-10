@@ -73,7 +73,7 @@ Classes ‘spec_tbl_df’, ‘tbl_df’, ‘tbl’ and &#39;data.frame&#39;:    
 </div>
 <div id="racket" class="section level3">
 <h3>Racket</h3>
-<p>The <code>csv-reading</code> package provides a high-level convenience funtion <code>csv-&gt;list</code> for reading a CSV file.</p>
+<p>The <code>csv-reading</code> package provides a high-level convenience function, <code>csv-&gt;list</code>, for reading a CSV file.</p>
 <pre><code>&gt; (require csv-reading)
 &gt; (call-with-input-file &quot;example.csv&quot; csv-&gt;list)
 &#39;((&quot;date&quot; &quot; integer&quot; &quot; float&quot; &quot; bool&quot; &quot; char&quot; &quot; word&quot; &quot; yn&quot;)
@@ -103,7 +103,7 @@ Classes ‘spec_tbl_df’, ‘tbl_df’, ‘tbl’ and &#39;data.frame&#39;:    
   (&quot;09/04/2007&quot; &quot;-686574&quot; &quot;779963704593.6128&quot; &quot;false&quot; &quot;L&quot; &quot;zule&quot; &quot;N&quot;)
   (&quot;03/07/2060&quot; &quot;372912&quot; &quot;605244557046.5792&quot; &quot;true&quot; &quot;N&quot; &quot;sez&quot; &quot;Y&quot;))</code></pre>
 <p><code>csv-&gt;list</code> reads all values as strings into a list<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> (i.e., no automated parsing of values). I think that reading CSV files provides an informative contrast between the R and Racket communities.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> By and large, R users are not programmers but end users who want to expeditiously perform tasks related to cleaning, analyzing, and visualizing their data. There is a large, and growing, industry around building R packages and tools that facilitate those end users. My early impression of the Racket community is that packages are generally written at a lower level of abstraction than R packages because the target audience is other programmers.<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> I think this <a href="https://groups.google.com/forum/#!msg/racket-users/1STqCq2dzSs/aMHeIhsIBAAJ">discussion on the racket-users mailing list</a> illustrates this difference reasonably well.</p>
-<p>Our example data was handled well by <code>csv-&gt;list</code>, but if your data is more unruly then you can turn to the lower-level functions in the <code>csv-reading</code> package, which involve making a <code>csv-reader</code> and then iteratively calling that reader.</p>
+<p>Our example data was handled well by <code>csv-&gt;list</code>, but if your data is more unruly ,then you can turn to the lower-level functions in the <code>csv-reading</code> package, which involves making a <code>csv-reader</code> and then iteratively calling that reader.</p>
 <pre><code>(define make-example-csv-reader
   (make-csv-reader-maker
    &#39;((separator-chars #\,))))

@@ -85,7 +85,7 @@ If you are dealing with large datasets with slow read times, [`fread`](https://w
 
 ### Racket 
 
-The `csv-reading` package provides a high-level convenience funtion `csv->list` for reading a CSV file. 
+The `csv-reading` package provides a high-level convenience function, `csv->list`, for reading a CSV file. 
 
 ```
 > (require csv-reading)
@@ -120,7 +120,7 @@ The `csv-reading` package provides a high-level convenience funtion `csv->list` 
 
 `csv->list` reads all values as strings into a list^[A Racket list is a linked list, which is different than the [list data structure in R](https://www.rdocumentation.org/packages/base/versions/3.6.0/topics/list) ([see also](https://stackoverflow.com/questions/29417134/what-is-the-difference-between-a-list-and-a-pairlist-in-r)).] (i.e., no automated parsing of values). I think that reading CSV files provides an informative contrast between the R and Racket communities.^[Of course, it is also relevant that the central data structure in R (i.e., data frame) is tabular. That is not true of Racket but there have been a couple of recent discussions on the racket-users mailing list ([here](https://groups.google.com/d/msg/racket-users/3Ve4UlOmnpo/udLRfywiBgAJ) and [here](https://groups.google.com/d/msg/racket-users/7MCIp7RmTh8/IIJLsC9ADAAJ)) about tabular data structures in Racket. And there is a [data frame package](https://docs.racket-lang.org/data-frame/index.html?q=data%20frame) that implements a data frame data structure in Racket.] By and large, R users are not programmers but end users who want to expeditiously perform tasks related to cleaning, analyzing, and visualizing their data. There is a large, and growing, industry around building R packages and tools that facilitate those end users. My early impression of the Racket community is that packages are generally written at a lower level of abstraction than R packages because the target audience is other programmers.^[This comparison is possibly made more stark by my choice to [learn Racket rather than Clojure](/post/programming-horizons/), which have [different philosophies](https://qr.ae/TWh7Ur) on how to build a community.] I think this [discussion on the racket-users mailing list](https://groups.google.com/forum/#!msg/racket-users/1STqCq2dzSs/aMHeIhsIBAAJ) illustrates this difference reasonably well.
 
-Our example data was handled well by `csv->list`, but if your data is more unruly then you can turn to the lower-level functions in the `csv-reading` package, which involve making a `csv-reader` and then iteratively calling that reader.  
+Our example data was handled well by `csv->list`, but if your data is more unruly ,then you can turn to the lower-level functions in the `csv-reading` package, which involves making a `csv-reader` and then iteratively calling that reader.  
 
 ```
 (define make-example-csv-reader
