@@ -22,6 +22,8 @@ image:
 
 
 <p>When programming in R, I generally pass data around by reading and writing text files (typically, CSV files). The ubiquity of CSV files means that many different types of software will open them easily (e.g., Notepad, Excel, TextEdit, etc.). However, if the data structure is not flat or contains other attributes, then writing to CSV requires flattening and/or dropping attributes. The general solution to writing data to a file while retaining structure and attributes is <a href="https://en.wikipedia.org/wiki/Serialization">serialization</a>.</p>
+<div id="r" class="section level3">
+<h3>R</h3>
 <p>In R, I use <code>readRDS</code> and <code>saveRDS</code> for reading and writing serialized objects. Let’s pull a nested list from a <a href="/post/named-lists-hash-tables/">recent post</a> as an example.</p>
 <pre><code>nested_list = list(&quot;female&quot; = list(&quot;0-1&quot; = 0, 
                                    &quot;1-2&quot; = 0,
@@ -46,6 +48,9 @@ identical(mat, mat_csv)
 saveRDS(mat, &quot;matrix.rds&quot;)
 mat_rds = readRDS(&quot;matrix.rds&quot;)
 identical(mat, mat_rds)</code></pre>
+</div>
+<div id="racket" class="section level3">
+<h3>Racket</h3>
 <p>Racket has a <a href="https://docs.racket-lang.org/reference/serialization.html">serialization library</a> for handling this type of task. The following code is based on this <a href="https://stackoverflow.com/a/35357586/2912447">Stack Overflow answer</a> and uses a hash table from the <a href="/post/named-lists-hash-tables/">same post</a> as the nested list above.</p>
 <pre><code>#lang racket
 
@@ -88,6 +93,7 @@ identical(mat, mat_rds)</code></pre>
 (save-rktd matrix &quot;matrix.rktd&quot;)
 (equal? matrix (read-rktd &quot;matrix.rktd&quot;))</code></pre>
 <p>One key difference between the R functions and my Racket versions is that the R functions apply compression by default and no compression is applied in the Racket functions. In fact, relative to writing/reading CSV files, using <code>saveRDS</code> and <code>readRDS</code> provides the benefits of small size on disk and fast read/write operations in addition to retaining data structure and attributes.</p>
+</div>
 <div class="footnotes">
 <hr />
 <ol>

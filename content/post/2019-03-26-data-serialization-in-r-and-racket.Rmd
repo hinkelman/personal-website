@@ -21,6 +21,8 @@ image:
 
 When programming in R, I generally pass data around by reading and writing text files (typically, CSV files). The ubiquity of CSV files means that many different types of software will open them easily (e.g., Notepad, Excel, TextEdit, etc.). However, if the data structure is not flat or contains other attributes, then writing to CSV requires flattening and/or dropping attributes. The general solution to writing data to a file while retaining structure and attributes is [serialization](https://en.wikipedia.org/wiki/Serialization).
 
+### R
+
 In R, I use `readRDS` and `saveRDS` for reading and writing serialized objects. Let's pull a nested list from a [recent post](/post/named-lists-hash-tables/) as an example. 
 
 ```
@@ -52,6 +54,8 @@ saveRDS(mat, "matrix.rds")
 mat_rds = readRDS("matrix.rds")
 identical(mat, mat_rds)
 ```
+
+### Racket
 
 Racket has a [serialization library](https://docs.racket-lang.org/reference/serialization.html) for handling this type of task. The following code is based on this [Stack Overflow answer](https://stackoverflow.com/a/35357586/2912447) and uses a hash table from the [same post](/post/named-lists-hash-tables/) as the nested list above.
 

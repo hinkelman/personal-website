@@ -1,0 +1,159 @@
+---
+title: Reading CSV files in R and Racket
+author: Travis Hinkelman
+date: '2019-06-09'
+slug: reading-csv-files-in-r-and-racket
+categories:
+  - R
+  - Racket
+tags:
+  - data structures
+  - data frame
+  - list
+---
+
+
+
+<p>In a <a href="/post/data-serialization-in-r-and-racket/">previous post</a>, I wrote about reading and writing data to file while retaining the structure and attributes of the data (i.e., data serialization). However, I more commonly pass data around as text files (usually, CSV files). For this post, I created an <a href="/post/example-data/example.csv">example CSV file</a> with a <a href="http://convertcsv.com/generate-test-data.htm">tool for generating test data</a>, which allows for including different data types (e.g., dates, integers, names, phone numbers) in the output file.</p>
+<div id="r" class="section level3">
+<h3>R</h3>
+<p>In base R, <code>read.csv</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> includes sensible defaults that make reading a CSV file relatively straightforward.</p>
+<pre><code>&gt; str(read.csv(&quot;example.csv&quot;))
+&#39;data.frame&#39;:   25 obs. of  7 variables:
+ $ date   : Factor w/ 25 levels &quot;01/23/2054&quot;,&quot;01/30/2023&quot;,..: 23 3 21 6 11 9 19 13 24 2 ...
+ $ integer: int  -958838 -165090 -207296 316236 722897 -903116 -350444 -498413 63304 -644668 ...
+ $ float  : num  5.90e+11 5.28e+11 9.94e+10 5.90e+11 -3.09e+11 ...
+ $ bool   : Factor w/ 2 levels &quot;false&quot;,&quot;true&quot;: 2 2 1 1 2 2 1 1 1 1 ...
+ $ char   : Factor w/ 20 levels &quot;)&quot;,&quot;$&quot;,&quot;0&quot;,&quot;1&quot;,..: 17 4 18 19 5 3 20 9 2 11 ...
+ $ word   : Factor w/ 25 levels &quot;ca&quot;,&quot;da&quot;,&quot;doptah&quot;,..: 24 4 3 8 10 6 21 7 18 20 ...
+ $ yn     : Factor w/ 2 levels &quot;N&quot;,&quot;Y&quot;: 2 2 2 1 1 2 1 1 2 2 ...</code></pre>
+<p>The <code>str</code> function shows the structure of an R object. For a <code>data.frame</code> object, each column in the <code>data.frame</code> is previewed in a row with the column name, followed by the column type, followed by the values for the first few rows in that column. Most of the columns in <code>example.csv</code> were converted to factors by <code>read.csv</code>. The factor levels are encoded as integers (e.g., <code>&quot;true&quot;</code> and <code>&quot;false&quot;</code> as <code>1</code> and <code>2</code>). I won’t re-hash the <a href="https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/">explanation for this default behavior</a>, but I now typically set <code>stringsAsFactors = FALSE</code> to read non-numeric data as strings.</p>
+<pre><code>&gt; str(read.csv(&quot;example.csv&quot;, stringsAsFactors = FALSE))
+&#39;data.frame&#39;:   25 obs. of  7 variables:
+ $ date   : chr  &quot;12/25/2060&quot; &quot;02/18/2023&quot; &quot;11/27/2064&quot; &quot;06/28/2044&quot; ...
+ $ integer: int  -958838 -165090 -207296 316236 722897 -903116 -350444 -498413 63304 -644668 ...
+ $ float  : num  5.90e+11 5.28e+11 9.94e+10 5.90e+11 -3.09e+11 ...
+ $ bool   : chr  &quot;true&quot; &quot;true&quot; &quot;false&quot; &quot;false&quot; ...
+ $ char   : chr  &quot;u&quot; &quot;1&quot; &quot;w&quot; &quot;x&quot; ...
+ $ word   : chr  &quot;zosu&quot; &quot;em&quot; &quot;doptah&quot; &quot;gutijenel&quot; ...
+ $ yn     : chr  &quot;Y&quot; &quot;Y&quot; &quot;Y&quot; &quot;N&quot; ...</code></pre>
+<p>However, I’m even more likely to use the <code>read_csv</code> function from the <a href="https://readr.tidyverse.org"><code>readr</code> package</a>.</p>
+<pre><code>&gt; library(readr)
+&gt; str(read_csv(&quot;example.csv&quot;))
+Parsed with column specification:
+cols(
+  date = col_character(),
+  integer = col_double(),
+  float = col_double(),
+  bool = col_logical(),
+  char = col_character(),
+  word = col_character(),
+  yn = col_character()
+)
+Classes ‘spec_tbl_df’, ‘tbl_df’, ‘tbl’ and &#39;data.frame&#39;:    25 obs. of  7 variables:
+ $ date   : chr  &quot;12/25/2060&quot; &quot;02/18/2023&quot; &quot;11/27/2064&quot; &quot;06/28/2044&quot; ...
+ $ integer: num  -958838 -165090 -207296 316236 722897 ...
+ $ float  : num  5.90e+11 5.28e+11 9.94e+10 5.90e+11 -3.09e+11 ...
+ $ bool   : logi  TRUE TRUE FALSE FALSE TRUE TRUE ...
+ $ char   : chr  &quot;u&quot; &quot;1&quot; &quot;w&quot; &quot;x&quot; ...
+ $ word   : chr  &quot;zosu&quot; &quot;em&quot; &quot;doptah&quot; &quot;gutijenel&quot; ...
+ $ yn     : chr  &quot;Y&quot; &quot;Y&quot; &quot;Y&quot; &quot;N&quot; ...
+ - attr(*, &quot;spec&quot;)=
+  .. cols(
+  ..   date = col_character(),
+  ..   integer = col_double(),
+  ..   float = col_double(),
+  ..   bool = col_logical(),
+  ..   char = col_character(),
+  ..   word = col_character(),
+  ..   yn = col_character()
+  .. )</code></pre>
+<p><code>readr</code> flexibly parses many data types. In our example file, <code>readr</code> converts the <code>bool</code> column of <code>&quot;true&quot;</code> and <code>&quot;false&quot;</code> to R’s logical type represented as <code>TRUE</code> and <code>FALSE</code>. <code>readr</code> is also capable of automatically parsing dates, but, apparently, not when the dates are in the <code>mm/dd/yyyy</code> format.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> Interestingly, <code>readr</code> parses the <code>integer</code> column in this example file as a <code>double</code> rather than <code>integer</code>, perhaps because the integer values are so large.</p>
+<p>If you are dealing with large datasets with slow read times, <a href="https://www.rdocumentation.org/packages/data.table/versions/1.12.2/topics/fread"><code>fread</code></a> from the <a href="http://r-datatable.com"><code>data.table</code> package</a> and the <a href="http://vroom.r-lib.org"><code>vroom</code> package</a> provide fast reading of delimited files. Jim Hester, maintainer of both the <code>readr</code> and <code>vroom</code> packages, made a <a href="https://www.youtube.com/watch?v=ZP_y5eaAc60">helpful video</a> comparing the performance of the <code>readr</code>, <code>vroom</code>, and <code>data.table</code> packages on a variety of tasks related to reading delimited files.</p>
+</div>
+<div id="racket" class="section level3">
+<h3>Racket</h3>
+<p>The <code>csv-reading</code> package provides a high-level convenience funtion <code>csv-&gt;list</code> for reading a CSV file.</p>
+<pre><code>&gt; (require csv-reading)
+&gt; (call-with-input-file &quot;example.csv&quot; csv-&gt;list)
+&#39;((&quot;date&quot; &quot; integer&quot; &quot; float&quot; &quot; bool&quot; &quot; char&quot; &quot; word&quot; &quot; yn&quot;)
+  (&quot;12/25/2060&quot; &quot;-958838&quot; &quot;590131109036.032&quot; &quot;true&quot; &quot;u&quot; &quot;zosu&quot; &quot;Y&quot;)
+  (&quot;02/18/2023&quot; &quot;-165090&quot; &quot;528052918838.8864&quot; &quot;true&quot; &quot;1&quot; &quot;em&quot; &quot;Y&quot;)
+  (&quot;11/27/2064&quot; &quot;-207296&quot; &quot;99397538938.88&quot; &quot;false&quot; &quot;w&quot; &quot;doptah&quot; &quot;Y&quot;)
+  (&quot;06/28/2044&quot; &quot;316236&quot; &quot;590216172037.7344&quot; &quot;false&quot; &quot;x&quot; &quot;gutijenel&quot; &quot;N&quot;)
+  (&quot;08/12/2045&quot; &quot;722897&quot; &quot;-309360363516.7232&quot; &quot;true&quot; &quot;7&quot; &quot;hueh&quot; &quot;N&quot;)
+  (&quot;07/23/1904&quot; &quot;-903116&quot; &quot;-509332808531.968&quot; &quot;true&quot; &quot;0&quot; &quot;fufcora&quot; &quot;Y&quot;)
+  (&quot;11/16/2021&quot; &quot;-350444&quot; &quot;-660010367870.5664&quot; &quot;false&quot; &quot;Y&quot; &quot;we&quot; &quot;N&quot;)
+  (&quot;08/30/1906&quot; &quot;-498413&quot; &quot;464406135282.0736&quot; &quot;false&quot; &quot;E&quot; &quot;gilveodo&quot; &quot;N&quot;)
+  (&quot;12/28/2059&quot; &quot;63304&quot; &quot;-89202181223.2192&quot; &quot;false&quot; &quot;$&quot; &quot;teocon&quot; &quot;Y&quot;)
+  (&quot;01/30/2023&quot; &quot;-644668&quot; &quot;777959066776.3712&quot; &quot;false&quot; &quot;J&quot; &quot;vettocfa&quot; &quot;Y&quot;)
+  (&quot;11/15/1952&quot; &quot;-157838&quot; &quot;-367124812713.1648&quot; &quot;false&quot; &quot;9&quot; &quot;ponposa&quot; &quot;N&quot;)
+  (&quot;07/14/1943&quot; &quot;526756&quot; &quot;-838433449495.7568&quot; &quot;true&quot; &quot;p&quot; &quot;ni&quot; &quot;Y&quot;)
+  (&quot;09/21/2032&quot; &quot;-397651&quot; &quot;492526730687.2832&quot; &quot;false&quot; &quot;9&quot; &quot;fa&quot; &quot;N&quot;)
+  (&quot;10/31/1997&quot; &quot;127459&quot; &quot;586856424642.9696&quot; &quot;true&quot; &quot;N&quot; &quot;rifot&quot; &quot;N&quot;)
+  (&quot;03/30/1971&quot; &quot;-430726&quot; &quot;816426901097.6768&quot; &quot;false&quot; &quot;C&quot; &quot;wihpubun&quot; &quot;N&quot;)
+  (&quot;12/10/2002&quot; &quot;986178&quot; &quot;390724723094.3232&quot; &quot;false&quot; &quot;0&quot; &quot;ca&quot; &quot;N&quot;)
+  (&quot;01/23/2054&quot; &quot;-761264&quot; &quot;167446627483.648&quot; &quot;false&quot; &quot;B&quot; &quot;ku&quot; &quot;Y&quot;)
+  (&quot;07/16/1999&quot; &quot;373063&quot; &quot;-487648905710.7968&quot; &quot;false&quot; &quot;)&quot; &quot;da&quot; &quot;Y&quot;)
+  (&quot;08/25/2041&quot; &quot;326420&quot; &quot;382617699273.9328&quot; &quot;false&quot; &quot;L&quot; &quot;kegtizub&quot; &quot;Y&quot;)
+  (&quot;07/29/1984&quot; &quot;335329&quot; &quot;-511355736870.0928&quot; &quot;false&quot; &quot;M&quot; &quot;kiili&quot; &quot;N&quot;)
+  (&quot;10/24/2027&quot; &quot;-149539&quot; &quot;244888640893.7472&quot; &quot;true&quot; &quot;g&quot; &quot;ufhuk&quot; &quot;N&quot;)
+  (&quot;12/30/2009&quot; &quot;258694&quot; &quot;-261971544060.7232&quot; &quot;false&quot; &quot;g&quot; &quot;zemegrif&quot; &quot;N&quot;)
+  (&quot;11/22/1920&quot; &quot;-553309&quot; &quot;-687846506836.7872&quot; &quot;false&quot; &quot;m&quot; &quot;hetige&quot; &quot;Y&quot;)
+  (&quot;09/04/2007&quot; &quot;-686574&quot; &quot;779963704593.6128&quot; &quot;false&quot; &quot;L&quot; &quot;zule&quot; &quot;N&quot;)
+  (&quot;03/07/2060&quot; &quot;372912&quot; &quot;605244557046.5792&quot; &quot;true&quot; &quot;N&quot; &quot;sez&quot; &quot;Y&quot;))</code></pre>
+<p><code>csv-&gt;list</code> reads all values as strings into a list<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> (i.e., no automated parsing of values). I think that reading CSV files provides an informative contrast between the R and Racket communities.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> By and large, R users are not programmers but end users who want to expeditiously perform tasks related to cleaning, analyzing, and visualizing their data. There is a large, and growing, industry around building R packages and tools that facilitate those end users. My early impression of the Racket community is that packages are generally written at a lower level of abstraction than R packages because the target audience is other programmers.<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> I think this <a href="https://groups.google.com/forum/#!msg/racket-users/1STqCq2dzSs/aMHeIhsIBAAJ">discussion on the racket-users mailing list</a> illustrates this difference reasonably well.</p>
+<p>Our example data was handled well by <code>csv-&gt;list</code>, but if your data is more unruly then you can turn to the lower-level functions in the <code>csv-reading</code> package, which involve making a <code>csv-reader</code> and then iteratively calling that reader.</p>
+<pre><code>(define make-example-csv-reader
+  (make-csv-reader-maker
+   &#39;((separator-chars #\,))))
+
+(define next-row
+  (make-example-csv-reader (open-input-file &quot;example.csv&quot;)))</code></pre>
+<p>The reader function, <code>next-row</code>, returns each row until it has reached the end of the file and then returns a null list (<code>'()</code>).</p>
+<pre><code>&gt; (next-row)
+&#39;(&quot;date&quot; &quot; integer&quot; &quot; float&quot; &quot; bool&quot; &quot; char&quot; &quot; word&quot; &quot; yn&quot;)
+&gt; (next-row)
+&#39;(&quot;12/25/2060&quot; &quot;-958838&quot; &quot;590131109036.032&quot; &quot;true&quot; &quot;u&quot; &quot;zosu&quot; &quot;Y&quot;)</code></pre>
+<p>We can use this behavior to create a function for previewing a CSV file that uses our previously defined <code>make-example-csv-reader</code> function and then iterates through the file with a recursive function.</p>
+<pre><code>(define (preview-csv filename [rows 6])
+  (define next-row
+    (make-example-csv-reader (open-input-file filename)))
+  (define (iterate iter [result &#39;()])
+    (define nr (next-row))
+    (if (or (&lt; iter 1) (empty? nr))
+        (reverse result)
+        (iterate (- iter 1) (cons nr result))))
+  (iterate rows))</code></pre>
+<p><code>preview-csv</code> allows the user to specify the maximum number of rows to preview (with a default of 6).</p>
+<pre><code>&gt; (preview-csv &quot;example.csv&quot;)
+&#39;((&quot;date&quot; &quot; integer&quot; &quot; float&quot; &quot; bool&quot; &quot; char&quot; &quot; word&quot; &quot; yn&quot;)
+  (&quot;12/25/2060&quot; &quot;-958838&quot; &quot;590131109036.032&quot; &quot;true&quot; &quot;u&quot; &quot;zosu&quot; &quot;Y&quot;)
+  (&quot;02/18/2023&quot; &quot;-165090&quot; &quot;528052918838.8864&quot; &quot;true&quot; &quot;1&quot; &quot;em&quot; &quot;Y&quot;)
+  (&quot;11/27/2064&quot; &quot;-207296&quot; &quot;99397538938.88&quot; &quot;false&quot; &quot;w&quot; &quot;doptah&quot; &quot;Y&quot;)
+  (&quot;06/28/2044&quot; &quot;316236&quot; &quot;590216172037.7344&quot; &quot;false&quot; &quot;x&quot; &quot;gutijenel&quot; &quot;N&quot;)
+  (&quot;08/12/2045&quot; &quot;722897&quot; &quot;-309360363516.7232&quot; &quot;true&quot; &quot;7&quot; &quot;hueh&quot; &quot;N&quot;))</code></pre>
+<p>With a small modification, we can change <code>preview-csv</code> to a function that reads the whole file.</p>
+<pre><code>(define (read-csv filename)
+  (define next-row
+    (make-example-csv-reader (open-input-file filename)))
+  (define (iterate [result &#39;()])
+    (define nr (next-row))
+    (if (empty? nr)
+        (reverse result)
+        (iterate (cons nr result))))
+  (iterate))</code></pre>
+<p>And, for this example, <code>read-csv</code> returns the same result as <code>csv-&gt;list</code>.</p>
+<pre><code>&gt; (equal? (call-with-input-file &quot;example.csv&quot; csv-&gt;list) (read-csv &quot;example.csv&quot;))
+#t</code></pre>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><code>read.csv</code> is a wrapper function to <a href="https://stat.ethz.ch/R-manual/R-devel/RHOME/library/utils/html/read.table.html"><code>read.table</code></a>, which adds type conversions (and other conveniences) to the <a href="https://stat.ethz.ch/R-manual/R-devel/RHOME/library/base/html/scan.html"><code>scan</code></a> function.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p><code>readr</code> correctly parses dates stored as strings in the <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>A Racket list is a linked list, which is different than the <a href="https://www.rdocumentation.org/packages/base/versions/3.6.0/topics/list">list data structure in R</a> (<a href="https://stackoverflow.com/questions/29417134/what-is-the-difference-between-a-list-and-a-pairlist-in-r">see also</a>).<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>Of course, it is also relevant that the central data structure in R (i.e., data frame) is tabular. That is not true of Racket but there have been a couple of recent discussions on the racket-users mailing list (<a href="https://groups.google.com/d/msg/racket-users/3Ve4UlOmnpo/udLRfywiBgAJ">here</a> and <a href="https://groups.google.com/d/msg/racket-users/7MCIp7RmTh8/IIJLsC9ADAAJ">here</a>) about tabular data structures in Racket. And there is a <a href="https://docs.racket-lang.org/data-frame/index.html?q=data%20frame">data frame package</a> that implements a data frame data structure in Racket.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p>This comparison is possibly made more stark by my choice to <a href="/post/programming-horizons/">learn Racket rather than Clojure</a>, which have <a href="https://qr.ae/TWh7Ur">different philosophies</a> on how to build a community.<a href="#fnref5" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
