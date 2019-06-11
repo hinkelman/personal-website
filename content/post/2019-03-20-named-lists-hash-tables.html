@@ -54,6 +54,20 @@ spawn_prob[[&quot;male&quot;]][[&quot;3-4&quot;]]</code></pre>
                      &quot;4+&quot; 0.9)))
 ; index nested hash table
 (hash-ref (hash-ref spawn-prob &quot;male&quot;) &quot;3-4&quot;)</code></pre>
+<p>Update: After a little more exposure to hash tables in Racket, it seems that it is more idiomatic to represent keys as symbols than strings. At the very least, it saves some keystrokes.</p>
+<pre><code>(define spawn-prob
+  (hash &#39;female (hash &#39;0-1 0
+                      &#39;1-2 0
+                      &#39;2-3 0.15
+                      &#39;3-4 0.4
+                      &#39;4+ 0.8)
+        &#39;male (hash &#39;0-1 0
+                    &#39;1-2 0.1
+                    &#39;2-3 0.4
+                    &#39;3-4 0.6
+                    &#39;4+ 0.9)))
+
+(hash-ref (hash-ref spawn-prob &#39;male) &#39;3-4)</code></pre>
 <div class="footnotes">
 <hr />
 <ol>
