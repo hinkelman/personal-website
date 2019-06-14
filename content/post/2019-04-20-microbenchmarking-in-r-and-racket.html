@@ -38,7 +38,7 @@ tags:
 min: 1 mean: 2 max: 22    function: flnormal-sample
 &gt; (time-apply-cpu-old flnormal-sample (list 0.0 1.0 100000) 50)
 min: 14 mean: 17 max: 45    function: flnormal-sample</code></pre>
-<p><code>time-apply-cpu-old</code> only allows for evaluation of a single function at a time and the display of the output is ugly. I thought it would be a good exercise to try to address those two deficiencies. There was a <a href="https://groups.google.com/forum/#!topic/racket-users/7MCIp7RmTh8">recent discussion on the Racket mailing list</a> that provided several options to allow for pretty printing of the timing output. I opted for a suggestion involving the <code>table</code> function from the <a href="https://docs.racket-lang.org/raart/index.html?q=raart">raart module</a>.</p>
+<p><code>time-apply-cpu-old</code> only allows for evaluation of a single function at a time and the display of the output is ugly. I thought it would be a good exercise to try to address those two deficiencies. There was a <a href="https://groups.google.com/forum/#!topic/racket-users/7MCIp7RmTh8">recent discussion on the Racket mailing list</a> that provided several options to allow for pretty printing of the timing output. I opted for a suggestion involving the <code>table</code> function from the <a href="https://docs.racket-lang.org/raart/index.html?q=raart">raart package</a>.</p>
 <pre><code>&gt; (require raart/draw)
 &gt; (define example-list (list (list &quot;col1&quot; &quot;col2&quot; &quot;col3&quot;)
                              (list 1.001 2.002 3.003)

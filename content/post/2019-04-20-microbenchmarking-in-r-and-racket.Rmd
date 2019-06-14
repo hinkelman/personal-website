@@ -43,7 +43,7 @@ min: 1 mean: 2 max: 22    function: flnormal-sample
 min: 14 mean: 17 max: 45    function: flnormal-sample
 ```
 
-`time-apply-cpu-old` only allows for evaluation of a single function at a time and the display of the output is ugly. I thought it would be a good exercise to try to address those two deficiencies. There was a [recent discussion on the Racket mailing list](https://groups.google.com/forum/#!topic/racket-users/7MCIp7RmTh8) that provided several options to allow for pretty printing of the timing output. I opted for a suggestion involving the `table` function from the [raart module](https://docs.racket-lang.org/raart/index.html?q=raart).
+`time-apply-cpu-old` only allows for evaluation of a single function at a time and the display of the output is ugly. I thought it would be a good exercise to try to address those two deficiencies. There was a [recent discussion on the Racket mailing list](https://groups.google.com/forum/#!topic/racket-users/7MCIp7RmTh8) that provided several options to allow for pretty printing of the timing output. I opted for a suggestion involving the `table` function from the [raart package](https://docs.racket-lang.org/raart/index.html?q=raart).
 
 ```
 > (require raart/draw)
