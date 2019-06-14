@@ -191,6 +191,7 @@ $B$Six
 Racket reads the nested list as a nested hash table^[See also [previous post](/post/named-lists-hash-tables/) on the similarity of nested lists in R and nested hash tables in Racket.] rather than a list of hash tables as with the data frame. As with reading the data frame above, the keys are listed in alphabetical order.
 
 ```
+> (read-json-wrapper "R_list.json")
 '#hasheq((A . #hasheq((One . (1)) (Three . (3)) (Two . (2))))
          (B . #hasheq((Five . (5)) (Four . (4)) (Six . (6)))))
 ```
