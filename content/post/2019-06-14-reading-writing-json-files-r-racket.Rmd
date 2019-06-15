@@ -16,9 +16,9 @@ tags:
   - vector
 ---
 
-In learning about [reading CSV files in Racket](/post/reading-csv-files-in-r-and-racket/), I have started to reconsider whether storing small(ish) datasets in CSV files is the best default behavior.^[I even used CSV files as a [database replacement](/post/dt-datatable-crud/) in my [Shiny Scorekeeper app](/project/shiny-scorekeeper/).] My default was set by primarily working in R, where reading and writing CSV files plays a central role in data analysis. When working solely in R, I expect that my old habits will die hard and CSV files will continue to play a prominent role. However, when passing small(ish) data betwee R and Racket, I think JSON might be a better alternative.
+In learning about [reading CSV files in Racket](/post/reading-csv-files-in-r-and-racket/), I have started to reconsider whether storing small(ish) datasets in CSV files is the best default behavior.^[I even used CSV files as a [database replacement](/post/dt-datatable-crud/) in my [Shiny Scorekeeper app](/project/shiny-scorekeeper/).] My default was set by primarily working in R, where reading and writing CSV files plays a central role in data analysis. When working solely in R, I expect that my old habits will die hard and CSV files will continue to play a prominent role. However, when passing small(ish) data between R and Racket, I think JSON might be a better alternative.
 
-Before we jump into a bunch of little code examples, let's define some wrapper functions to make the subsequent code a bit more concise. In R, we are using the [`jsonlite` package](https://github.com/jeroen/jsonlite) and a little function to write the JSON object to file.
+Before we jump into a bunch of code examples, let's define some wrapper functions to make the subsequent code a bit more concise. In R, we are using the [`jsonlite` package](https://github.com/jeroen/jsonlite) and a little function to write the JSON object to file.
 
 ```
 library(jsonlite)
@@ -28,7 +28,7 @@ write_json <- function(object, filename){
 }
 ```
 
-In Racket, we are using the [`json` module](https://docs.racket-lang.org/json/index.html?q=json) and have simple wrapper functions for both reading and writing JSON. A `jsexpr` is a subset of Racket values (e.g., list, hash table, etc.) that can be represented as JSON strings.
+In Racket, we are using the [`json` module](https://docs.racket-lang.org/json/index.html?q=json) and have simple wrapper functions for both reading and writing JSON. A [`jsexpr`](https://docs.racket-lang.org/json/index.html?q=jsexpr#%28tech._jsexpr%29) is a subset of Racket values (e.g., list, hash table, etc.) that can be represented as JSON strings.
 
 ```
 #lang racket
@@ -62,7 +62,7 @@ The data frame is the central data structure in R, which corresponds well to fla
 6 07/23/1904 -903116 -509332808532  true    0   fufcora  Y
 ```
 
-Racket reads the data frame as a list of [hash tables](https://docs.racket-lang.org/reference/hashtables.html?q=hasheq#%28def._%28%28quote._~23~25kernel%29._hasheq%29%29). Note that keys in the hash table are listed in alphabetical order. Also, the redundancy of the JSON format is evident for this tabular data via the repetition of the column names.
+Racket reads the data frame as a list of [hash tables](https://docs.racket-lang.org/reference/hashtables.html?q=hasheq#%28def._%28%28quote._~23~25kernel%29._hasheq%29%29). Note that keys (e.g., `bool`, `char`, `date`, etc.) in the hash table are listed in alphabetical order. Also, the redundancy of the JSON format is evident for this tabular data via the repetition of the column names.
 
 ```
 > (read-json-wrapper "R_dataframe.json")
