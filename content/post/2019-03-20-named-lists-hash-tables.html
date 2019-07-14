@@ -23,7 +23,7 @@ fecundity_anadromous = 4000</code></pre>
 <pre><code># create named vector
 fecundity = c(&quot;resident&quot; = 1000,
               &quot;anadromous&quot; = 4000)</code></pre>
-<p>The fecundity value is then looked up by name, which is safer than by position, e.g., <code>fecundity[[&quot;resident&quot;]]</code> returns <code>1000</code>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+<p>The fecundity value is then looked up by name, which is safer than by position, e.g., <code>fecundity[["resident"]]</code> returns <code>1000</code>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
 <p>When a parameter differs across multiple groups, a nested named list fits the bill. In the next example, the spawning probability parameter is different between sexes and across age classes. The nested list structure is easy to read and indexing is similar to using a named vector.</p>
 <pre><code># create nested named list
 spawn_prob = list(&quot;female&quot; = list(&quot;0-1&quot; = 0, 
@@ -71,6 +71,6 @@ spawn_prob[[&quot;male&quot;]][[&quot;3-4&quot;]]</code></pre>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>Note that indexing with <code>[</code> returns the name and the value. Using <code>[[</code> returns the value only.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>Note that indexing with <code>[</code> returns the name and the value. Using <code>[[</code> returns the value only.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>

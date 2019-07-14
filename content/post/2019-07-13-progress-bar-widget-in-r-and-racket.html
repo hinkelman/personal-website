@@ -1,0 +1,77 @@
+---
+title: Progress bar widget in R and Racket
+author: Travis Hinkelman
+date: '2019-07-13'
+slug: progress-bar-widget-in-r-and-racket
+categories:
+  - R
+  - Racket
+tags:
+  - GUI
+  - class
+  - object
+  - Tk
+---
+
+
+
+<p>As an impatient person and an insecure programmer, I typically use progress bars for any code that takes more than a few minutes to run. In R, a progress bar widget is available through the <a href="https://stat.ethz.ch/R-manual/R-devel/library/tcltk/html/tcltk-package.html"><code>tcltk</code> package</a>.</p>
+<pre><code>library(tcltk)
+
+pb &lt;- tkProgressBar(title = &quot;Progress Bar&quot;, label = &quot;0%&quot;, max = 100)
+for(i in 1:100) {
+  Sys.sleep(0.05)
+  setTkProgressBar(pb, value = i, label = paste0(i, &quot;%&quot;))
+}
+close(pb)</code></pre>
+<p>In this code, we initialize a progress bar and assign it to <code>pb</code>. As the loop progresses, updates are sent to the progress bar that change the value and label of the progress bar. When the loop is complete, the progress bar is closed. On macOS<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, the progress bar looks like this:</p>
+<p><img src="/post/progress/progress_r.png" /></p>
+<p>In Racket, we can build a progress bar widget using the <a href="https://docs.racket-lang.org/gui/">GUI toolkit</a>.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> In my first try, I was able to write code (not shown here) to create the progress bar, but I struggled to see how to make it easily reusable. As usual, I reached out to the <a href="https://groups.google.com/forum/#!topic/racket-users/qKijYKGdo4U">Racket mailing list</a>. After some gentle nudging from the mailing list, I realized that it was straightforward to return a GUI object from a function (also not shown here but see mailing list link). However, another mailing list member provided an alternative implementation based on defining a new class, which I think is the more natural way to approach this task.</p>
+<pre><code>#lang racket/gui
+
+(define progress-bar%
+  (class horizontal-pane%
+    (super-new)
+
+    (define gauge (new gauge%
+                       [label #f]
+                       [parent this]
+                       [range 100]))
+
+    ;; initialize to 100% with no auto resize
+    ;; this way the label has the right size
+    ;; so that everything can be seen
+    ;; and it does not &quot;wobble&quot; around while filling up
+    (define msg (new message%
+                     [parent this]
+                     [label &quot;100%&quot;]))
+
+    (define/public (set-value val)
+      (send gauge set-value val)
+      (send msg set-label (string-append (~a val) &quot;%&quot;)))
+
+    ;; set back to 0%
+    (set-value 0)))</code></pre>
+<p>In this code, a new class, <code>progress-bar%</code>, is defined as a <a href="https://docs.racket-lang.org/gui/horizontal-pane_.html?q=set-label"><code>horizontal-pane%</code></a> that contains a <a href="https://docs.racket-lang.org/gui/gauge_.html?q=set-label"><code>gauge%</code></a> and a <a href="https://docs.racket-lang.org/gui/message_.html?q=set-label"><code>message%</code></a>. The arrangement of the <code>gauge%</code> and <code>message%</code> is determined by the order that they appear in the <code>progress-bar%</code> definition (i.e., left to right in a <code>horizontal-pane%</code>).</p>
+<p>The <code>progress-bar%</code> class includes a single method, <code>set-value</code>, for updating both the <code>gauge%</code> and the <code>message%</code><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>. Interestingly, you can call the <code>set-value</code> method from within the class definition.</p>
+<pre><code>(define frame (new frame%
+                   [label &quot;Progress Bar&quot;]
+                   [width 300]))
+
+(define progress (new progress-bar% [parent frame]))
+
+(send frame show #t)
+(for ([i (in-range 1 101)])
+  (sleep 0.05)
+  (send progress set-value i))
+(send frame show #f)</code></pre>
+<p>A <a href="https://docs.racket-lang.org/gui/frame_.html?q=set-label"><code>frame%</code></a> is defined as a top-level container for <code>progress</code>. The <code>frame</code> is shown or hidden by sending <code>#t</code> or <code>#f</code>, respectively, with the <code>show</code> method. As in R, the value of the progress bar and label is updated on each iteration. On macOS, the progress bar looks like this:</p>
+<p><img src="/post/progress/progress_racket.png" /></p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://www.xquartz.org">XQuartz</a> is required to display the widget on macOS.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>For more on building GUI’s in Racket, see also <a href="https://alex-hhh.github.io/index.html">Alex Harsányi’s blog</a>.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p><code>~a</code> is shorthand for converting a number to a string. <code>paste</code> in R implicitly converts values to strings before concatenation, but <code>string-append</code> in Racket requires that all arguments are strings.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

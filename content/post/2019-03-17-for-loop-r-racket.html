@@ -65,7 +65,7 @@ for (i in 1:(nrow(results) - 1)){
 (define fecundity #(0 0 200 400 800))
 (define survival #(0.2 0.4 0.6 0.8 0)) 
 (define capacity #(1e6 1e5 1e4 1e3 1e2))</code></pre>
-<p>A Racket vector is more like a list in R because it can contain heterogenous data types, e.g., <code>#(1 &quot;cat&quot; #(2 &quot;dog&quot;))</code>. But Racket also has a <a href="https://docs.racket-lang.org/reference/pairs.html">list data structure</a>. Needless to say, I still don’t have a good grasp of the similarities and differences between data structures in <a href="http://adv-r.had.co.nz/Data-structures.html">R</a> and <a href="https://beautifulracket.com/explainer/data-structures.html">Racket</a>.</p>
+<p>A Racket vector is more like a list in R because it can contain heterogenous data types, e.g., <code>#(1 "cat" #(2 "dog"))</code>. But Racket also has a <a href="https://docs.racket-lang.org/reference/pairs.html">list data structure</a>. Needless to say, I still don’t have a good grasp of the similarities and differences between data structures in <a href="http://adv-r.had.co.nz/Data-structures.html">R</a> and <a href="https://beautifulracket.com/explainer/data-structures.html">Racket</a>.</p>
 <p>The Beverton-Holt function definition illustrates Racket’s use of prefix operators. Operations are read from inside out<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
 <pre><code>;; multistage Beverton-Holt model 
 (define (beverton-holt N p c)
@@ -165,7 +165,7 @@ for (i in 1:(nrow(results) - 1)){
 
 (iterate (make-list (length fecundity) 10) years)</code></pre>
 <p>The first thing to notice is that Daniel’s approach uses lists, not vectors. Like vectors, lists can be created with shorthand notation, e.g., <code>'(1 2 3)</code> versus <code>(list 1 2 3)</code>. The <code>capacity</code> list includes an extra element (-999) to avoid passing an empty list in <code>evolve</code> but that element is never used.</p>
-<p>The <code>evolve</code> function uses default values for every argument except <code>N</code>. <code>evolve</code> is a “list-eater” function that represents the inner loop from the nested for loop structure. When the <code>fecundity</code> list is empty, <code>evolve</code> returns the abundances of each age class in the next time step. When the second argument to <code>cons</code> is a list, <code>cons</code> return a list with the first argument appended to the beginning of the list. The last argument to the recursive call to <code>evolve</code> (i.e., code after <code>;;survival</code>) builds up <code>Nt</code> in reverse (i.e., left to right is oldest to youngest age class), which is why <code>Nt</code> needs to be reversed before appending <code>Nt0</code> to the front of the list.</p>
+<p>The <code>evolve</code> function uses default values for every argument except <code>N</code>. <code>evolve</code> is a “list-eater” function that represents the inner loop from the nested for loop structure. When the <code>fecundity</code> list is empty, <code>evolve</code> returns the abundances of each age class in the next time step. When the second argument to <code>cons</code> is a list, <code>cons</code> return a list with the first argument appended to the beginning of the list. The last argument to the recursive call to <code>evolve</code> (i.e., code after <code>survival</code>) builds up <code>Nt</code> in reverse (i.e., left to right is oldest to youngest age class), which is why <code>Nt</code> needs to be reversed before appending <code>Nt0</code> to the front of the list.</p>
 <p><code>evolve</code> is the workhouse in this solution. It is a relatively simple matter to write another recursive function (<code>iterate</code>) to repeat <code>evolve</code> for the specified number of years. In Daniel’s solution, <code>iterate</code> displays the output without storing it. I’ve modified <code>iterate</code> below to return a list of lists.</p>
 <pre><code>(define (iterate N n [i 1])
   (if (= i n)
@@ -189,11 +189,11 @@ for (i in 1:(nrow(results) - 1)){
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>The <a href="http://lexi-lambda.github.io/threading/threading.html">threading module</a> allows for writing Racket code in “pipelines” to reduce deeply nested code.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>Admittedly, four of those parantheses are superfluous but I find it more readable to make the order of operations explicit.<a href="#fnref2" class="footnote-back">↩</a></p></li>
-<li id="fn3"><p>Square brackets can be used in place of parantheses to improve readability. Iterating through a sequence is one of the contexts where the convention is to use square brackets.<a href="#fnref3" class="footnote-back">↩</a></p></li>
-<li id="fn4"><p>Just as <code>for/list</code> produces a list.<a href="#fnref4" class="footnote-back">↩</a></p></li>
-<li id="fn5"><p>I subsequently wrote a <a href="https://gist.github.com/hinkelman/2efcf106b7ca4d1defaed1cf4078f852">version</a> using <code>math/array</code> that is a more direct translation of the R code<a href="#fnref5" class="footnote-back">↩</a></p></li>
-<li id="fn6"><p>Well, not exactly. See <a href="/post/vectorized-conditional-statement-r-racket/">this post</a> for clarification.<a href="#fnref6" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>The <a href="http://lexi-lambda.github.io/threading/threading.html">threading module</a> allows for writing Racket code in “pipelines” to reduce deeply nested code.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>Admittedly, four of those parantheses are superfluous but I find it more readable to make the order of operations explicit.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>Square brackets can be used in place of parantheses to improve readability. Iterating through a sequence is one of the contexts where the convention is to use square brackets.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>Just as <code>for/list</code> produces a list.<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>I subsequently wrote a <a href="https://gist.github.com/hinkelman/2efcf106b7ca4d1defaed1cf4078f852">version</a> using <code>math/array</code> that is a more direct translation of the R code<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>Well, not exactly. See <a href="/post/vectorized-conditional-statement-r-racket/">this post</a> for clarification.<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
