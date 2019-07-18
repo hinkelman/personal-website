@@ -1,0 +1,149 @@
+---
+title: ASCII progress bar in R and Racket
+author: Travis Hinkelman
+date: '2019-07-17'
+slug: ascii-progress-bar-in-r-and-racket
+categories:
+  - R
+  - Racket
+tags:
+  - raart
+---
+
+
+
+<p>In a <a href="/post/progress-bar-widget-in-r-and-racket/">previous post</a>, I used GUI toolkits to make progress bars in R and Racket. However, I usually prefer the ASCII progress bars of the <a href="https://github.com/r-lib/progress"><code>progress</code> package</a> in R. The <code>progress</code> package includes several options for formatting the progress bar. I particularly like the option to display the estimated time remaining. However, for this post, we will stick to the basic progress bar.</p>
+<pre><code>library(progress)
+
+pb &lt;- progress_bar$new(total = 100)
+for (i in 1:100) {
+  pb$tick()
+  Sys.sleep(0.05)
+}
+
+[==============================&gt;-------------------------------]  50%</code></pre>
+<p>The basic progress bar only requires specifiying the total number of iterations. A default label is produced automatically. The progress bar is customizable (messages, characters, etc.) and works from the command line, Emacs, and RStudio.</p>
+<p>My attempt to create an ASCII progress bar in Racket falls <strong>far</strong> short of the capabilities of the <code>progress</code> package. My Racket ASCII progress bar uses the functionality provided by the <a href="https://docs.racket-lang.org/raart/"><code>raart</code> package</a>, which I also used to format the tabular output of a <a href="/post/microbenchmarking-in-r-and-racket/">microbenchmarking function</a>.</p>
+<pre><code>#lang racket
+
+(require raart)
+
+(define (generate-bar value)
+  (when (or (&lt; value 0) (&gt; value 100))
+    (error &quot;given value is not between 0 and 100&quot;))
+  (unless (integer? value)
+    (error &quot;given value is not an integer&quot;))
+    
+  ;; scale progress bar by half to fit in default terminal window on mac (80 columns) 
+  (define new-value (floor (/ value 2)))
+  (define num-equals (if (= new-value 0) 0 (- new-value 1)))
+  ;; always one arrow character unless value is zero
+  (define arrow (if (= new-value 0) &quot;&quot; &quot;&gt;&quot;))
+  
+  ;; placeholder-string to maintain constant width as progress changes
+  ;; &quot;  0%&quot;, &quot; 10%&quot;, &quot;100%&quot;
+  (define placeholder-string  
+    (cond
+      [(&lt; value 10) &quot;  &quot;]
+      [(&lt; value 100) &quot; &quot;]
+      [else &quot;&quot;]))
+      
+  (text (string-append
+         &quot;[&quot;
+         (make-string num-equals #\=)
+         arrow
+         (make-string (- 50 new-value) #\-)
+         &quot;]&quot;
+         placeholder-string
+         (~a value)
+         &quot;%&quot;)))</code></pre>
+<p>As a first step, we create a function, <code>generate-bar</code>, that appends the characters of the progress bar into a single string. The basic idea is straightforward and facilitated by <code>make-string</code> (<a href="https://docs.racket-lang.org/reference/reader.html#%28part._parse-character%29"><code>#\</code></a> starts a character constant).</p>
+<pre><code>&gt; (make-string 15 #\-)
+&quot;---------------&quot;
+&gt; (make-string 0 #\-)
+&quot;&quot;</code></pre>
+<p>I flailed around for too long trying to work out the logic for appending the strings. When I took a step back and made the table below, the logic in <code>generate-bar</code> became clear.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">value</th>
+<th align="left"><code>=</code></th>
+<th align="left"><code>&gt;</code></th>
+<th align="left"><code>-</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">50</td>
+</tr>
+<tr class="even">
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">49</td>
+</tr>
+<tr class="odd">
+<td align="left">2</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">49</td>
+</tr>
+<tr class="even">
+<td align="left">50</td>
+<td align="left">24</td>
+<td align="left">1</td>
+<td align="left">25</td>
+</tr>
+<tr class="odd">
+<td align="left">98</td>
+<td align="left">48</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">99</td>
+<td align="left">48</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">100</td>
+<td align="left">49</td>
+<td align="left">1</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>text</code> function converts the appended string to an <code>raart</code> object. The <code>raart</code> object can be drawn to a fresh buffer with <code>draw-here</code>.</p>
+<pre><code>&gt; (draw-here (generate-bar 0))
+[--------------------------------------------------]  0%
+&gt; (draw-here (generate-bar 1))
+[--------------------------------------------------]  1%
+&gt; (draw-here (generate-bar 2))
+[&gt;-------------------------------------------------]  2%
+&gt; (draw-here (generate-bar 50))
+[========================&gt;-------------------------] 50%
+&gt; (draw-here (generate-bar 98))
+[================================================&gt;-] 98%
+&gt; (draw-here (generate-bar 99))
+[================================================&gt;-] 99%
+&gt; (draw-here (generate-bar 100))
+[=================================================&gt;]100%</code></pre>
+<p><a href="https://docs.racket-lang.org/raart/index.html?q=make-cached-buffer#%28def._%28%28lib._raart%2Fbuffer..rkt%29._make-cached-buffer%29%29"><code>make-cached-buffer</code></a> creates a buffer (1 row x 70 columns) and allows for the progress bar in the buffer to be updated.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> When the loop finishes, <code>newline</code> places the cursor on the next line instead of at the end of the progress bar.</p>
+<pre><code>(define buffer (make-cached-buffer 1 70))
+(for ([i (in-range 0 101)])
+  (sleep 0.05)
+  (draw buffer (generate-bar i)))
+(newline)</code></pre>
+<p>I was able to produce a minimal working ASCII progress bar, but it only works from the command line.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> Because Racket programs are generally faster when run from the command line than through DrRacket, this is probably not a limitation. If you have a long-running program that you want to monitor with a progress bar, then you will probably want to run it from the command line anyway.</p>
+<p>Ultimately, I’m not very satisfied with my ASCII progress bar in Racket. But this exercise has given me a new appreciation for the excellence of the R <code>progress</code> package and Racket’s GUI toolkit.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Using <code>draw-here</code> in the loop would draw 101 progress bars.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>You can run Racket files from the command line with, for example, <code>racket progress.rkt</code> after changing the directory (or specifying the full path to the file).<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
