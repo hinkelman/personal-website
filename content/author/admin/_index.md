@@ -21,7 +21,7 @@ interests:
 - R
 - Shiny
 - NetLogo
-- Racket
+- Scheme
 name: Travis Hinkelman
 organizations:
 - name: Cramer Fish Sciences

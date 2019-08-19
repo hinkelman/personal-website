@@ -48,7 +48,7 @@ The REPL has several nice features including:
 
 * Navigate through previous expressions with the up and down arrow keys.
 * Autocomplete functions and paths with <kbd>TAB</kbd>.
-* Enter and edit multi-line expressions.
+* Write and edit multi-line expressions.
 
 ```
 > (define (example x y z)
@@ -168,7 +168,7 @@ The power of Emacs is in the keyboard shortcuts and customization. I'm too early
 
 ### Geiser
 
-[Geiser](https://www.nongnu.org/geiser/) is a package the provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through [MELPA](https://melpa.org/#/). 
+[Geiser](https://www.nongnu.org/geiser/) is a package that provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through [MELPA](https://melpa.org/#/). 
 
 Open Emacs, enter `C-x` `C-f` to find a file, and type `.emacs` at the prompt. On macOS, I added the following to `.emacs`. 
 
@@ -204,7 +204,7 @@ The Chez REPL is launched through Emacs with `M-x` followed by `run-chez`. You c
 
 ### Library Directory
 
-Apparently, the changes that we made to `.bash_profile` on macOS and the environment variables on Windows to point Chez to libraries and extensions are not picked up by the Chez REPL used by Geiser. We need to add a couple of lines to `.emacs`.
+Apparently, the changes that we made to `.bash_profile` on macOS and the environment variables on Windows to point Chez to libraries and extensions are not picked up by the Chez REPL as used by Geiser. We need to add a couple of lines to `.emacs`.
 
 On macOS...
 
@@ -220,4 +220,7 @@ On Windows...
 (setenv "CHEZSCHEMELIBEXTS" ".sc;;.so;")
 ```
 
+***
+
+UPDATE (2019-08-18): In Emacs, I eventually noticed that there is an option to highlight matching parantheses, which I find very helpful. Select `Options/Highlight Matching Parantheses` and then `Options/Save Options`. I've also started using [company-mode](http://company-mode.github.io) for text completion.
 

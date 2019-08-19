@@ -38,7 +38,7 @@ tags:
 <ul>
 <li>Navigate through previous expressions with the up and down arrow keys.</li>
 <li>Autocomplete functions and paths with <kbd>TAB</kbd>.</li>
-<li>Enter and edit multi-line expressions.</li>
+<li>Write and edit multi-line expressions.</li>
 </ul>
 <pre><code>&gt; (define (example x y z)
     (if (&gt; x 0)
@@ -108,7 +108,7 @@ Type (debug) to enter the debugger.
 </div>
 <div id="geiser" class="section level3">
 <h3>Geiser</h3>
-<p><a href="https://www.nongnu.org/geiser/">Geiser</a> is a package the provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through <a href="https://melpa.org/#/">MELPA</a>.</p>
+<p><a href="https://www.nongnu.org/geiser/">Geiser</a> is a package that provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through <a href="https://melpa.org/#/">MELPA</a>.</p>
 <p>Open Emacs, enter <code>C-x</code> <code>C-f</code> to find a file, and type <code>.emacs</code> at the prompt. On macOS, I added the following to <code>.emacs</code>.</p>
 <pre><code>(require &#39;package)
 
@@ -127,13 +127,15 @@ Type (debug) to enter the debugger.
 </div>
 <div id="library-directory-1" class="section level3">
 <h3>Library Directory</h3>
-<p>Apparently, the changes that we made to <code>.bash_profile</code> on macOS and the environment variables on Windows to point Chez to libraries and extensions are not picked up by the Chez REPL used by Geiser. We need to add a couple of lines to <code>.emacs</code>.</p>
+<p>Apparently, the changes that we made to <code>.bash_profile</code> on macOS and the environment variables on Windows to point Chez to libraries and extensions are not picked up by the Chez REPL as used by Geiser. We need to add a couple of lines to <code>.emacs</code>.</p>
 <p>On macOS…</p>
 <pre><code>(setenv &quot;CHEZSCHEMELIBDIRS&quot; &quot;/usr/local/lib/raven&quot;)
 (setenv &quot;CHEZSCHEMELIBEXTS&quot; &quot;.sc::.so:&quot;)</code></pre>
 <p>On Windows…</p>
 <pre><code>(setenv &quot;CHEZSCHEMELIBDIRS&quot; &quot;C:\\scheme\\lib;&quot;)
 (setenv &quot;CHEZSCHEMELIBEXTS&quot; &quot;.sc;;.so;&quot;)</code></pre>
+<hr />
+<p>UPDATE (2019-08-18): In Emacs, I eventually noticed that there is an option to highlight matching parantheses, which I find very helpful. Select <code>Options/Highlight Matching Parantheses</code> and then <code>Options/Save Options</code>. I’ve also started using <a href="http://company-mode.github.io">company-mode</a> for text completion.</p>
 </div>
 </div>
 <div class="footnotes">
