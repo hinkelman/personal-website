@@ -222,5 +222,5 @@ On Windows...
 
 ***
 
-UPDATE (2019-08-18): In Emacs, I eventually noticed that there is an option to highlight matching parantheses, which I find very helpful. Select `Options/Highlight Matching Parantheses` and then `Options/Save Options`. I've also started using [company-mode](http://company-mode.github.io) for text completion.
+UPDATE (2019-08-20): In Emacs, I eventually noticed that there is an option to highlight matching parantheses, which I find very helpful. Select `Options/Highlight Matching Parantheses` and then `Options/Save Options`. I've also started using [company-mode](http://company-mode.github.io) for text completion. I was also pleased to discover that reindenting lines in Emacs is as simple as selecting the section to indent and pressing <kbd>TAB</kbd>.
 
