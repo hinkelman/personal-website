@@ -1,16 +1,16 @@
 +++
 # Project title.
-title = "R Packages"
+title = "Chez Scheme Libraries"
 
 # Date this page was created.
-date = 2019-08-20T00:00:00
+date = 2019-08-25T00:00:00
 
 # Project summary to display on homepage.
 summary = ""
 
 # Tags: can be used for filtering projects.
 # Example: `tags = ["machine-learning", "deep-learning"]`
-tags = ["R"]
+tags = ["Chez Scheme"]
 
 # Optional external URL for project (replaces project detail page).
 external_link = ""
@@ -44,10 +44,7 @@ url_code = ""
   focal_point = "Smart"
 +++
 
-### [CDECRetrieveGUI](https://github.com/fishsciences/CDECRetrieveGUI)
+### [chez-stats](https://github.com/hinkelman/chez-stats)
 
-A map-based interface to the [CDECRetrieve package](https://github.com/FlowWest/CDECRetrieve). The goal of this [Shiny Gadget](https://shiny.rstudio.com/articles/gadgets.html) is to aid discovery of [CDEC](http://cdec.water.ca.gov) gaging stations, sensors available at each station, and dates of availability.
+Procedures for descriptive statistics and generating random variates.
 
-### [cfs.misc](https://github.com/fishsciences/cfs.misc)
-
-Miscellaneous convenience functions used in projects at [Cramer Fish Sciences](https://www.fishsciences.net).

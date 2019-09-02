@@ -6,7 +6,8 @@ title = "DSM2 HYDRO Viz Tool"
 date = 2018-11-21T00:00:00
 
 # Project summary to display on homepage.
-summary = "A tool for visualizing DSM2 HYDRO output built with the Shiny web framework for R."
+# summary = "A tool for visualizing DSM2 HYDRO output built with the Shiny web framework for R."
+summary = ""
 
 # Tags: can be used for filtering projects.
 # Example: `tags = ["machine-learning", "deep-learning"]`

@@ -6,7 +6,8 @@ title = "Shiny Scorekeeper"
 date = 2019-02-24T00:00:00
 
 # Project summary to display on homepage.
-summary = "A basketball scorekeeper app built with the Shiny web framework for R."
+# summary = "A basketball scorekeeper app built with the Shiny web framework for R."
+summary = ""
 
 # Tags: can be used for filtering projects.
 # Example: `tags = ["machine-learning", "deep-learning"]`
