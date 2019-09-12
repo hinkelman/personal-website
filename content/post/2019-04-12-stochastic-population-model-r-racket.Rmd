@@ -172,7 +172,7 @@ Unit: milliseconds
 **Update 2019-04-21:** All of the previous timings were run in DrRacket. Running from the command line yields much better performance (2-3x).
 
 ```
-> racket stochastic-logistic.rkt
+$ racket stochastic-logistic.rkt
 min: 34 mean: 41 max: 218    function: logmod
 min: 27 mean: 33 max: 195    function: logmod-typed
 min: 14 mean: 15 max: 16    function: logmod-vec

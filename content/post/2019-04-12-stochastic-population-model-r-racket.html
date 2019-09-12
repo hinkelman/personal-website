@@ -130,7 +130,7 @@ Unit: milliseconds
  purrr::map(reps, ~logmodc(t, yinit, r, k, thetasd))  8.863207  9.245297 11.48015 10.048379 11.14099 44.91200   100
  purrr::map(reps, ~logmodr(t, yinit, r, k, thetasd)) 28.869978 29.357927 32.00268 30.180079 33.39805 48.81793   100</code></pre>
 <p><strong>Update 2019-04-21:</strong> All of the previous timings were run in DrRacket. Running from the command line yields much better performance (2-3x).</p>
-<pre><code>&gt; racket stochastic-logistic.rkt
+<pre><code>$ racket stochastic-logistic.rkt
 min: 34 mean: 41 max: 218    function: logmod
 min: 27 mean: 33 max: 195    function: logmod-typed
 min: 14 mean: 15 max: 16    function: logmod-vec

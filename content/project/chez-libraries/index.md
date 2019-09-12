@@ -46,5 +46,5 @@ url_code = ""
 
 ### [chez-stats](https://github.com/hinkelman/chez-stats)
 
-Procedures for descriptive statistics and generating random variates.
+Procedures for descriptive statistics and generating random variates. See this [blog post](/post/writing-chez-scheme-library/) for more information.
 
