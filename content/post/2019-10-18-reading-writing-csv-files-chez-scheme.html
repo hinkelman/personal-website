@@ -1,0 +1,124 @@
+---
+title: Reading and writing CSV files in Chez Scheme
+author: Travis Hinkelman
+date: '2019-10-18'
+slug: reading-writing-csv-files-chez-scheme
+categories:
+  - Chez Scheme
+  - chez-stats
+tags: []
+---
+
+
+
+<p>I have added functionality for reading and writing CVS files to my Chez Scheme library, <a href="https://github.com/hinkelman/chez-stats"><code>chez-stats</code></a>. In a <a href="/post/reading-csv-files-in-r-and-racket/">previous post</a>, I compared reading CSV files in R and Racket and made the following observation.</p>
+<blockquote>
+<p>By and large, R users are not programmers but end users who want to expeditiously perform tasks related to cleaning, analyzing, and visualizing their data. There is a large, and growing, industry around building R packages and tools that facilitate those end users. My early impression of the Racket community is that packages are generally written at a lower level of abstraction than R packages because the target audience is other programmers.</p>
+</blockquote>
+<p>Well, writing procedures for reading and writing CSV files in Chez Scheme required me to take yet another step down the abstraction ladder. As an R programmer, I have given very little thought to the mechanics of reading and writing files. When I started working with examples of parsing files into Scheme data structures, I was honestly suprised to realize that the contents of a file are parsed character by character. Discovering these gaping holes in my understanding of programming and computer science is alarming. But that is largely the point of me spending my free time learning Scheme.</p>
+<div id="reading-a-csv-file" class="section level3">
+<h3>Reading a CSV file</h3>
+<p><a href="http://rosettacode.org/wiki/Category:Programming_Tasks">Rosetta Code</a> was my first stop to learn more about how to approach reading files. The two approaches provided there are to read a file line by line or to read the whole file into a string. I opted for reading line by line and the Scheme example for that task involved a function called <code>read-line</code>. In Chez Scheme, though, the function is called <code>get-line</code>, not <code>read-line</code>. Unfortunately, <code>get-line</code> only breaks lines for the line feed character (<code>\n</code>), not the carriage return character (<code>\r</code>).</p>
+<pre><code>&gt; (get-line (open-input-string &quot;One,2,C,867-5309\r\nTwo,3,D,555-2439\r\n&quot;))
+&quot;One,2,C,867-5309\r&quot;</code></pre>
+<p>That problem was easily solved thanks to a helpful <a href="https://stackoverflow.com/questions/37858083/how-to-read-a-line-of-input-in-chez-scheme">StackOverflow</a> user from 2016 who provided a <code>read-line</code> procedure.</p>
+<pre><code>&gt; (read-line (open-input-string &quot;One,2,C,867-5309\r\nTwo,3,D,555-2439\r\n&quot;))
+&quot;One,2,C,867-5309&quot;</code></pre>
+<p>Now that we can read a file line by line, we need a procedure to parse each line (represented as a string) into a list. For parsing, I’m using a <a href="https://github.com/alex-hhh/data-frame/blob/master/private/csv.rkt"><code>parse-line</code> procedure</a> written by <a href="https://alex-hhh.github.io/About.html">Alex Harsanyi</a> for Racket as part of his <a href="https://docs.racket-lang.org/data-frame/index.html">data-frame package</a>.</p>
+<pre><code>&gt; (parse-line (read-line (open-input-string &quot;One,2,C,867-5309\r\nTwo,3,D,555-2439\r\n&quot;)))
+(&quot;One&quot; &quot;2&quot; &quot;C&quot; &quot;867-5309&quot;)</code></pre>
+<p>Both <code>read-line</code> and <code>parse-line</code> read every character. I pondered trying to combine the two procedures to remedy that inefficiency. Ultimately, though, I decided it was better to have two more easily understood procedures and live with the inefficiency. That is consistent with the rest of <code>chez-stats</code>, which is <strong>not</strong> written with performance in mind.</p>
+<p>With <code>read-line</code> and <code>parse-line</code> in our toolboox, we can iterate through the CSV file to build up a list of lists where each sub-list is one row in the CSV file. As in my <a href="/post/reading-csv-files-in-r-and-racket/">post</a> on reading CSV files with Racket, I wrote a procedure, <code>preview-csv</code>, to preview a specified number of rows in the CSV file (up to the max rows in the file).</p>
+<pre><code>(define (preview-csv path rows)
+  (let ([p (open-input-file path)])
+    (let loop ([row (read-line p)]
+               [results &#39;()]
+               [iter rows])
+      (cond [(or (eof-object? row) (&lt; iter 1))
+             (close-port p)
+             (reverse results)]
+            [else
+             (loop (read-line p) (cons (parse-line row) results) (sub1 iter))]))))</code></pre>
+<p>The whole file can be read with <code>read-csv</code>, which simply calls <code>preview-csv</code> on an infinite number of rows.</p>
+<pre><code>(define (read-csv path)
+  (preview-csv path +inf.0))</code></pre>
+<p>There is nothing sophisticated about my approach to reading CSV files. For all files, we end up with a list of lists of strings. There is no attempt to convert strings to numbers or other objects. Also, the CSV file needs to be rectangular, i.e., every row must have the same number of columns.</p>
+</div>
+<div id="writing-a-csv-file" class="section level3">
+<h3>Writing a CSV file</h3>
+<p>We can write a file line by line with the <code>put-string</code> procedure provided by Chez Scheme. First, we need to convert each row in our list of lists to a string. For that, I wrote a procedure called <code>delimit-list</code> because the main role of the function is to add the comma delimiter between the elements of the list. Before we can talk about <code>delimit-list</code>, though, we need to write a function to handle strings that contain commas and double quotes.</p>
+<pre><code>(define (quote-string str)
+  (let* ([in (open-input-string str)]
+         [str-list (string-&gt;list str)]
+         [str-length (length str-list)])
+    (if (not (or (member #\, str-list) (member #\&quot; str-list)))
+        str  ;; return string unchanged b/c no commas or double quotes
+        (let loop ([c (read-char in)]
+                   [result &quot;\&quot;&quot;]
+                   [ctr 0])
+          (cond [(eof-object? c)
+                 (string-append result &quot;\&quot;&quot;)]
+                [(and (char=? c #\&quot;) (or (= ctr 0) (= ctr (sub1 str-length))))
+                 ;; don&#39;t add double-quote character to string when it is at start or end of string
+                 (loop (read-char in) (string-append result &quot;&quot;) (add1 ctr))]
+                 ;; 2x double-quotes for double-quotes inside string (not at start or end)
+                [(char=? c #\&quot;)
+                 (loop (read-char in) (string-append result &quot;\&quot;\&quot;&quot;) (add1 ctr))]
+                [else
+                 (loop (read-char in) (string-append result (string c)) (add1 ctr))])))))</code></pre>
+<p><code>quote-string</code> returns simple strings unchanged.</p>
+<pre><code>&gt; (parse-line &quot;example&quot;)
+(&quot;example&quot;)
+&gt; (parse-line (quote-string &quot;example&quot;))
+(&quot;example&quot;)</code></pre>
+<p>Strings that contain commas and double quotes are double quoted.</p>
+<pre><code>&gt; (parse-line &quot;1,000&quot;)
+(&quot;1&quot; &quot;000&quot;)
+&gt; (parse-line (quote-string &quot;1,000&quot;))
+(&quot;\&quot;1,000\&quot;&quot;)
+&gt; (parse-line &quot;Earvin \&quot;Magic\&quot; Johnson&quot;)
+(&quot;Earvin \&quot;Magic\&quot; Johnson&quot;)
+&gt; (parse-line (quote-string &quot;Earvin \&quot;Magic\&quot; Johnson&quot;))
+(&quot;\&quot;Earvin \&quot;Magic\&quot; Johnson\&quot;&quot;)</code></pre>
+<p>But strings containing single quotes are not modified.</p>
+<pre><code>&gt; (parse-line &quot;Earvin &#39;Magic&#39; Johnson&quot;)
+(&quot;Earvin &#39;Magic&#39; Johnson&quot;)
+&gt; (parse-line (quote-string &quot;Earvin &#39;Magic&#39; Johnson&quot;))
+(&quot;Earvin &#39;Magic&#39; Johnson&quot;)</code></pre>
+<p>The <code>delimit-list</code> procedure converts the elements of the list from characters, symbols, and numbers to strings before appending the elements into a single string separated by commas. Moreover, exact numbers are converted to inexact numbers before converting to strings.</p>
+<pre><code>(define (delimit-list ls)
+  (define (iterate ls result first?)
+    (if (null? ls)
+        result
+        (let* ([item (car ls)]
+               [sep (if first? &quot;&quot; &quot;,&quot;)]
+               [item-new (cond [(char? item) (string item)]
+                               [(symbol? item) (symbol-&gt;string item)]
+                               [(real? item) (number-&gt;string
+                                              (if (exact? item)
+                                                  (exact-&gt;inexact item)
+                                                  item))]
+               [else (quote-string item)])])
+          (iterate (cdr ls) (string-append result sep item-new) #f))))
+  (iterate ls &quot;&quot; #t))</code></pre>
+<pre><code>&gt; (delimit-list (list &#39;a #\b &quot;c&quot; 7 1/3))
+&quot;a,b,c,7.0,0.3333333333333333&quot;</code></pre>
+<p>In <code>write-csv</code>, we loop through a list of lists, convert each row to a string, and write that string to a file at the specified path.</p>
+<pre><code>(define (write-csv ls path overwrite)
+  (when (and (file-exists? path) (not overwrite))
+    (assertion-violation path &quot;file already exists&quot;))
+  (delete-file path)
+  (let ([p (open-output-file path)])
+    (let loop ([ls-local ls])
+      (cond [(null? ls-local)
+             (close-port p)]
+            [else
+             (put-string p (delimit-list (car ls-local)))
+             (newline p)
+             (loop (cdr ls-local))]))))</code></pre>
+</div>
+<div id="conclusions" class="section level3">
+<h3>Conclusions</h3>
+<p>I haven’t yet written any tests for <code>(chez-stats csv)</code> and there is almost zero input checking. This stands in stark contrast to the other procedures in <code>chez-stats</code>.</p>
+<p>I’m still struggling to settle on a consistent style for my Scheme code. For example, I bounce between using <code>define</code> and <code>let</code> inside of procedures. I also bounce between using <code>iterate</code> and <code>loop</code> to describe recursive functions within a procedure. And the shape of <code>delimit-list</code> (see above) is flat out ugly. I suppose it is inevitable that, if I’m still writing Scheme code in 5 years, I will be embarrassed by what I’m writing now, but, at times, the fear of writing embarrassing code definitely impedes writing any code.</p>
+</div>
