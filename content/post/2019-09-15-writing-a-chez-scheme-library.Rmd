@@ -7,6 +7,8 @@ categories:
   - Chez Scheme
   - chez-stats
 tags:
+  - libraries
+  - packages
   - statistics
   - random variates
   - distributions
@@ -18,7 +20,7 @@ Recently, I [switched](/post/exploring-scheme-implementations/) from learning Ra
 
 Writing `chez-stats` has been a great learning experience. Even though I have lots of applied statistics experience, I had no idea that [accurately calculating sample variance is challenging](https://www.johndcook.com/blog/standard_deviation/) or that there are nine algorithms to choose from when using [`quantile` in R](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html)^[I had only ever used the default value.] (and now also in `chez-stats`). 
 
-When I was [choosing a new programming language to learn](/post/programming-horizons/), I did not make the size of the package ecosystem a key consideration, but, in retrospect, I think it was clearly a factor in choosing Racket. And, as I started to switch my attention to Chez Scheme, I had several moments where I almost went running back to Racket when faced with the lack of third-party libraries for Chez Scheme. I'm not keen on reinventing the wheel, but I previously underestimated how valuable that experience could be.^[And **vastly** underestimated how satisfying that experience could be.] As I gain experience with Chez Scheme, it will be interesting to see if I continue to value writing my own libraries^[[The Lisp Curse](http://www.winestockwebdesign.com/Essays/Lisp_Curse.html)] or start to lament the lack of libraries. 
+When I was [choosing a new programming language to learn](/post/programming-horizons/), I did not make the size of the package ecosystem a key consideration, but, in retrospect, I think it was clearly a factor in choosing Racket. And, as I started to switch my attention to Chez Scheme, I had several moments where I almost went running back to Racket when faced with the lack of third-party libraries for Chez Scheme. I'm not keen on reinventing the wheel, but I previously underestimated how valuable that experience could be.^[And **vastly** underestimated how satisfying that experience could be.] As I gain experience with Chez Scheme, it will be interesting to see if I continue to value writing my own libraries^[[The Lisp Curse](http://www.winestockwebdesign.com/Essays/Lisp_Curse.html)] or start to lament the lack of libraries.
 
 When I started working on `chez-stats`, I made a couple of decisions to simplify my efforts. For one, I made it specific to Chez Scheme rather than try to write portable scheme code. Second, I stuck to the list as the primary data structure. It would be nice to have the flexibility to also work with vectors, but I am kicking that can down the road.
 

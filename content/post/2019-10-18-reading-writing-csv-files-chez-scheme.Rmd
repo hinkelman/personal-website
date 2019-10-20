@@ -6,7 +6,10 @@ slug: reading-writing-csv-files-chez-scheme
 categories:
   - Chez Scheme
   - chez-stats
-tags: []
+tags:
+  - libraries
+  - packages
+  - statistics
 ---
 
 I have added functionality for reading and writing CVS files to my Chez Scheme library, [`chez-stats`](https://github.com/hinkelman/chez-stats). In a [previous post](/post/reading-csv-files-in-r-and-racket/), I compared reading CSV files in R and Racket and made the following observation.
@@ -66,7 +69,7 @@ There is nothing sophisticated about my approach to reading CSV files. For all f
 
 ### Writing a CSV file
 
-We can write a file line by line with the `put-string` procedure provided by Chez Scheme. First, we need to convert each row in our list of lists to a string. For that, I wrote a procedure called `delimit-list` because the main role of the function is to add the comma delimiter between the elements of the list. Before we can talk about `delimit-list`, though, we need to write a function to handle strings that contain commas and double quotes.
+We can write a file line by line with the `put-string` procedure provided by Chez Scheme. First, we need to write a procedure to handle strings that contain commas and double quotes.
 
 ```
 (define (quote-string str)
@@ -165,7 +168,7 @@ In `write-csv`, we loop through a list of lists, convert each row to a string, a
 
 ### Conclusions
 
-I haven't yet written any tests for `(chez-stats csv)` and there is almost zero input checking. This stands in stark contrast to the other procedures in `chez-stats`. 
+I haven't yet written any tests for `(chez-stats csv)` and there is almost zero input checking. This stands in contrast to the other procedures in `chez-stats`. 
 
 I'm still struggling to settle on a consistent style for my Scheme code. For example, I bounce between using `define` and `let` inside of procedures. I also bounce between using `iterate` and `loop` to describe recursive functions within a procedure. And the shape of `delimit-list` (see above) is flat out ugly. I suppose it is inevitable that, if I'm still writing Scheme code in 5 years, I will be embarrassed by what I'm writing now, but, at times, the fear of writing embarrassing code definitely impedes writing any code.
 

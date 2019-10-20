@@ -6,7 +6,10 @@ slug: reading-writing-csv-files-chez-scheme
 categories:
   - Chez Scheme
   - chez-stats
-tags: []
+tags:
+  - libraries
+  - packages
+  - statistics
 ---
 
 
@@ -46,7 +49,7 @@ tags: []
 </div>
 <div id="writing-a-csv-file" class="section level3">
 <h3>Writing a CSV file</h3>
-<p>We can write a file line by line with the <code>put-string</code> procedure provided by Chez Scheme. First, we need to convert each row in our list of lists to a string. For that, I wrote a procedure called <code>delimit-list</code> because the main role of the function is to add the comma delimiter between the elements of the list. Before we can talk about <code>delimit-list</code>, though, we need to write a function to handle strings that contain commas and double quotes.</p>
+<p>We can write a file line by line with the <code>put-string</code> procedure provided by Chez Scheme. First, we need to write a procedure to handle strings that contain commas and double quotes.</p>
 <pre><code>(define (quote-string str)
   (let* ([in (open-input-string str)]
          [str-list (string-&gt;list str)]
@@ -119,6 +122,6 @@ tags: []
 </div>
 <div id="conclusions" class="section level3">
 <h3>Conclusions</h3>
-<p>I haven’t yet written any tests for <code>(chez-stats csv)</code> and there is almost zero input checking. This stands in stark contrast to the other procedures in <code>chez-stats</code>.</p>
+<p>I haven’t yet written any tests for <code>(chez-stats csv)</code> and there is almost zero input checking. This stands in contrast to the other procedures in <code>chez-stats</code>.</p>
 <p>I’m still struggling to settle on a consistent style for my Scheme code. For example, I bounce between using <code>define</code> and <code>let</code> inside of procedures. I also bounce between using <code>iterate</code> and <code>loop</code> to describe recursive functions within a procedure. And the shape of <code>delimit-list</code> (see above) is flat out ugly. I suppose it is inevitable that, if I’m still writing Scheme code in 5 years, I will be embarrassed by what I’m writing now, but, at times, the fear of writing embarrassing code definitely impedes writing any code.</p>
 </div>

@@ -1,0 +1,34 @@
+---
+title: chez-stats is now available through Raven
+author: Travis Hinkelman
+date: '2019-10-19'
+slug: chez-stats-now-available-through-raven
+categories:
+  - Chez Scheme
+  - chez-stats
+  - Raven
+tags:
+  - libraries
+  - packages
+  - statistics
+---
+
+My little statistics library, [`chez-stats`](https://github.com/hinkelman/chez-stats), is now available for installation through [Raven](http://ravensc.com), a package manager for Chez Scheme. Raven aims to provide an easy-to-use tool for local package management. 
+
+Raven's [installation instructions](https://guenchi.gitbooks.io/raven/content/installation.html) are straightforward. However, on macOS Catalina, I had to use `sudo` when making a copy of the Chez Scheme compiler, i.e., `sudo cp chez scheme`.
+
+When starting a new project, `raven init` will prompt you to provide the content to populate a `package.sc` file with the metadata for your project. `raven init` also creates a `lib` folder for housing the packages you install in your project with `raven install PACKAGENAME`. It is not necessary to run `raven init` first. `raven install PACKAGENAME` will also create a `lib` folder and `package.sc` file that you can then edit with your favorite text editor.
+
+The only dependency in `chez-stats` is the `srfi` package; [`srfi 64`](https://srfi.schemers.org/srfi-64/srfi-64.html) is used for testing. Because `srfi` is installed locally in the `lib` folder within the `chez-stats` directory, Chez isn't aware of it. Rather than adding each local `lib` folder to my `.bash_profile` (or `.zshenv`), I added the following code to the top of `tests.ss` in `chez-stats`.
+
+```
+(library-directories (cons (cons "./lib" "./lib")
+                           (library-directories)))
+                           
+(import (chez-stats chez-stats)
+        (srfi s64 testing))
+```
+
+This code adds the relative path for the `lib` folder to `library-directories` so that Chez can find `(srfi s64 testing)` in the `import` step.
+
+I've only covered basic Raven functionality. See the [documentation](https://guenchi.gitbooks.io/raven/content/) to learn about the full capabilities.

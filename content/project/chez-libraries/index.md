@@ -46,5 +46,11 @@ url_code = ""
 
 ### [chez-stats](https://github.com/hinkelman/chez-stats)
 
-This is a statistics library only in a loose sense. More accurately, it is a hodgepodge of procedures that an R programmer thought would be useful when working in Chez Scheme. For more information, see blog posts [here](https://www.travishinkelman.com/post/writing-chez-scheme-library/) and [here](https://www.travishinkelman.com/post/reading-writing-csv-files-chez-scheme/).
+Read/write CSV files, compute descriptive statistics, and generate random variates in Chez Scheme.
+
+Related blog posts:  
+[Writing a Chez Scheme library](/post/writing-chez-scheme-library/)  
+[Reading and writing CSV files in Chez Scheme](/post/reading-writing-csv-files-chez-scheme/)  
+[chez-stats is now available through Raven](/post/chez-stats-now-available-through-raven)
+
 
