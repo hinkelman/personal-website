@@ -17,7 +17,7 @@ tags:
 
 <p>My little statistics library, <a href="https://github.com/hinkelman/chez-stats"><code>chez-stats</code></a>, is now available for installation through <a href="http://ravensc.com">Raven</a>, a package manager for Chez Scheme. Raven aims to provide an easy-to-use tool for local package management.</p>
 <p>Raven’s <a href="https://guenchi.gitbooks.io/raven/content/installation.html">installation instructions</a> are straightforward. However, on macOS Catalina, I had to use <code>sudo</code> when making a copy of the Chez Scheme compiler, i.e., <code>sudo cp chez scheme</code>.</p>
-<p>When starting a new project, <code>raven init</code> will prompt you to provide the content to populate a <code>package.sc</code> file with the metadata for your project. <code>raven init</code> also creates a <code>lib</code> folder for housing the packages you install in your project with <code>raven install PACKAGENAME</code>. It is not necessary to run <code>raven init</code> first. <code>raven install PACKAGENAME</code> will also create a <code>lib</code> folder and <code>package.sc</code> file that you can then edit with your favorite text editor.</p>
+<p>When starting a new project, <code>raven init</code> will prompt you to provide the content to populate a <code>package.sc</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> file with the metadata for your project. <code>raven init</code> also creates a <code>lib</code> folder for housing the packages you install in your project with <code>raven install PACKAGENAME</code>. It is not necessary to run <code>raven init</code> first. <code>raven install PACKAGENAME</code> will also create a <code>lib</code> folder and <code>package.sc</code> file that you can then edit with your favorite text editor.</p>
 <p>The only dependency in <code>chez-stats</code> is the <code>srfi</code> package; <a href="https://srfi.schemers.org/srfi-64/srfi-64.html"><code>srfi 64</code></a> is used for testing. Because <code>srfi</code> is installed locally in the <code>lib</code> folder within the <code>chez-stats</code> directory, Chez isn’t aware of it. Rather than adding each local <code>lib</code> folder to my <code>.bash_profile</code> (or <code>.zshenv</code>), I added the following code to the top of <code>tests.ss</code> in <code>chez-stats</code>.</p>
 <pre><code>(library-directories (cons (cons &quot;./lib&quot; &quot;./lib&quot;)
                            (library-directories)))
@@ -26,3 +26,9 @@ tags:
         (srfi s64 testing))</code></pre>
 <p>This code adds the relative path for the <code>lib</code> folder to <code>library-directories</code> so that Chez can find <code>(srfi s64 testing)</code> in the <code>import</code> step.</p>
 <p>I’ve only covered basic Raven functionality. See the <a href="https://guenchi.gitbooks.io/raven/content/">documentation</a> to learn about the full capabilities.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>If you add <code>*.sc linguist-language=Scheme</code> in <code>.gitattributes</code> for a repository, then GitHub will associate your <code>.sc</code> files as Scheme, not Scala, files.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
