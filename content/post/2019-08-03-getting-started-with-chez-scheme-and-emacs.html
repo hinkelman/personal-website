@@ -137,6 +137,10 @@ Type (debug) to enter the debugger.
 (setenv &quot;CHEZSCHEMELIBEXTS&quot; &quot;.sc;;.so;&quot;)</code></pre>
 <hr />
 <p>UPDATE (2019-08-20): In Emacs, I eventually noticed that there is an option to highlight matching parantheses, which I find very helpful. Select <code>Options/Highlight Matching Parantheses</code> and then <code>Options/Save Options</code>. I’ve also started using <a href="http://company-mode.github.io">company-mode</a> for text completion. I was also pleased to discover that reindenting lines in Emacs is as simple as selecting the section to indent and pressing <kbd>TAB</kbd>.</p>
+<p>UPDATE (2019-12-04): Add the following lines to your <code>.emacs</code> file for <code>scheme-mode</code> to recognize the <code>.sc</code> and <code>.sls</code> file extensions that are used with scheme code.</p>
+<pre><code>(add-to-list &#39;auto-mode-alist
+             &#39;(&quot;\\.sls\\&#39;&quot; . scheme-mode)
+             &#39;(&quot;\\.sc\\&#39;&quot; . scheme-mode))</code></pre>
 </div>
 </div>
 <div class="footnotes">

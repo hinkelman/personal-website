@@ -226,3 +226,10 @@ On Windows...
 
 UPDATE (2019-08-20): In Emacs, I eventually noticed that there is an option to highlight matching parantheses, which I find very helpful. Select `Options/Highlight Matching Parantheses` and then `Options/Save Options`. I've also started using [company-mode](http://company-mode.github.io) for text completion. I was also pleased to discover that reindenting lines in Emacs is as simple as selecting the section to indent and pressing <kbd>TAB</kbd>.
 
+UPDATE (2019-12-04): Add the following lines to your `.emacs` file for `scheme-mode` to recognize the `.sc` and `.sls` file extensions that are used with scheme code.
+
+```
+(add-to-list 'auto-mode-alist
+             '("\\.sls\\'" . scheme-mode)
+             '("\\.sc\\'" . scheme-mode))
+```
