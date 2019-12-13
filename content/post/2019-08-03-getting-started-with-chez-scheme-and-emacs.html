@@ -15,6 +15,8 @@ tags:
   - geiser
 ---
 
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<script src="/rmarkdown-libs/elevate-section-attrs/elevate-section-attrs.js"></script>
 
 
 <p>I <a href="/post/exploring-scheme-implementations/">recently decided</a> to switch my attention from learning <a href="https://racket-lang.org">Racket</a> to <a href="https://cisco.github.io/ChezScheme/">Chez Scheme</a>. One of the reasons that I <a href="/post/programming-horizons/">chose Racket</a> was because of how easy it is to get up and running. Setting up a development environment for Chez requires jumping through a few more hoops. In this post, I document those hoops. Disclaimer: The suggestions in this post may not represent best practice. I will update the post as I become more experienced with Chez and Emacs.</p>
@@ -141,6 +143,7 @@ Type (debug) to enter the debugger.
 <pre><code>(add-to-list &#39;auto-mode-alist
              &#39;(&quot;\\.sls\\&#39;&quot; . scheme-mode)
              &#39;(&quot;\\.sc\\&#39;&quot; . scheme-mode))</code></pre>
+<p>UPDATE (2019-12-13): In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type <code>C-x</code> <code>C-e</code>. If the executed code displays any output, it will be shown in the minibuffer and not the REPL. [If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).] To evaluate several s-expressions, highlight the region and type <code>C-c</code> <code>C-r</code>. To select an s-expression, place your cursor at the beginning of the s-expression and type <code>M-C-space</code> (where space is the space bar). I’ve done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I’m excited to recently discover this last one.</p>
 </div>
 </div>
 <div class="footnotes">

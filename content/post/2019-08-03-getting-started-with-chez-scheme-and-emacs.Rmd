@@ -233,3 +233,5 @@ UPDATE (2019-12-04): Add the following lines to your `.emacs` file for `scheme-m
              '("\\.sls\\'" . scheme-mode)
              '("\\.sc\\'" . scheme-mode))
 ```
+
+UPDATE (2019-12-13): In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type `C-x` `C-e`. If the executed code displays any output, it will be shown in the minibuffer and not the REPL. [If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).] To evaluate several s-expressions, highlight the region and type `C-c` `C-r`. To select an s-expression, place your cursor at the beginning of the s-expression and type `M-C-space` (where space is the space bar). I've done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I'm excited to recently discover this last one.
