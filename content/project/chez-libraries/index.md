@@ -53,4 +53,10 @@ Related blog posts:
 [Reading and writing CSV files in Chez Scheme](/post/reading-writing-csv-files-chez-scheme/)  
 [chez-stats is now available through Raven](/post/chez-stats-now-available-through-raven)
 
+### [chez-docs](https://github.com/hinkelman/chez-docs)
+
+Access Chez Scheme documentation from the REPL. 
+
+Related blog post:  
+[Library to access Chez Scheme documentation from the REPL](/post/access-chez-scheme-documentation-from-repl/)  
 

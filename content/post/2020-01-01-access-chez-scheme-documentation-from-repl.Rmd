@@ -1,0 +1,251 @@
+---
+title: Library to access Chez Scheme documentation from the REPL
+author: Travis Hinkelman
+date: '2020-01-01'
+slug: access-chez-scheme-documentation-from-repl
+categories:
+  - Chez Scheme
+  - R
+tags:
+  - rvest
+  - tsv
+  - association list
+  - system
+authors: []
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+subtitle: ''
+summary: ''
+---
+
+In the process of learning Chez Scheme, I've missed R's ability to quickly pull up documentation from the console via [`help` or `?`](https://www.r-project.org/help.html). I've toyed with the idea of trying to format the contents of the [Chez Scheme User's Guide](https://cisco.github.io/ChezScheme/csug9.5/) for display in the REPL (similar to [Clojure Docs](https://clojuredocs.org/clojure.repl/doc)). But that is probably too big of a task for me at this point. It recently occurred to me, though, that I can write a simple library, [`chez-docs`](https://github.com/hinkelman/chez-docs), with only one procedure, `doc`, that will make it a bit easier to access the Chez Scheme User's Guide. 
+
+My typical entry point to learning about Chez Scheme is the [Summary of Forms](https://cisco.github.io/ChezScheme/csug9.5/summary.html) page of the Chez Scheme User's Guide. The simple idea behind `chez-docs` is to scrape the data from the Summary of Forms page and write a procedure that opens links to the documentation from the REPL. 
+
+### Web Scraping with R
+
+I used the [`rvest` package](http://rvest.tidyverse.org) for R to scrape the data from the Summary of Forms page. First, I downloaded the page and opened it in a text editor to see how the table was structured. Then, I extracted the URLs by drilling down into the nodes of the HTML document and retrieving the contents of the `href` attribute.
+
+```
+library(tidyverse)
+library(rvest)
+
+chez_url = "https://cisco.github.io/ChezScheme/csug9.5/summary.html"
+
+chez_links <- read_html(chez_url) %>% 
+  html_nodes("table") %>% 
+  html_nodes("tr") %>% 
+  html_nodes("a") %>% 
+  html_attr("href")
+```
+
+Next, I retrieved the text contents of the HTML table. `html_table` returns a list with all of the tables on the page as data frames. In this case, there is only one table in the list.
+
+```
+chez_table_list <- read_html(chez_url) %>% 
+  html_nodes("table") %>% 
+  html_table()
+```
+
+### Data Preparation with R
+
+The Summary of Forms page links to two sources: [The Scheme Programming Language (TSPL)](https://www.scheme.com/tspl4/) and the [Chez Scheme User's Guide (CSUG)](https://cisco.github.io/ChezScheme/csug9.5/). A `t` in the page number indicates TSPL as the source. The extracted URLs linking to those sources required a little cleanup. 
+
+I'm using `Key` to mean the first 'word' in the `Form` column. In many cases, that 'word' is just a symbol, e.g., `>`, `+`, `*`, etc.
+
+```
+chez_table <- chez_table_list[[1]] %>% 
+  filter(Form != "") %>%          # drop empty first row
+  mutate(URL = chez_links,
+         # clean up extracted links to TSPL
+         URL = gsub(pattern = "http://scheme.com/tspl4/./",
+                    replacement = "https://scheme.com/tspl4/",
+                    URL),
+         # convert relative to absolute links for CSUG
+         URL = gsub(pattern = "^\\.", 
+                    replacement = "https://cisco.github.io/ChezScheme/csug9.5", 
+                    x = URL),
+         Key = sapply(strsplit(Form, "\\s"), "[[", 1),
+         Key = gsub("\\(|\\)", "", Key),
+         Source = ifelse(substr(Page, 1, 1) == "t", "TSPL", "CSUG")) %>% 
+  select(Key, Form, Source, URL) 
+```
+
+The problem here is that `Key` is not unique because the same key can be associated with more than one form and/or more than one source. I decided that the simplest solution was to separate the keys by source and combine the forms for each key that shared the same URL. I used nested `for` loops to tear down the data frame and build it back up. 
+
+```
+source_list <- list()
+excluded_list <- list()
+for (j in c("CSUG", "TSPL")){
+  ct_source <- filter(chez_table, Source == j)
+  key_list <- list()
+  excluded <- c()
+  for (i in unique(ct_source$Key)){
+    ctsk <- filter(ct_source, Key == i)
+    if (nrow(ctsk) == 1){
+      key_list[[i]] <- ctsk
+    } else {
+      if (nrow(unique(select(ctsk, Key, Source, URL))) == 1){
+        key_list[[i]] <- tibble(Key = i,
+                                Form = paste(unique(ctsk$Form), collapse = "~"),
+                                Source = j,
+                                URL = ctsk$URL[1])
+      } else {
+        excluded <- c(excluded, i)
+      }
+    }
+  }
+  excluded_list[[j]] <- excluded
+  source_list[[j]] <- bind_rows(key_list)
+}
+out <- bind_rows(source_list)
+```
+
+I decided that it would look nice to separate the forms with newlines for display in Chez, but writing and reading files with newlines as separators within a column creates a mess. Instead, I chose `~` as the separator in the `Form` column because it is not a character that appears in any of the forms, which makes it easier to replace with `\n` on the Chez side.
+
+I kept track of which keys were excluded to decide if I needed to take additional processing steps. `alias` and `let` were the only keys that were excluded because the two forms are associated with two different links. No additional processing was done to include `alias` and `let`.
+
+The last step in R was to write the processed table to file. Because some of the forms contain commas, e.g., `#,template`, I wrote the table as a TSV file. I split the table into two files because it made the processing simpler in Chez.
+
+```
+for (j in c("CSUG", "TSPL")){
+  out %>% 
+    filter(Source == j) %>% 
+    select(-Source) %>% 
+    write_tsv(paste0(j, ".tsv"))
+}
+```
+
+### Data Preparation with Chez Scheme
+
+First, I needed to make a small modification to my [`csv` library](https://github.com/hinkelman/chez-stats/blob/dev/csv.ss) to read TSV files. Then, I read each TSV file, dropped the header row, and converted each row into an association list where the first element of the row is the key and values are represented by a list of the other two values in the row (i.e., forms and URLs). The two association lists were then combined to create a nested association list, which was written to file.
+
+```
+(import (chez-stats chez-stats))
+
+(define csug (cdr (read-tsv "R/CSUG.tsv")))
+(define tspl (cdr (read-tsv "R/TSPL.tsv")))
+
+(define csug-alist (map (lambda (x) (list (car x) (cdr x))) csug))
+(define tspl-alist (map (lambda (x) (list (car x) (cdr x))) tspl))
+
+(define data (list (list "CSUG" csug-alist)
+                   (list "TSPL" tspl-alist)))
+
+(with-output-to-file "data.ss" (lambda () (write data)))
+```
+
+After writing the file, I added the few lines of code needed to make [`data.ss`](https://github.com/hinkelman/chez-docs/blob/master/data.ss) a library that exports only the data. 
+
+### `chez-docs`
+
+`chez-docs` only exports one procedure, `doc`, which uses `case-lambda` to handle optional arguments with default values. 
+
+```
+(define doc
+  (case-lambda
+    [(proc) (doc-helper proc "both" #t)]
+    [(proc source) (doc-helper proc source #t)]
+    [(proc source launch?) (doc-helper proc source launch?)]))
+```
+
+`data-lookup` checks that the strings passed as arguments are valid and returns a list of the association lists for `proc` from the `proc-data` object imported as part of `(chez-docs data)`.
+
+```
+(define (data-lookup proc source)
+  (cond [(or (string=? source "CSUG") (string=? source "TSPL"))
+         (list (dl-helper proc source))]
+        [(string=? source "both")
+         (let ([csug (dl-helper proc "CSUG")]
+               [tspl (dl-helper proc "TSPL")])
+           (if (or csug tspl)
+               (list csug tspl)
+               (assertion-violation "(doc proc)" "procedure not found")))]
+        [else
+         (assertion-violation "(doc proc source)" "source not one of CSUG, TSPL, both")]))
+         
+;; proc-data imported with (chez-docs data)
+(define (dl-helper proc source)
+  (assoc proc (cadr (assoc source proc-data)))) 
+```
+
+When using `data-lookup` on `<`, we see that there is an entry for `<` in both CSUG and TPSL as there is an association list returned for both elements of the list.
+
+```
+> (data-lookup "<" "both")
+(("<" ("(< real1 real2 real3 ...)"
+        "https://cisco.github.io/ChezScheme/csug9.5/numeric.html#./numeric:s67"))
+  ("<" ("(< real1 real2 real3 ...)"
+         "https://scheme.com/tspl4/objects.html#./objects:s88")))
+```
+
+If `proc` is only found in one source, and both are requested, then one element of the returned list will be `#f`.
+
+```
+> (data-lookup "map" "both")
+(#f ("map"
+      ("(map procedure list1 list2 ...)"
+        "https://scheme.com/tspl4/control.html#./control:s30")))
+```
+
+`display-launch` takes an association list, `proc-data-selected`, returned by `data-lookup`, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. `display-launch` makes a system call to `open`^[To test if `open` is available on your system, try running the following command in your shell `open https://www.unl.edu`.] and requires an internet connection. 
+
+```
+(define (display-launch proc-data-selected launch?)
+  (when proc-data-selected
+    (display (replace-tilde (string-append (caadr proc-data-selected) "\n")))
+    (when launch?
+      (system (string-append "open " (cadadr proc-data-selected))))))
+```
+
+When `launch?` is `#f`, `display-launch` simply displays the form(s) for the specified `proc`, which is helpful if you can't remember the order of arguments for a procedure.
+
+```
+> (display-launch (car (data-lookup "append" "TSPL")) #f)
+(append)
+(append list ... obj)
+```
+
+For multi-line display of forms, the `~` added in R to separate forms is replaced with `\n` using `replace-tilde`.
+
+```
+(define (replace-tilde str)
+  (let* ([in (open-input-string str)]
+         [str-list (string->list str)])
+    (if (not (member #\~ str-list))
+        str  ;; return string unchanged b/c no tilde
+        (let loop ([c (read-char in)]
+                   [result ""])
+          (cond [(eof-object? c)
+                 result]
+                [(char=? c #\~)
+                 (loop (read-char in) (string-append result "\n"))]
+                [else
+                 (loop (read-char in) (string-append result (string c)))])))))
+```
+
+The last piece is `doc-helper`, which loops through the output of `data-lookup` and passes it to `display-launch`.
+
+```
+(define (doc-helper proc source launch?)
+  (define (loop ls)
+    (cond [(null? ls) (void)]
+          [else
+           (display-launch (car ls) launch?)
+           (loop (cdr ls))]))
+  (loop (data-lookup proc source)))
+```
+
+The downside of this approach is that if a `proc` is found in both sources with the same form, then it will be displayed twice. I decided this behavior isn't sufficiently annoying to take the extra steps to prevent it from happening.
+
+```
+> (doc "<" "both" #f)
+(< real1 real2 real3 ...)
+(< real1 real2 real3 ...)
+```
+
+### Conclusions
+
+This was a fun little project. When I first had the idea, I was really excited because I worked out all of the initial code in less than 2 hours. But, when I started to write this blog post, I started to discover all of the little problems that didn't occur to me initially. Nonetheless, I think that I might have produced something reasonably useful for myself from a modest effort. 
