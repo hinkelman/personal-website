@@ -185,7 +185,7 @@ The main procedure in `chez-docs` is `doc`, which uses `case-lambda` to handle o
          
 ;; proc-data imported with (chez-docs data)
 (define (dl-helper proc source)
-  (assoc proc (cadr (assoc source proc-data)))) 
+  (assoc proc (cadr (assoc source data)))) 
 ```
 
 When using `data-lookup` on `<`, we see that there is an entry for `<` in both CSUG and TPSL as there is an association list returned for both elements of the list.
@@ -210,11 +210,11 @@ If `proc` is only found in one source, and both are requested, then one element 
 `display-launch` takes an association list, `proc-data-selected`, returned by `data-lookup`, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. `display-launch` makes a system call to `open`^[To test if `open` is available on your system, try running the following command in your shell `open https://www.unl.edu`.] and requires an internet connection. 
 
 ```
-(define (display-launch proc-data-selected launch?)
-  (when proc-data-selected
-    (display (replace-tilde (string-append (caadr proc-data-selected) "\n")))
+(define (display-launch data-selected launch?)
+  (when data-selected
+    (display (replace-tilde (string-append (caadr data-selected) "\n")))
     (when launch?
-      (system (string-append "open " (cadadr proc-data-selected))))))
+      (system (string-append "open " (cadadr data-selected))))))
 ```
 
 When `launch?` is `#f`, `display-launch` simply displays the form(s) for the specified `proc`, which is helpful if you can't remember the order of arguments for a procedure.

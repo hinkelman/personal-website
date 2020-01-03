@@ -154,7 +154,7 @@ out &lt;- bind_rows(source_list)</code></pre>
          
 ;; proc-data imported with (chez-docs data)
 (define (dl-helper proc source)
-  (assoc proc (cadr (assoc source proc-data)))) </code></pre>
+  (assoc proc (cadr (assoc source data)))) </code></pre>
 <p>When using <code>data-lookup</code> on <code>&lt;</code>, we see that there is an entry for <code>&lt;</code> in both CSUG and TPSL as there is an association list returned for both elements of the list.</p>
 <pre><code>&gt; (data-lookup &quot;&lt;&quot; &quot;both&quot;)
 ((&quot;&lt;&quot; (&quot;(&lt; real1 real2 real3 ...)&quot;
@@ -167,11 +167,11 @@ out &lt;- bind_rows(source_list)</code></pre>
       (&quot;(map procedure list1 list2 ...)&quot;
         &quot;https://scheme.com/tspl4/control.html#./control:s30&quot;)))</code></pre>
 <p><code>display-launch</code> takes an association list, <code>proc-data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. <code>display-launch</code> makes a system call to <code>open</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> and requires an internet connection.</p>
-<pre><code>(define (display-launch proc-data-selected launch?)
-  (when proc-data-selected
-    (display (replace-tilde (string-append (caadr proc-data-selected) &quot;\n&quot;)))
+<pre><code>(define (display-launch data-selected launch?)
+  (when data-selected
+    (display (replace-tilde (string-append (caadr data-selected) &quot;\n&quot;)))
     (when launch?
-      (system (string-append &quot;open &quot; (cadadr proc-data-selected))))))</code></pre>
+      (system (string-append &quot;open &quot; (cadadr data-selected))))))</code></pre>
 <p>When <code>launch?</code> is <code>#f</code>, <code>display-launch</code> simply displays the form(s) for the specified <code>proc</code>, which is helpful if you can’t remember the order of arguments for a procedure.</p>
 <pre><code>&gt; (display-launch (car (data-lookup &quot;append&quot; &quot;TSPL&quot;)) #f)
 (append)
