@@ -1,5 +1,5 @@
 ---
-title: Library to access Chez Scheme documentation from the REPL
+title: Access Chez Scheme documentation from the REPL
 author: Travis Hinkelman
 date: '2020-01-01'
 slug: access-chez-scheme-documentation-from-repl
@@ -134,14 +134,31 @@ First, I needed to make a small modification to my [`csv` library](https://githu
 (define data (list (list "CSUG" csug-alist)
                    (list "TSPL" tspl-alist)))
 
-(with-output-to-file "data.ss" (lambda () (write data)))
+(with-output-to-file "data.scm" (lambda () (write data)))
 ```
 
-After writing the file, I added the few lines of code needed to make [`data.ss`](https://github.com/hinkelman/chez-docs/blob/master/data.ss) a library that exports only the data. 
+### Reading Data in Chez Scheme Library
 
-### `chez-docs`
+To read the data when `chez-docs` is loaded, we need to identify the path where the data is located. For `(import (chez-docs docs))` to work, the user needs to have installed `chez-docs` in a directory found by `(library-directories)` (see this [blog post](/post/getting-started-with-chez-scheme-and-emacs/) for more information on library directories). Thus, we can loop through the list of library directories to find the file location and read the data. 
 
-`chez-docs` only exports one procedure, `doc`, which uses `case-lambda` to handle optional arguments with default values. 
+```
+(define data-paths
+  (map (lambda (x) (string-append x "/chez-docs/data.scm"))
+       (map car (library-directories))))
+
+(define data
+  (let ([tmp '()])
+    (for-each
+     (lambda (path)
+       (when (file-exists? path)
+         (set! tmp (with-input-from-file path read))))
+     data-paths)
+    tmp))
+```
+
+### Launching Documentation
+
+The main procedure in `chez-docs` is `doc`, which uses `case-lambda` to handle optional arguments with default values. 
 
 ```
 (define doc

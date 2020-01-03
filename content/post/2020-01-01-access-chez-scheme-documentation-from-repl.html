@@ -1,5 +1,5 @@
 ---
-title: Library to access Chez Scheme documentation from the REPL
+title: Access Chez Scheme documentation from the REPL
 author: Travis Hinkelman
 date: '2020-01-01'
 slug: access-chez-scheme-documentation-from-repl
@@ -113,12 +113,27 @@ out &lt;- bind_rows(source_list)</code></pre>
 (define data (list (list &quot;CSUG&quot; csug-alist)
                    (list &quot;TSPL&quot; tspl-alist)))
 
-(with-output-to-file &quot;data.ss&quot; (lambda () (write data)))</code></pre>
-<p>After writing the file, I added the few lines of code needed to make <a href="https://github.com/hinkelman/chez-docs/blob/master/data.ss"><code>data.ss</code></a> a library that exports only the data.</p>
+(with-output-to-file &quot;data.scm&quot; (lambda () (write data)))</code></pre>
 </div>
-<div id="chez-docs" class="section level3">
-<h3><code>chez-docs</code></h3>
-<p><code>chez-docs</code> only exports one procedure, <code>doc</code>, which uses <code>case-lambda</code> to handle optional arguments with default values.</p>
+<div id="reading-data-in-chez-scheme-library" class="section level3">
+<h3>Reading Data in Chez Scheme Library</h3>
+<p>To read the data when <code>chez-docs</code> is loaded, we need to identify the path where the data is located. For <code>(import (chez-docs docs))</code> to work, the user needs to have installed <code>chez-docs</code> in a directory found by <code>(library-directories)</code> (see this <a href="/post/getting-started-with-chez-scheme-and-emacs/">blog post</a> for more information on library directories). Thus, we can loop through the list of library directories to find the file location and read the data.</p>
+<pre><code>(define data-paths
+  (map (lambda (x) (string-append x &quot;/chez-docs/data.scm&quot;))
+       (map car (library-directories))))
+
+(define data
+  (let ([tmp &#39;()])
+    (for-each
+     (lambda (path)
+       (when (file-exists? path)
+         (set! tmp (with-input-from-file path read))))
+     data-paths)
+    tmp))</code></pre>
+</div>
+<div id="launching-documentation" class="section level3">
+<h3>Launching Documentation</h3>
+<p>The main procedure in <code>chez-docs</code> is <code>doc</code>, which uses <code>case-lambda</code> to handle optional arguments with default values.</p>
 <pre><code>(define doc
   (case-lambda
     [(proc) (doc-helper proc &quot;both&quot; #t)]
