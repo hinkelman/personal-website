@@ -51,12 +51,13 @@ Read/write CSV files, compute descriptive statistics, and generate random variat
 Related blog posts:  
 [Writing a Chez Scheme library](/post/writing-chez-scheme-library/)  
 [Reading and writing CSV files in Chez Scheme](/post/reading-writing-csv-files-chez-scheme/)  
-[chez-stats is now available through Raven](/post/chez-stats-now-available-through-raven)
+[chez-stats is now available through Raven](/post/chez-stats-now-available-through-raven/)
 
 ### [chez-docs](https://github.com/hinkelman/chez-docs)
 
 Access Chez Scheme documentation from the REPL. 
 
-Related blog post:  
+Related blog posts:  
 [Access Chez Scheme documentation from the REPL](/post/access-chez-scheme-documentation-from-repl/)  
+[Adding string matching to chez-docs](/post/adding-string-matching-to-chez-docs/)
 
