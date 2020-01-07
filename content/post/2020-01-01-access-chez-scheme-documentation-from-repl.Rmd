@@ -169,7 +169,7 @@ The main procedure in `chez-docs` is `doc`, which uses `case-lambda` to handle o
     [(proc source launch?) (doc-helper proc source launch?)]))
 ```
 
-`data-lookup` checks that the strings passed as arguments are valid and returns a list of the association lists for `proc` from the `proc-data` object imported as part of `(chez-docs data)`.
+`data-lookup` checks that the strings passed as arguments are valid and returns a list of the association lists for `proc` from the `data` object created above.
 
 ```
 (define (data-lookup proc source)
@@ -184,7 +184,7 @@ The main procedure in `chez-docs` is `doc`, which uses `case-lambda` to handle o
         [else
          (assertion-violation "(doc proc source)" "source not one of CSUG, TSPL, both")]))
          
-;; proc-data imported with (chez-docs data)
+;; data is imported above
 (define (dl-helper proc source)
   (assoc proc (cadr (assoc source data)))) 
 ```
@@ -208,7 +208,7 @@ If `proc` is only found in one source, and both are requested, then one element 
         "https://scheme.com/tspl4/control.html#./control:s30")))
 ```
 
-`display-launch` takes an association list, `proc-data-selected`, returned by `data-lookup`, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. `display-launch` makes a system call to `open`^[To test if `open` is available on your system, try running the following command in your shell `open https://www.unl.edu`.] and requires an internet connection. 
+`display-launch` takes an association list, `data-selected`, returned by `data-lookup`, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. `display-launch` makes a system call to `open`^[To test if `open` is available on your system, try running the following command in your shell `open https://www.unl.edu`.] and requires an internet connection. 
 
 ```
 (define (display-launch data-selected launch?)

@@ -140,7 +140,7 @@ out &lt;- bind_rows(source_list)</code></pre>
     [(proc) (doc-helper proc &quot;both&quot; #t)]
     [(proc source) (doc-helper proc source #t)]
     [(proc source launch?) (doc-helper proc source launch?)]))</code></pre>
-<p><code>data-lookup</code> checks that the strings passed as arguments are valid and returns a list of the association lists for <code>proc</code> from the <code>proc-data</code> object imported as part of <code>(chez-docs data)</code>.</p>
+<p><code>data-lookup</code> checks that the strings passed as arguments are valid and returns a list of the association lists for <code>proc</code> from the <code>data</code> object created above.</p>
 <pre><code>(define (data-lookup proc source)
   (cond [(or (string=? source &quot;CSUG&quot;) (string=? source &quot;TSPL&quot;))
          (list (dl-helper proc source))]
@@ -153,7 +153,7 @@ out &lt;- bind_rows(source_list)</code></pre>
         [else
          (assertion-violation &quot;(doc proc source)&quot; &quot;source not one of CSUG, TSPL, both&quot;)]))
          
-;; proc-data imported with (chez-docs data)
+;; data is imported above
 (define (dl-helper proc source)
   (assoc proc (cadr (assoc source data)))) </code></pre>
 <p>When using <code>data-lookup</code> on <code>&lt;</code>, we see that there is an entry for <code>&lt;</code> in both CSUG and TPSL as there is an association list returned for both elements of the list.</p>
@@ -167,7 +167,7 @@ out &lt;- bind_rows(source_list)</code></pre>
 (#f (&quot;map&quot;
       (&quot;(map procedure list1 list2 ...)&quot;
         &quot;https://scheme.com/tspl4/control.html#./control:s30&quot;)))</code></pre>
-<p><code>display-launch</code> takes an association list, <code>proc-data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. <code>display-launch</code> makes a system call to <code>open</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> and requires an internet connection.</p>
+<p><code>display-launch</code> takes an association list, <code>data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. <code>display-launch</code> makes a system call to <code>open</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> and requires an internet connection.</p>
 <pre><code>(define (display-launch data-selected launch?)
   (when data-selected
     (display (replace-tilde (string-append (caadr data-selected) &quot;\n&quot;)))
