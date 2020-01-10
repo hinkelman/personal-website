@@ -202,7 +202,7 @@ C:\Program Files\Chez Scheme 9.5\bin\ta6nt\scheme
 
 Click `Apply and Save`. Click the `Geiser` link next to `Parent groups:` Click on `Geiser Implementation` and change the default implementation to `chez`. Optionally, you could also delete some (or all) of the non-Chez implementations listed under active implementations. Click `Apply and Save`. Restart Emacs.
   
-The Chez REPL is launched through Emacs with `M-x` followed by `run-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>. Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
+The Chez REPL is launched through Emacs with `M-x` followed by `run-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>.^[Because my MacBook doesn't have a physical <kbd>ESC</kbd>, I prefer `C-[` as an alternative to <kbd>ESC</kbd> and, thus, navigate among previously entered expressions with `C-[` `p` and `C-[` `n`.] Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
 
 ### Library Directory
 
