@@ -68,11 +68,13 @@ summary: ''
           [(char=? (car s-list) (car t-sub))
            (loop (cdr s-list) (cdr t-sub))]
           [else #f]))
-  (let ([s (string-&gt;list s)]
-        [t (string-&gt;list t)])
-    (if (not (for-all (lambda (x) (member x t)) s))
-        #f
-        (loop s (member (car s) t)))))</code></pre>
+  (let* ([s-list-temp (string-&gt;list s)]
+         [starts-with? (char=? (car s-list-temp) #\^)]
+         [s-list (if starts-with? (cdr s-list-temp) s-list-temp)]
+         [t-list (string-&gt;list t)])
+    (cond [(and starts-with? (not (char=? (car s-list) (car t-list)))) #f]
+          [(not (for-all (lambda (x) (member x t-list)) s-list)) #f]  
+          [else (loop s-list (member (car s-list) t-list))])))</code></pre>
 <p><code>member</code> is the workhorse of <code>string-match</code>. It’s an interesting turn for me because when I first started using <code>member</code> in my Scheme code I was puzzled by why it didn’t work like <code>%in%</code> in R. For example, <code>(member 2 '(1 2 3))</code> returns <code>(2 3)</code>, but <code>2 %in% c(1, 2, 3)</code> returns <code>TRUE</code>. Because all values other than <code>#f</code> count as <code>#t</code> in Scheme, <code>member</code> can be used as a predicate, e.g., <code>(if (member 2 '(1 2 3)) 1 0)</code> returns <code>1</code>. Nonetheless, it wasn’t obvious to me how <code>member</code>’s behavior was useful…until I started writing <code>string-match</code>. Those experiences make programming fun.</p>
 <p><code>string-match</code> returns a boolean value.</p>
 <pre><code>&gt; (map (lambda (x) (string-match &quot;head&quot; x)) &#39;(&quot;head&quot; &quot;read&quot; &quot;load&quot; &quot;list-head&quot;))
@@ -107,20 +109,35 @@ summary: ''
     (map cdr (list-head ls max-n))))</code></pre>
 <p>I first realized that Levenshtein distance might not be very useful for <code>find-proc</code> when searching for <code>head</code>, a commonly used procedure in R.</p>
 <pre><code>&gt; (find-proc &quot;head&quot; 5 #t)
-(&quot;read&quot; &quot;cd&quot; &quot;load&quot; &quot;and&quot; &quot;cadr&quot;)</code></pre>
+(&quot;read&quot; &quot;and&quot; &quot;cadr&quot; &quot;car&quot; &quot;cd&quot;)</code></pre>
 <p>However, substring matching points us to the relevant function, <code>list-head</code>, in Chez Scheme.</p>
 <pre><code>&gt; (find-proc &quot;head&quot; 5)
-(&quot;list-head&quot; &quot;make-boot-header&quot; &quot;lookahead-char&quot; &quot;lookahead-u8&quot;)</code></pre>
-<p>Fuzzy matching is useful, though, in cases of where the search string is short and common.</p>
-<pre><code>&gt; (find-proc &quot;&gt;&quot; 3)
-(&quot;bytevector-&gt;immutable-bytevector&quot; &quot;bytevector-&gt;s8-list&quot; &quot;date-&gt;time-utc&quot;)
-&gt; (find-proc &quot;&gt;&quot; 3 #t)
-(&quot;&gt;&quot; &quot;=&gt;&quot; &quot;_&quot;)</code></pre>
-<p>It’s also useful for discovery when there are options with similar forms, e.g., <code>hash-table?</code> and <code>hashtable?</code>.</p>
+(&quot;list-head&quot; &quot;lookahead-char&quot; &quot;lookahead-u8&quot; &quot;make-boot-header&quot;)</code></pre>
+<p>Fuzzy matching is useful, though, for discovery when there are options with similar forms, e.g., <code>hash-table?</code> and <code>hashtable?</code>.</p>
 <pre><code>&gt; (find-proc &quot;hash-table?&quot; 3)
 (&quot;hash-table?&quot;)
 &gt; (find-proc &quot;hash-table?&quot; 3 #t)
 (&quot;hash-table?&quot; &quot;hashtable?&quot; &quot;eq-hashtable?&quot;)</code></pre>
+<p>The <code>^</code> indicates that only search strings found at the start of the procedure should be returned.</p>
+<pre><code>&gt; (find-proc &quot;map&quot;)
+(&quot;andmap&quot; &quot;hash-table-map&quot; &quot;map&quot; &quot;ormap&quot; &quot;vector-map&quot;)
+&gt; (find-proc &quot;^map&quot;)
+(&quot;map&quot;)
+
+&gt; (find-proc &quot;file&quot; 3)
+(&quot;&amp;i/o-file-already-exists&quot; &quot;&amp;i/o-file-does-not-exist&quot; &quot;&amp;i/o-file-is-read-only&quot;)
+&gt; (find-proc &quot;^file&quot; 3)
+(&quot;file-access-time&quot; &quot;file-buffer-size&quot; &quot;file-change-time&quot;)
+
+&gt; (find-proc &quot;let&quot; 5)
+(&quot;delete-directory&quot; &quot;delete-file&quot; &quot;let*&quot; &quot;let*-values&quot; &quot;let-syntax&quot;)
+&gt; (find-proc &quot;^let&quot;)
+(&quot;let*&quot; &quot;let*-values&quot; &quot;let-syntax&quot; &quot;let-values&quot; &quot;letrec&quot; &quot;letrec*&quot; &quot;letrec-syntax&quot;)</code></pre>
+<p>Under fuzzy matching, the <code>^</code> is included as part of the Levenshtein distance calculation and, thus, should not be included in search strings when using fuzzy matching.</p>
+<pre><code>&gt; (find-proc &quot;map&quot; 5 #t)
+(&quot;map&quot; &quot;max&quot; &quot;*&quot; &quot;+&quot; &quot;-&quot;)
+&gt; (find-proc &quot;^map&quot; 5 #t)
+(&quot;map&quot; &quot;max&quot; &quot;car&quot; &quot;exp&quot; &quot;memp&quot;)</code></pre>
 </div>
 <div class="footnotes">
 <hr />

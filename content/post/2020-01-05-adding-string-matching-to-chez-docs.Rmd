@@ -79,11 +79,13 @@ This is the first time that I've used `do` loops in Scheme. In the example below
           [(char=? (car s-list) (car t-sub))
            (loop (cdr s-list) (cdr t-sub))]
           [else #f]))
-  (let ([s (string->list s)]
-        [t (string->list t)])
-    (if (not (for-all (lambda (x) (member x t)) s))
-        #f
-        (loop s (member (car s) t)))))
+  (let* ([s-list-temp (string->list s)]
+         [starts-with? (char=? (car s-list-temp) #\^)]
+         [s-list (if starts-with? (cdr s-list-temp) s-list-temp)]
+         [t-list (string->list t)])
+    (cond [(and starts-with? (not (char=? (car s-list) (car t-list)))) #f]
+          [(not (for-all (lambda (x) (member x t-list)) s-list)) #f]  
+          [else (loop s-list (member (car s-list) t-list))])))
 ```
 
 `member` is the workhorse of `string-match`. It's an interesting turn for me because when I first started using `member` in my Scheme code I was puzzled by why it didn't work like `%in%` in R. For example, `(member 2 '(1 2 3))` returns `(2 3)`, but `2 %in% c(1, 2, 3)` returns `TRUE`. Because all values other than `#f` count as `#t` in Scheme, `member` can be used as a predicate, e.g., `(if (member 2 '(1 2 3)) 1 0)` returns `1`. Nonetheless, it wasn't obvious to me how `member`'s behavior was useful...until I started writing `string-match`. Those experiences make programming fun.
@@ -134,30 +136,49 @@ I first realized that Levenshtein distance might not be very useful for `find-pr
 
 ```
 > (find-proc "head" 5 #t)
-("read" "cd" "load" "and" "cadr")
+("read" "and" "cadr" "car" "cd")
 ```
 
 However, substring matching points us to the relevant function, `list-head`, in Chez Scheme. 
 
 ```
 > (find-proc "head" 5)
-("list-head" "make-boot-header" "lookahead-char" "lookahead-u8")
+("list-head" "lookahead-char" "lookahead-u8" "make-boot-header")
 ```
 
-Fuzzy matching is useful, though, in cases of where the search string is short and common.
-
-```
-> (find-proc ">" 3)
-("bytevector->immutable-bytevector" "bytevector->s8-list" "date->time-utc")
-> (find-proc ">" 3 #t)
-(">" "=>" "_")
-```
-
-It's also useful for discovery when there are options with similar forms, e.g., `hash-table?` and `hashtable?`.
+Fuzzy matching is useful, though, for discovery when there are options with similar forms, e.g., `hash-table?` and `hashtable?`.
 
 ```
 > (find-proc "hash-table?" 3)
 ("hash-table?")
 > (find-proc "hash-table?" 3 #t)
 ("hash-table?" "hashtable?" "eq-hashtable?")
+```
+
+The `^` indicates that only search strings found at the start of the procedure should be returned.
+
+```
+> (find-proc "map")
+("andmap" "hash-table-map" "map" "ormap" "vector-map")
+> (find-proc "^map")
+("map")
+
+> (find-proc "file" 3)
+("&i/o-file-already-exists" "&i/o-file-does-not-exist" "&i/o-file-is-read-only")
+> (find-proc "^file" 3)
+("file-access-time" "file-buffer-size" "file-change-time")
+
+> (find-proc "let" 5)
+("delete-directory" "delete-file" "let*" "let*-values" "let-syntax")
+> (find-proc "^let")
+("let*" "let*-values" "let-syntax" "let-values" "letrec" "letrec*" "letrec-syntax")
+```
+
+Under fuzzy matching, the `^` is included as part of the Levenshtein distance calculation and, thus, should not be included in search strings when using fuzzy matching.
+
+```
+> (find-proc "map" 5 #t)
+("map" "max" "*" "+" "-")
+> (find-proc "^map" 5 #t)
+("map" "max" "car" "exp" "memp")
 ```
