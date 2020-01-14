@@ -27,7 +27,7 @@ summary: ''
 <div id="levenshtein-distance" class="section level3">
 <h3>Levenshtein Distance</h3>
 <p>My initial thought was that I should approach this problem with approximate string matching. After a little searching, I learned that <a href="https://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein distance</a> was one of the simplest approaches to calculate the distance between two strings. This excellent <a href="https://blogs.mathworks.com/cleve/2017/08/14/levenshtein-edit-distance-between-strings/">blog post</a> included a few MATLAB implementations of Levenshtein distance algorithms<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> that were relatively easy for me to follow because of my experience with MATLAB and R.</p>
-<p>I first implemented the recursive algorithm<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> thinking that it would be most natural in Scheme, but it was unacceptaly slow. I then implemented the iterative two-row algorithm and found the performance to be sufficiently snappy for my needs.</p>
+<p>I first implemented the recursive algorithm<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> thinking that it would be most natural in Scheme, but it was unacceptably slow. I then implemented the iterative two-row algorithm and found the performance to be sufficiently snappy for my needs.</p>
 <pre><code>(define (lev s t)
   (let* ([s (list-&gt;vector (string-&gt;list s))]
          [t (list-&gt;vector (string-&gt;list t))]
