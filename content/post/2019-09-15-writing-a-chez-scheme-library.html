@@ -16,8 +16,7 @@ tags:
   - unit tests
 ---
 
-<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
-<script src="/rmarkdown-libs/elevate-section-attrs/elevate-section-attrs.js"></script>
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 
 <p>Recently, I <a href="/post/exploring-scheme-implementations/">switched</a> from learning Racket to Chez Scheme. I wanted to try to repeat some of my previous Racket exercises in Chez Scheme, but quickly ran into a barrier when my <a href="/post/stochastic-population-model-r-racket/">first choice</a> required drawing random variates from a normal distribution. I looked for existing Chez Scheme libraries but came up empty. I considered <a href="https://srfi.schemers.org/srfi-27/srfi-27.html">SRFI 27: Sources of Random Bits</a>, which includes example code for generating random numbers from a normal distribution, and <a href="https://www.reddit.com/r/scheme/comments/cnw0cy/generating_random_variates/">reached out for guidance</a>. Ultimately, I decided that it would be a good exercise to write a library for generating random variates from different distributions. As I started to write the random variate procedures, I realized that I minimally needed procedures for calculating mean and variance to test the output of the random variate procedures. And, thus, the scope of the library started to expand and the <a href="https://github.com/hinkelman/chez-stats"><code>chez-stats</code> library</a> was born.</p>

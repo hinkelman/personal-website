@@ -15,8 +15,7 @@ tags:
   - CRUD
 ---
 
-<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
-<script src="/rmarkdown-libs/elevate-section-attrs/elevate-section-attrs.js"></script>
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 
 <p><a href="https://github.com/hinkelman/Shiny-Scorekeeper">Shiny Scorekeeper</a> is a basketball scorekeeper app built with the <a href="https://shiny.rstudio.com">Shiny</a> web framework for <a href="https://www.r-project.org">R</a>. I’ve written about the motivation for creating Shiny Scorekeeper on my <a href="/project/shiny-scorekeeper/">projects page</a>. The short version is that I needed a new app for scoring video of my son’s basketball games and I decided it would be a good learning experience to try to build my own. In this post, I describe using <a href="https://rstudio.github.io/DT/">DataTables from the DT package</a> as the interface to the CRUD (create-read-update-delete) features in Shiny Scorekeeper. The post assumes familiarity with features of Shiny apps, particularly <a href="https://shiny.rstudio.com/reference/shiny/0.14/reactiveValues.html"><code>reactiveValues()</code></a>, <a href="https://shiny.rstudio.com/reference/shiny/latest/observe.html"><code>observe()</code></a>, and <a href="https://shiny.rstudio.com/reference/shiny/1.0.1/observeEvent.html"><code>observeEvent()</code></a>.</p>

@@ -16,8 +16,7 @@ tags:
   - vector
 ---
 
-<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
-<script src="/rmarkdown-libs/elevate-section-attrs/elevate-section-attrs.js"></script>
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 
 <p>In learning about <a href="/post/reading-csv-files-in-r-and-racket/">reading CSV files in Racket</a>, I have started to reconsider whether storing small(ish) datasets in CSV files is the best default behavior.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> My default was set by primarily working in R, where reading and writing CSV files plays a central role in data analysis. When working solely in R, I expect that my old habits will die hard and CSV files will continue to play a prominent role. However, when passing small(ish) data between R and Racket, I think JSON might be a better alternative.</p>
