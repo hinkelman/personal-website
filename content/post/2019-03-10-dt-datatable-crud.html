@@ -15,7 +15,6 @@ tags:
   - CRUD
 ---
 
-<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 
 <p><a href="https://github.com/hinkelman/Shiny-Scorekeeper">Shiny Scorekeeper</a> is a basketball scorekeeper app built with the <a href="https://shiny.rstudio.com">Shiny</a> web framework for <a href="https://www.r-project.org">R</a>. I’ve written about the motivation for creating Shiny Scorekeeper on my <a href="/project/shiny-scorekeeper/">projects page</a>. The short version is that I needed a new app for scoring video of my son’s basketball games and I decided it would be a good learning experience to try to build my own. In this post, I describe using <a href="https://rstudio.github.io/DT/">DataTables from the DT package</a> as the interface to the CRUD (create-read-update-delete) features in Shiny Scorekeeper. The post assumes familiarity with features of Shiny apps, particularly <a href="https://shiny.rstudio.com/reference/shiny/0.14/reactiveValues.html"><code>reactiveValues()</code></a>, <a href="https://shiny.rstudio.com/reference/shiny/latest/observe.html"><code>observe()</code></a>, and <a href="https://shiny.rstudio.com/reference/shiny/1.0.1/observeEvent.html"><code>observeEvent()</code></a>.</p>
@@ -23,7 +22,7 @@ tags:
 <p>Shiny Scorekeeper uses a homemade database comprised of a set of CSV files linked with ID columns. The teams table includes columns for TeamID, Season, League, and Coach; the players table includes PlayerID, FirstName, and LastName; and, the rosters table includes TeamID, PlayerID, and Number (i.e., jersey number). The goal is to manage data for multiple players across many different teams and seasons.</p>
 <div id="teams" class="section level3">
 <h3>Teams</h3>
-<p>Teams.csv is read from file, stored as a reactive value (<code>rv[["teams"]]</code>), and rendered as a DataTable with custom options to simplify the display. Importantly, the TeamID column is hidden to make it inaccessible for editing. The proxy object (<code>proxyTeams</code>) allows for manipulation of the DataTable.</p>
+<p>Teams.csv is read from file, stored as a reactive value (<code>rv[[&quot;teams&quot;]]</code>), and rendered as a DataTable with custom options to simplify the display. Importantly, the TeamID column is hidden to make it inaccessible for editing. The proxy object (<code>proxyTeams</code>) allows for manipulation of the DataTable.</p>
 <pre><code>output$teamsTable = renderDT(
   rv[[&quot;teams&quot;]], selection = &quot;single&quot;, editable = TRUE, 
   style = &quot;bootstrap&quot;, rownames = FALSE,
@@ -31,7 +30,7 @@ tags:
                  columnDefs = list(list(visible = FALSE, targets = 0)))) # hide TeamID column; first column indexed with 0
 
 proxyTeams = dataTableProxy(&quot;teamsTable&quot;)</code></pre>
-<p>When the <code>teamsTable</code> is edited, the edited value replaces the previous value in <code>rv[["teams"]]</code> and the new <code>rv[["teams"]]</code> object replaces <code>proxyTeams</code>. The <code>coerceValue()</code> function from the DT package coerces the edited value (passed as character string) to the type of the value that it is replacing.</p>
+<p>When the <code>teamsTable</code> is edited, the edited value replaces the previous value in <code>rv[[&quot;teams&quot;]]</code> and the new <code>rv[[&quot;teams&quot;]]</code> object replaces <code>proxyTeams</code>. The <code>coerceValue()</code> function from the DT package coerces the edited value (passed as character string) to the type of the value that it is replacing.</p>
 <pre><code>observeEvent(input$teamsTable_cell_edit, {
   info = input$teamsTable_cell_edit
   i = info$row
@@ -88,7 +87,7 @@ proxyTeams = dataTableProxy(&quot;teamsTable&quot;)</code></pre>
 </div>
 <div id="rosters" class="section level3">
 <h3>Rosters</h3>
-<p>Creating the <code>rosterTable</code> is similar to the <code>teamsTable</code>. In this case, I am hiding the first two columns, which are indexed with <code>c(0,1)</code>. Also, Rosters.csv contains rosters for all teams and is stored in <code>rv[["rosters"]]</code> whereas <code>rv[["roster"]]</code><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> holds only the roster for the team selected in the <code>teamsTable</code>.</p>
+<p>Creating the <code>rosterTable</code> is similar to the <code>teamsTable</code>. In this case, I am hiding the first two columns, which are indexed with <code>c(0,1)</code>. Also, Rosters.csv contains rosters for all teams and is stored in <code>rv[[&quot;rosters&quot;]]</code> whereas <code>rv[[&quot;roster&quot;]]</code><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> holds only the roster for the team selected in the <code>teamsTable</code>.</p>
 <pre><code>output$rosterTable = renderDT(
   rv[[&quot;roster&quot;]], selection = &quot;single&quot;, editable = TRUE, 
   style = &quot;bootstrap&quot;, rownames = FALSE,
@@ -105,7 +104,7 @@ observeEvent(input$teamsTable_rows_selected,{
     left_join(rv[[&quot;players&quot;]], by = &quot;PlayerID&quot;)
   replaceData(proxyRoster, rv[[&quot;roster&quot;]], resetPaging = FALSE, rownames = FALSE) 
 })</code></pre>
-<p>Editing a cell in the <code>rosterTable</code> involves jumping through a few extra hoops because two tables are being edited. As a quick reminder, the players table includes PlayerID, FirstName, and LastName and the rosters table includes TeamID, PlayerID, and Number. Because TeamID and PlayerID are hidden columns, only FirstName, LastName, and Number are editable. If first or last name are edited, then <code>rv[["players""]]</code> is updated. If jersey number is edited, then <code>rv[["rosters"]]</code> is updated.</p>
+<p>Editing a cell in the <code>rosterTable</code> involves jumping through a few extra hoops because two tables are being edited. As a quick reminder, the players table includes PlayerID, FirstName, and LastName and the rosters table includes TeamID, PlayerID, and Number. Because TeamID and PlayerID are hidden columns, only FirstName, LastName, and Number are editable. If first or last name are edited, then <code>rv[[&quot;players&quot;&quot;]]</code> is updated. If jersey number is edited, then <code>rv[[&quot;rosters&quot;]]</code> is updated.</p>
 <pre><code>observeEvent(input$rosterTable_cell_edit, {
   info = input$rosterTable_cell_edit
   i = info$row
@@ -160,7 +159,7 @@ observeEvent(input$teamsTable_rows_selected,{
 <pre><code>observe({
   toggle(&quot;add_selected_players&quot;, condition = !is.null(input$selected_players))
 })</code></pre>
-<p>The players selected from the dropdown menu are appended to the bottom of <code>rv[["rosters"]]</code> and <code>rv[["roster"]]</code> is rebuilt.</p>
+<p>The players selected from the dropdown menu are appended to the bottom of <code>rv[[&quot;rosters&quot;]]</code> and <code>rv[[&quot;roster&quot;]]</code> is rebuilt.</p>
 <pre><code>observeEvent(input$add_selected_players,{
   req(rv[[&quot;roster&quot;]], rv[[&quot;players&quot;]]) # probably not necessary b/c handled upstream
   
@@ -204,7 +203,7 @@ observeEvent(input$save_teams_roster_changes,{
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>For a fancier interface to editable DataTables, check out the <a href="https://www.bryer.org/post/2018-22-26-dtedit/">DTEdit package.</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>I should have chosen better names. I found the plural/singular distinction intuitive but it does make a small typo more likely to create a problem than if the names were longer.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p>For a fancier interface to editable DataTables, check out the <a href="https://www.bryer.org/post/2018-22-26-dtedit/">DTEdit package.</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>I should have chosen better names. I found the plural/singular distinction intuitive but it does make a small typo more likely to create a problem than if the names were longer.<a href="#fnref2" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

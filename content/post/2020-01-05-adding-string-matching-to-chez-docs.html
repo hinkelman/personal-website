@@ -19,7 +19,6 @@ subtitle: ''
 summary: ''
 ---
 
-<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 
 <p>I recently wrote a little library, <a href="https://github.com/hinkelman/chez-docs"><code>chez-docs</code></a>, to make accessing documentation easier while learning Chez Scheme (<a href="/post/access-chez-scheme-documentation-from-repl/">blog post</a>). The main procedure, <code>doc</code>, in <code>chez-docs</code> only returns results for exact matches with <code>proc</code>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> To aid in discovery, I’ve added a procedure, <code>find-proc</code>, that provides exact and approximate matching of search strings.</p>
@@ -141,8 +140,8 @@ summary: ''
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p><code>proc</code> is shorthand for procedure, but not all of the items in <code>chez-docs</code> are procedures, e.g., <code>&amp;assertion</code>.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>The MATLAB post linked to implementations of Levenshtein distance in other languages, including <a href="https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Scheme">Scheme</a>, but the Scheme example was hard for me to follow so I set it aside.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>After translating the MATLAB version of the recursive algorithm to Chez Scheme, I realized that a recursive example was available on <a href="http://rosettacode.org/wiki/Levenshtein_distance#Scheme">Rosetta Code</a>.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p><code>proc</code> is shorthand for procedure, but not all of the items in <code>chez-docs</code> are procedures, e.g., <code>&amp;assertion</code>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>The MATLAB post linked to implementations of Levenshtein distance in other languages, including <a href="https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Scheme">Scheme</a>, but the Scheme example was hard for me to follow so I set it aside.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>After translating the MATLAB version of the recursive algorithm to Chez Scheme, I realized that a recursive example was available on <a href="http://rosettacode.org/wiki/Levenshtein_distance#Scheme">Rosetta Code</a>.<a href="#fnref3" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

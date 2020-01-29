@@ -31,7 +31,7 @@ The RSE template doesn't mention anything about the arguably obvious steps of in
 
 After installing Node, Electron and Electron Forge are installed using `npm` from the command line. On Windows, Node installs a Node.js command prompt that I used for any `npm` and `electron-forge` commands (rather than the default Windows command prompt). The Node installer asks Windows users if they want to install [Chocolatey](https://chocolatey.org/). It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn't install Chocolately as part of the Node installation, you can download an installer from the Chocolatey website.
 
-2. Run `npm install -g electron-forge` in the Terminal (macOS) or Node.js command prompt (Windows) to install Electron Forge globally. 
+2. Run `npm install -g electron-forge` in the Terminal (macOS)^[On macOS, you may need to provide permission to access `/usr/local/lib/node_modules`. [Solve the permission error](https://flaviocopes.com/npm-fix-missing-write-access-error/) by running `sudo chown -R $USER /usr/local/lib/node_modules` from the Terminal.] or Node.js command prompt (Windows) to install Electron Forge globally. 
 
 3. Clone or download the GitHub repository for the RSE template.
 
@@ -93,7 +93,7 @@ The build process will create a folder called `Out` in the `r-shiny-electron` di
 
 After working through the build process on the r-shiny-electron example app, I downloaded a fresh version of the RSE template, renamed the `r-shiny-electron` directory to `DSM2-Viz-Tool`, removed the `app.R` file from `DSM2-Viz-Tool/shiny`, and replaced it with the files for the [DSM2 Viz Tool Shiny app](https://github.com/fishsciences/DSM2-Viz-Tool/tree/master/shiny). I also opened `package.json` in a text editor and changed a [few fields](https://github.com/fishsciences/DSM2-Viz-Tool/blob/master/package.json) (e.g., name, productName, version, description, author). 
 
-Next, I started working through the build process described above. However, before running `npm start` I needed to add the binary files for the `rhdf5` and `Rhdf5lib` packages because `Rscript add-cran-binary-pkgs.R` doesn't find Bioconductor packages.^[I also had to manually copy the `zeallot` package for some reason.] You can find where R packages are installed on your machine by running `.libPaths()` from the R console. I manually copied and pasted the `rhdf5` and `Rhdf5lib` folders from the location indicated by the output of `.libPaths()` to `DSM2-Viz-Tool/r-mac/library` and `DSM2-Viz-Tool/r-win/library` on macOS and Windows, respectively. Then, I was able to finish the build process.
+Next, I started working through the build process described above. However, before running `npm start` I needed to add the binary files for the `rhdf5` and `Rhdf5lib` packages because `Rscript add-cran-binary-pkgs.R` doesn't find Bioconductor packages. You can find where R packages are installed on your machine by running `.libPaths()` from the R console. I manually copied and pasted the `rhdf5` and `Rhdf5lib` folders from the location indicated by the output of `.libPaths()` to `DSM2-Viz-Tool/r-mac/library` and `DSM2-Viz-Tool/r-win/library` on macOS and Windows, respectively. Then, I was able to finish the build process.
 
 Working through this process involved plenty of frustration (because of my knowledge gaps), but it was extremely satisfying to arrive at the end goal of packaging the DSM2 Viz Tool as a standalone desktop application.
 

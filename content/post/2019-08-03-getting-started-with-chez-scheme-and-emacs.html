@@ -15,7 +15,6 @@ tags:
   - geiser
 ---
 
-<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 
 <p>I <a href="/post/exploring-scheme-implementations/">recently decided</a> to switch my attention from learning <a href="https://racket-lang.org">Racket</a> to <a href="https://cisco.github.io/ChezScheme/">Chez Scheme</a>. One of the reasons that I <a href="/post/programming-horizons/">chose Racket</a> was because of how easy it is to get up and running. Setting up a development environment for Chez requires jumping through a few more hoops. In this post, I document those hoops. Disclaimer: The suggestions in this post may not represent best practice. I will update the post as I become more experienced with Chez and Emacs.</p>
@@ -55,7 +54,7 @@ tags:
 <p><code>library-directories</code> returns the directories where Chez looks for libraries.</p>
 <pre><code>&gt; (library-directories)
 ((&quot;.&quot; . &quot;.&quot;))</code></pre>
-<p>The <code>"."</code> indicates that Chez is looking in the default directory. You can find the default directory by running <code>current-directory</code> in a freshly launched Chez REPL.</p>
+<p>The <code>&quot;.&quot;</code> indicates that Chez is looking in the default directory. You can find the default directory by running <code>current-directory</code> in a freshly launched Chez REPL.</p>
 <p>On macOS…</p>
 <pre><code>&gt; (current-directory)
 &quot;/Users/username&quot;</code></pre>
@@ -148,11 +147,11 @@ Type (debug) to enter the debugger.
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>My experience with Chez Scheme on Windows is limited to installation and set up as described in this post. But I’m under the impression that working with Chez Scheme on Windows involves more friction than on macOS or Linux.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>You can also type <code>petite</code> to launch Petite Chez Scheme. See <a href="https://cisco.github.io/ChezScheme/csug9.5/use.html">here</a> for more information on the differences between Chez Scheme and Petite Chez Scheme.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>I’ve written a bit more about using Raven in this <a href="/post/chez-stats-now-available-through-raven">blog post</a>.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
-<li id="fn4"><p>If you are using macOS Catalina, the default shell is Zsh, not Bash. You simply need to replace <code>.bash_profile</code> with <code>.zshenv</code> in the instructions in this post.<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
-<li id="fn5"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
-<li id="fn6"><p>Because my MacBook doesn’t have a physical <kbd>ESC</kbd>, I prefer <code>C-[</code> as an alternative to <kbd>ESC</kbd> and, thus, navigate among previously entered expressions with <code>C-[</code> <code>p</code> and <code>C-[</code> <code>n</code>.<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p>My experience with Chez Scheme on Windows is limited to installation and set up as described in this post. But I’m under the impression that working with Chez Scheme on Windows involves more friction than on macOS or Linux.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>You can also type <code>petite</code> to launch Petite Chez Scheme. See <a href="https://cisco.github.io/ChezScheme/csug9.5/use.html">here</a> for more information on the differences between Chez Scheme and Petite Chez Scheme.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>I’ve written a bit more about using Raven in this <a href="/post/chez-stats-now-available-through-raven">blog post</a>.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>If you are using macOS Catalina, the default shell is Zsh, not Bash. You simply need to replace <code>.bash_profile</code> with <code>.zshenv</code> in the instructions in this post.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref5" class="footnote-back">↩</a></p></li>
+<li id="fn6"><p>Because my MacBook doesn’t have a physical <kbd>ESC</kbd>, I prefer <code>C-[</code> as an alternative to <kbd>ESC</kbd> and, thus, navigate among previously entered expressions with <code>C-[</code> <code>p</code> and <code>C-[</code> <code>n</code>.<a href="#fnref6" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
