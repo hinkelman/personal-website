@@ -16,36 +16,39 @@ tags:
 <script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 
-<p>UPDATE 2020-01-26: This workflow is currently broken. I will update the post when I get it sorted out.</p>
 <p>In developing the <a href="/project/dsm2-viz-tool/">DSM2 HYDRO Viz Tool</a>, we were faced with deciding how to deploy a Shiny app that required interaction with large local files. I first heard about the possibility of using <a href="https://electronjs.org/">Electron</a> to deploy Shiny apps as standalone desktop applications in this <a href="https://www.youtube.com/watch?v=ARrbbviGvjc">talk by Katie Sasso</a>, but it wasn’t until I discovered the <a href="https://github.com/dirkschumacher/r-shiny-electron">R Shiny Electron (RSE) template</a> that I decided to take the plunge.</p>
 <div id="r-shiny-electron-build-process" class="section level2">
 <h2>R Shiny Electron Build Process</h2>
 <p>The <a href="https://github.com/dirkschumacher/r-shiny-electron">R Shiny Electron (RSE) template</a> includes only very basic instructions for how to get started with this process (and they clearly specify that it is not ready for production). There were considerable gaps in my understanding that left me flailing while trying to get things to work (especially on Windows). Below I am describing what I did to get up and running but I make no argument that this process represents best practices.</p>
 <div id="basic-setup" class="section level3">
 <h3>Basic setup</h3>
-<p>The RSE template doesn’t mention anything about the arguably obvious steps of installing <a href="https://nodejs.org/">Node</a>, <a href="https://electronjs.org/">Electron</a>, and <a href="https://electronforge.io/">Electron Forge</a>. Node can be installed with pre-built installers from the Node website. After installing Node, Electron and Electron Forge are installed using <code>npm</code> from the command line. On Windows, Node installs a Node.js command prompt that I used for any <code>npm</code> and <code>electron-forge</code> commands (rather than the default Windows command prompt). The Node installer asks Windows users if they want to install <a href="https://chocolatey.org/">Chocolatey</a>. It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn’t install Chocolately as part of the Node installation, you can download an installer from the Chocolatey website.</p>
-<p>Run the following command to install Electron globally.</p>
-<pre><code>npm install -g electron</code></pre>
-<p>Then run this command to install Electron Forge globally.</p>
-<pre><code>npm install -g electron-forge</code></pre>
-<p>Next, clone or download the GitHub repository for the RSE template.</p>
-<p>Edit: The RSE template hasn’t been updated in over a year and the Node ecosystem evolves rapidly. I <a href="https://github.com/hinkelman/r-shiny-electron">forked the repository</a>, searched for each dependency package in <code>package.json</code> via the <a href="https://www.npmjs.com">npm website</a>, and updated version numbers to the latest version found in the npm package search. If you are having trouble with the original repository, you should try the forked version of the RSE template repository.</p>
+<p>The RSE template doesn’t mention anything about the arguably obvious steps of installing <a href="https://nodejs.org/">Node</a>, <a href="https://electronjs.org/">Electron</a>, and <a href="https://electronforge.io/">Electron Forge</a>.</p>
+<ol style="list-style-type: decimal">
+<li>Install Node with one of the pre-built installers available from the Node website.</li>
+</ol>
+<p>After installing Node, Electron and Electron Forge are installed using <code>npm</code> from the command line. On Windows, Node installs a Node.js command prompt that I used for any <code>npm</code> and <code>electron-forge</code> commands (rather than the default Windows command prompt). The Node installer asks Windows users if they want to install <a href="https://chocolatey.org/">Chocolatey</a>. It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn’t install Chocolately as part of the Node installation, you can download an installer from the Chocolatey website.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Run <code>npm install -g electron-forge</code> the in the Terminal (macOS) or Node.js command prompt (Windows) to install Electron Forge globally.</p></li>
+<li><p>Clone or download the GitHub repository for the RSE template.</p></li>
+</ol>
+<p>Edit: The RSE template hasn’t been updated in over a year and the Node ecosystem evolves rapidly. I <a href="https://github.com/hinkelman/r-shiny-electron">forked the repository</a>, searched for each dependency package in <code>package.json</code> via the <a href="https://www.npmjs.com">npm website</a>, and updated version numbers to the latest version found in the npm package search. I also removed <code>electron-forge</code> from the devDependencies because it is installed globally. If you are having trouble with the original repository, you should try the forked version of the RSE template repository.</p>
 </div>
 <div id="build-process-on-macos" class="section level3">
 <h3>Build process on macOS</h3>
 <p>The RSE template repository includes a simple Shiny app. As a first step, I recommend following the steps below to confirm that you can build the executable with the simple app before trying your own app. At the end of this post, I will write more about extra steps required to build the executable for the DSM2 Viz Tool.</p>
 <ol style="list-style-type: decimal">
-<li><p>Open the terminal and change the directory to the location of <code>r-shiny-electron</code> or <code>r-shiny-electron-master</code> (see <a href="https://macpaw.com/how-to/use-terminal-on-mac">how to use terminal</a>).</p></li>
-<li><p>Run <code>npm install</code> in the terminal to set up the project in the <code>r-shiny-electron</code> directory.</p></li>
+<li><p>Open the Terminal and change the directory to the location of <code>r-shiny-electron</code> or <code>r-shiny-electron-master</code> (see <a href="https://macpaw.com/how-to/use-terminal-on-mac">how to use the Terminal</a>).</p></li>
+<li><p>Run <code>npm install --save-dev electron</code> in the Terminal to install Electron locally.</p></li>
+<li><p>Run <code>npm install</code> to set up the project in the <code>r-shiny-electron</code> directory.</p></li>
 </ol>
 <p>You will get lots of warnings about outdated packages.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> I tried to fix the warnings with <code>npm audit fix</code>, but ran into problems and started over with a fresh clone of the RSE template.</p>
-<ol start="3" style="list-style-type: decimal">
+<ol start="4" style="list-style-type: decimal">
 <li><p>Download R binary for macOS by running <code>./get-r-mac.sh</code>.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p></li>
 <li><p>Identify and download packages used in Shiny app by running <code>Rscript add-cran-binary-pkgs.R</code>.</p></li>
 <li><p>Run <code>npm start</code> to test if app launches (and works correctly).</p></li>
 <li><p>If the app works correctly, run <code>electron-forge make</code> to build the macOS executable.</p></li>
 </ol>
-<p>The build process will create a folder called <code>Out</code> in the <code>r-shiny-electron</code> directory. In <code>Out/r-shiny-electron-darwin-x64</code>, you will have an executable (<code>r-shiny-electron.app</code>) that you can run to test that the app is working correctly. In <code>Out/make</code>, you will have a zip file that contains the executable but is better for distributing because of the smaller file size.</p>
+<p>The build process will create a folder called <code>Out</code> in the <code>r-shiny-electron</code> directory. In <code>Out/r-shiny-electron-darwin-x64</code>, you will have an executable (<code>r-shiny-electron.app</code>) that you can run to test that the app is working correctly. In <code>Out/make</code>, you will have a zip file that contains the executable but is better for distributing because of the smaller file size.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
 <p>It is possible to <a href="https://github.com/dirkschumacher/r-shiny-electron/issues/25">build a Windows installer on macOS</a>, but it “takes forever.” I tried going down this road, but bailed after the process had run for 2 hours without finishing because I had access to a Windows machine for building the app.</p>
 </div>
 <div id="build-process-on-windows" class="section level3">
@@ -58,12 +61,13 @@ tags:
 <p>As it turns out, the Chocolatey version of <code>innoextract</code> (for unpacking installers created by Inno Setup) will not work with the R installer. We need the development version: <a href="http://constexpr.org/innoextract/files/snapshots/innoextract-1.8-dev-2018-09-09/">innoextract-1.8-dev-2018-09-09-windows.zip</a>. After extracting the development version of <code>innoextract</code> from the zip file, you can move it to <a href="https://chocolatey.org/faq#where-does-chocolatey-install-by-default">where Chocolatey installs packages</a>. The main point of Chocolatey for me was that it made it easy to find the location of <code>innoextract</code> (and <code>./get-r-win.sh</code> found it, too).</p>
 <ol start="3" style="list-style-type: decimal">
 <li><p>Open the Node.js command prompt and change the directory to the location of <code>r-shiny-electron</code> or <code>r-shiny-electron-master</code>.</p></li>
+<li><p>Run <code>npm install --save-dev electron</code> in the Node.js command prompt to install Electron locally.</p></li>
 <li><p>Run <code>npm install</code> in the Node.js command prompt to set up the project in the <code>r-shiny-electron</code> directory.</p></li>
-<li><p>Download R binary for Windows by running <code>./get-r-win.sh</code> in Cygwin.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p></li>
+<li><p>Download R binary for Windows by running <code>./get-r-win.sh</code> in Cygwin.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p></li>
 <li><p>Identify and download packages used in Shiny app by running <code>Rscript add-cran-binary-pkgs.R</code>.</p></li>
 </ol>
 <p>I unsuccessfully tried to run this line in the default command prompt, the Node.js command prompt, and the Cygwin Terminal. I don’t know what I was missing to make that work and I didn’t try very hard because I was able to successfully run this line in the <a href="https://support.rstudio.com/hc/en-us/articles/115010737148-Using-the-RStudio-Terminal">RStudio Terminal</a>. Remember to change the directory to <code>r-shiny-electron</code>.</p>
-<ol start="7" style="list-style-type: decimal">
+<ol start="8" style="list-style-type: decimal">
 <li><p>Run <code>npm start</code> in the Node.js command prompt to test if the app launches (and works correctly).</p></li>
 <li><p>If the app works correctly, run <code>electron-forge make</code> in the Node.js command prompt to build the Windows executable.</p></li>
 </ol>
@@ -72,7 +76,7 @@ tags:
 <div id="customizing-build-process-for-dsm2-viz-tool" class="section level3">
 <h3>Customizing build process for DSM2 Viz Tool</h3>
 <p>After working through the build process on the r-shiny-electron example app, I downloaded a fresh version of the RSE template, renamed the <code>r-shiny-electron</code> directory to <code>DSM2-Viz-Tool</code>, removed the <code>app.R</code> file from <code>DSM2-Viz-Tool/shiny</code>, and replaced it with the files for the <a href="https://github.com/fishsciences/DSM2-Viz-Tool/tree/master/shiny">DSM2 Viz Tool Shiny app</a>. I also opened <code>package.json</code> in a text editor and changed a <a href="https://github.com/fishsciences/DSM2-Viz-Tool/blob/master/package.json">few fields</a> (e.g., name, productName, version, description, author).</p>
-<p>Next, I started working through the build process described above. However, before running <code>npm start</code> I needed to add the binary files for the <code>rhdf5</code> and <code>Rhdf5lib</code> packages because <code>Rscript add-cran-binary-pkgs.R</code> doesn’t find Bioconductor packages. You can find where R packages are installed on your machine by running <code>.libPaths()</code> from the R console. I copied and pasted the <code>rhdf5</code> and <code>Rhdf5lib</code> folders from the location indicated by the output of <code>.libPaths()</code> to <code>DSM2-Viz-Tool/r-mac/library</code> and <code>DSM2-Viz-Tool/r-win/library</code> on macOS and Windows, respectively. Then, I was able to finish the build process.</p>
+<p>Next, I started working through the build process described above. However, before running <code>npm start</code> I needed to add the binary files for the <code>rhdf5</code> and <code>Rhdf5lib</code> packages because <code>Rscript add-cran-binary-pkgs.R</code> doesn’t find Bioconductor packages.<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> You can find where R packages are installed on your machine by running <code>.libPaths()</code> from the R console. I manually copied and pasted the <code>rhdf5</code> and <code>Rhdf5lib</code> folders from the location indicated by the output of <code>.libPaths()</code> to <code>DSM2-Viz-Tool/r-mac/library</code> and <code>DSM2-Viz-Tool/r-win/library</code> on macOS and Windows, respectively. Then, I was able to finish the build process.</p>
 <p>Working through this process involved plenty of frustration (because of my knowledge gaps), but it was extremely satisfying to arrive at the end goal of packaging the DSM2 Viz Tool as a standalone desktop application.</p>
 </div>
 </div>
@@ -81,6 +85,8 @@ tags:
 <ol>
 <li id="fn1"><p>I personally find all the security warnings alarming, but <a href="https://www.voitanos.io/blog/don-t-be-alarmed-by-vulnerabilities-after-running-npm-install">this article</a> suggests that I shouldn’t worry about it.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 <li id="fn2"><p>The R version specified in this shell script should be the same R version that was used to build the shiny app.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>If you change the R version in this shell script (or make other changes), don’t make the same mistake that I did by using Notepad to edit the file because it will introduce an issue with end of line characters. But that issue is easily <a href="https://learningintheopen.org/2013/03/07/microsoft-windows-cygwin-error-r-command-not-found/">fixed</a>.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>On macOS Catalina, the first time that you run the app, you will be prompted to give permmission to access the file system. After granting permission, you may need to quit the app and then launch it again.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>If you change the R version in this shell script (or make other changes), don’t make the same mistake that I did by using Notepad to edit the file because it will introduce an issue with end of line characters. But that issue is easily <a href="https://learningintheopen.org/2013/03/07/microsoft-windows-cygwin-error-r-command-not-found/">fixed</a>.<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>I also had to manually copy the <code>zeallot</code> package for some reason.<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
