@@ -31,7 +31,7 @@ The RSE template doesn't mention anything about the arguably obvious steps of in
 
 After installing Node, Electron and Electron Forge are installed using `npm` from the command line. On Windows, Node installs a Node.js command prompt that I used for any `npm` and `electron-forge` commands (rather than the default Windows command prompt). The Node installer asks Windows users if they want to install [Chocolatey](https://chocolatey.org/). It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn't install Chocolately as part of the Node installation, you can download an installer from the Chocolatey website.
 
-2. Run `npm install -g electron-forge` the in the Terminal (macOS) or Node.js command prompt (Windows) to install Electron Forge globally. 
+2. Run `npm install -g electron-forge` in the Terminal (macOS) or Node.js command prompt (Windows) to install Electron Forge globally. 
 
 3. Clone or download the GitHub repository for the RSE template.
 

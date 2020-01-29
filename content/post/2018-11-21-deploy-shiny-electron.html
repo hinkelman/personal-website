@@ -28,7 +28,7 @@ tags:
 </ol>
 <p>After installing Node, Electron and Electron Forge are installed using <code>npm</code> from the command line. On Windows, Node installs a Node.js command prompt that I used for any <code>npm</code> and <code>electron-forge</code> commands (rather than the default Windows command prompt). The Node installer asks Windows users if they want to install <a href="https://chocolatey.org/">Chocolatey</a>. It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn’t install Chocolately as part of the Node installation, you can download an installer from the Chocolatey website.</p>
 <ol start="2" style="list-style-type: decimal">
-<li><p>Run <code>npm install -g electron-forge</code> the in the Terminal (macOS) or Node.js command prompt (Windows) to install Electron Forge globally.</p></li>
+<li><p>Run <code>npm install -g electron-forge</code> in the Terminal (macOS) or Node.js command prompt (Windows) to install Electron Forge globally.</p></li>
 <li><p>Clone or download the GitHub repository for the RSE template.</p></li>
 </ol>
 <p>Edit: The RSE template hasn’t been updated in over a year and the Node ecosystem evolves rapidly. I <a href="https://github.com/hinkelman/r-shiny-electron">forked the repository</a>, searched for each dependency package in <code>package.json</code> via the <a href="https://www.npmjs.com">npm website</a>, and updated version numbers to the latest version found in the npm package search. I also removed <code>electron-forge</code> from the devDependencies because it is installed globally. If you are having trouble with the original repository, you should try the forked version of the RSE template repository.</p>
