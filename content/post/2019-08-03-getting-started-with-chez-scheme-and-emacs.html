@@ -112,10 +112,14 @@ Type (debug) to enter the debugger.
 <p><a href="https://www.nongnu.org/geiser/">Geiser</a> is a package that provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through <a href="https://melpa.org/#/">MELPA</a>.</p>
 <p>Open Emacs, enter <code>C-x</code> <code>C-f</code> to find a file, and type <code>.emacs</code> at the prompt. On macOS, I added the following to <code>.emacs</code>.</p>
 <pre><code>(require &#39;package)
+;;; either the stable version:
 
 (add-to-list &#39;package-archives
-             &#39;(&quot;melpa&quot; . &quot;http://melpa.org/packages/&quot;)
-               t)</code></pre>
+  ;; choose either the stable or the latest git version:
+  &#39;(&quot;melpa-stable&quot; . &quot;https://stable.melpa.org/packages/&quot;))
+  ;; &#39;(&quot;melpa-unstable&quot; . &quot;https://melpa.org/packages/&quot;))
+
+(package-initialize)</code></pre>
 <p>On Windows, I added the more extensive code provided on <a href="https://melpa.org/#/getting-started">MELPA’s Getting Started page</a>.</p>
 <p>Save <code>.emacs</code> and restart Emacs. Then type <code>M-x</code> followed by <code>package-refresh-contents</code>. If that is successful, you will see the message <code>Package refresh done</code> in the <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Minibuffer.html">minibuffer</a>. To install Geiser, type <code>M-x</code> and then <code>package-install</code>. In response to the <code>Install package:</code> prompt, type <code>geiser</code> and hit return.</p>
 <p>To customize Geiser, I used the menu options rather than directly editing the <code>.emacs</code> file. Choose <code>Options/Customize Emacs/Specific Group...</code> and type <code>geiser</code> at the prompt. Click on <code>Geiser Chez</code> and change the location of the binary.</p>

@@ -176,10 +176,14 @@ Open Emacs, enter `C-x` `C-f` to find a file, and type `.emacs` at the prompt. O
 
 ```
 (require 'package)
+;;; either the stable version:
 
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/")
-	           t)
+  ;; choose either the stable or the latest git version:
+  '("melpa-stable" . "https://stable.melpa.org/packages/"))
+  ;; '("melpa-unstable" . "https://melpa.org/packages/"))
+
+(package-initialize)
 ```
 
 On Windows, I added the more extensive code provided on [MELPA's Getting Started page](https://melpa.org/#/getting-started). 
