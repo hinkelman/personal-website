@@ -4,7 +4,7 @@ author: Travis Hinkelman
 date: '2019-09-11'
 slug: writing-chez-scheme-library
 categories:
-  - Chez Scheme
+  - ChezScheme
   - chez-stats
 tags:
   - libraries

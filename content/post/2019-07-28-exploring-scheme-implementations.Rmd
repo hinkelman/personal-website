@@ -6,7 +6,7 @@ slug: exploring-scheme-implementations
 categories:
   - Racket
   - Chicken
-  - Chez Scheme
+  - ChezScheme
 tags: []
 ---
 

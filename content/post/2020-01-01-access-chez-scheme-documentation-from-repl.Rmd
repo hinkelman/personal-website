@@ -4,7 +4,7 @@ author: Travis Hinkelman
 date: '2020-01-01'
 slug: access-chez-scheme-documentation-from-repl
 categories:
-  - Chez Scheme
+  - ChezScheme
   - R
   - chez-docs
 tags:

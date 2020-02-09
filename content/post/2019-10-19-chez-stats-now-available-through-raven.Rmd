@@ -4,7 +4,7 @@ author: Travis Hinkelman
 date: '2019-10-19'
 slug: chez-stats-now-available-through-raven
 categories:
-  - Chez Scheme
+  - ChezScheme
   - chez-stats
   - Raven
 tags:

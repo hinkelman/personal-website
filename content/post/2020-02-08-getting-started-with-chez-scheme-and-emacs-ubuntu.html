@@ -1,0 +1,136 @@
+---
+title: Getting started with Chez Scheme and Emacs on Ubuntu
+author: Travis Hinkelman
+date: '2020-02-08'
+slug: getting-started-with-chez-scheme-and-emacs-ubuntu
+categories:
+  - ChezScheme
+  - Emacs
+tags:
+  - REPL
+  - packages
+  - libraries
+  - extensions
+  - Raven
+  - geiser
+  - Linux
+---
+
+
+
+<p>I’ve been an enthusiastic Mac user for about 12 years, but hardware problems with a recent MacBook Pro and friction surrounding the Catalina upgrade pushed me to evaluate other Unix-like systems. I pulled out an old ASUS laptop that originally had Windows 7(?) installed, but was most recently running <a href="https://www.neverware.com/freedownload">CloudReady</a>. I first tried installing <a href="https://www.freebsd.org">FreeBSD</a> because it seemed like an intriguing alternative, but the installation failed on the old hardware. I then tried <a href="https://www.debian.org">Debian</a>, but also failed. Finally, I reached for <a href="https://ubuntu.com">Ubuntu</a> and, true to its reputation as being beginner friendly, was able to successfully complete the installation.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+<p>I have been <a href="/categories/chezscheme/">learning Chez Scheme</a> over the past 6 months and had previously written about <a href="/post/getting-started-with-chez-scheme-and-emacs/">getting started with Chez Scheme and Emacs on macOS and Windows</a>. For this post, I’ve copied the text of the previous post and updated only the components that needed to be changed to work with Ubuntu.</p>
+<hr />
+<div id="chez-scheme" class="section level2">
+<h2>Chez Scheme</h2>
+<div id="installation" class="section level3">
+<h3>Installation</h3>
+<p>I installed Chez with <a href="https://en.wikipedia.org/wiki/APT_(software)">APT</a>.</p>
+<pre><code>$ sudo apt install chezscheme</code></pre>
+</div>
+<div id="repl" class="section level3">
+<h3>REPL</h3>
+<p>To launch the Chez <a href="https://en.wikipedia.org/wiki/Read–eval–print_loop">REPL</a>, open Terminal and type <code>scheme</code>.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
+<p>Test the REPL with simple expression.</p>
+<pre><code>&gt; (+ 100 10 1)
+111</code></pre>
+<p>The REPL has several nice features including:</p>
+<ul>
+<li>Navigate through previous expressions with the up and down arrow keys.</li>
+<li>Autocomplete functions and paths with <kbd>TAB</kbd>.</li>
+<li>Write and edit multi-line expressions.</li>
+</ul>
+<pre><code>&gt; (define (example x y z)
+    (if (&gt; x 0)
+        (+ y z)
+        (- y z)))
+&gt; (example 1 2 3)
+5</code></pre>
+<p>When navigating through previous expressions, only the first line of a multi-line expression is shown. To see (and edit) all lines, type <kbd>CTRL</kbd>+<kbd>L</kbd>. In the middle of an expression, <kbd>RET</kbd> creates a new line; to enter an expression from the middle of an expression, use <kbd>CTRL</kbd>+<kbd>J</kbd>.</p>
+</div>
+<div id="library-directory" class="section level3">
+<h3>Library Directory</h3>
+<p>Chez does not come with a package manager, but there are 3rd-party options, e.g., <a href="http://ravensc.com">Raven</a><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> and <a href="https://akkuscm.org">Akku</a>. In this post, though, I will describe manual package management.</p>
+<p><code>library-directories</code> returns the directories where Chez looks for libraries.</p>
+<pre><code>&gt; (library-directories)
+((&quot;.&quot; . &quot;.&quot;))</code></pre>
+<p>The <code>&quot;.&quot;</code> indicates that Chez is looking in the default directory. You can find the default directory by running <code>current-directory</code> in a freshly launched Chez REPL.</p>
+<pre><code>&gt; (current-directory)
+&quot;/home/username&quot;</code></pre>
+<p>You probably don’t want to put libraries in these default locations. I created a library directory at <code>/home/username/chez-lib</code>.</p>
+<p>Before we go over where to stash that directory information, let’s cover library extensions.</p>
+<pre><code>&gt; (library-extensions)
+((&quot;.chezscheme.sls&quot; . &quot;.chezscheme.so&quot;) (&quot;.ss&quot; . &quot;.so&quot;)
+  (&quot;.sls&quot; . &quot;.so&quot;) (&quot;.scm&quot; . &quot;.so&quot;) (&quot;.sch&quot; . &quot;.so&quot;))</code></pre>
+<p>These are the file extensions that Chez uses when searching the library directories. The authors of Raven recommend the use of <code>.sc</code> so we need to stash that information, too.</p>
+<p>I edited <code>.profile</code> to add information on library directories and extensions. From a Terminal window, open <code>.profile</code> with the <a href="https://help.ubuntu.com/community/gedit">gedit text editor</a>.</p>
+<pre><code>$ gedit ~/.profile</code></pre>
+<p>I added the following lines to my <code>.profile</code>.</p>
+<pre><code>export CHEZSCHEMELIBDIRS=&quot;/home/username/chez-lib:&quot;
+export CHEZSCHEMELIBEXTS=&quot;.sc::.so:&quot;</code></pre>
+<p>The <code>:</code> at the end is used to indicate that the new entries should be appended to the existing entries. Remove the <code>:</code> to replace the default values with the new entries. After saving <code>.profile</code>, you need to logout from your user account and login again <a href="https://askubuntu.com/questions/951000/how-to-make-the-changes-to-source-profile-permanent">to make the changes to <code>.profile</code> permanent</a>. For your current session, though, you can source <code>.profile</code>.</p>
+<pre><code>$ source ~/.profile</code></pre>
+<p>Now, from a Chez REPL, we can see the effect of our changes.</p>
+<pre><code>&gt; (library-directories)
+((&quot;/home/username/chez-lib&quot; . &quot;/home/username/chez-lib&quot;)
+  (&quot;.&quot; . &quot;.&quot;))
+&gt; (library-extensions)
+((&quot;.sc&quot; . &quot;.so&quot;) (&quot;.chezscheme.sls&quot; . &quot;.chezscheme.so&quot;) (&quot;.ss&quot; . &quot;.so&quot;)
+  (&quot;.sls&quot; . &quot;.so&quot;) (&quot;.scm&quot; . &quot;.so&quot;) (&quot;.sch&quot; . &quot;.so&quot;))</code></pre>
+<p>If we have a library at <code>home/username/chez-lib/srfi/s1/lists.sls</code>, then we import the library with <code>(import (srfi s1 lists))</code>, i.e., you pass the components of the path to import.</p>
+<pre><code>&gt; (xcons 1 2)
+Exception: variable xcons is not bound
+Type (debug) to enter the debugger.
+&gt; (import (srfi s1 lists))
+&gt; (xcons 1 2)
+(2 . 1)</code></pre>
+<hr />
+</div>
+</div>
+<div id="emacs" class="section level2">
+<h2>Emacs</h2>
+<p>I’m not aware of an <a href="https://en.wikipedia.org/wiki/Integrated_development_environment">IDE</a> for Chez Scheme, but pairing a good text editor with the Chez REPL provides a decent development environment. I chose <a href="https://www.gnu.org/software/emacs/emacs.html">Emacs</a> as a text editor. I’m slowly becoming more comfortable with Emacs, but I’m far from proficient.</p>
+<div id="installation-1" class="section level3">
+<h3>Installation</h3>
+<p>Emacs is available through the Ubuntu Software Manager.</p>
+</div>
+<div id="basic-usage" class="section level3">
+<h3>Basic Usage</h3>
+<p>The power of Emacs is in the keyboard shortcuts and customization. I’m too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., <code>C-x</code> <code>C-f</code> corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with <code>M</code> as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to <code>.profile</code>, Emacs can be customized through commands saved in the <code>.emacs</code> file.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
+</div>
+<div id="geiser" class="section level3">
+<h3>Geiser</h3>
+<p><a href="https://www.nongnu.org/geiser/">Geiser</a> is a package that provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through <a href="https://melpa.org/#/">MELPA</a>.</p>
+<p>Open Emacs, enter <code>C-x</code> <code>C-f</code> to find a file, and type <code>.emacs</code> at the prompt. I added the following to <code>.emacs</code>.</p>
+<pre><code>(require &#39;package)
+;;; either the stable version:
+
+(add-to-list &#39;package-archives
+  ;; choose either the stable or the latest git version:
+  &#39;(&quot;melpa-stable&quot; . &quot;https://stable.melpa.org/packages/&quot;))
+  ;; &#39;(&quot;melpa-unstable&quot; . &quot;https://melpa.org/packages/&quot;))
+
+(package-initialize)</code></pre>
+<p>Save <code>.emacs</code> and restart Emacs. Then type <code>M-x</code> followed by <code>package-refresh-contents</code>. If that is successful, you will see the message <code>Package refresh done</code> in the <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Minibuffer.html">minibuffer</a>. To install Geiser, type <code>M-x</code> and then <code>package-install</code>. In response to the <code>Install package:</code> prompt, type <code>geiser</code> and hit return.</p>
+<p>To customize Geiser, I used the menu options rather than directly editing the <code>.emacs</code> file. Choose <code>Options/Customize Emacs/Specific Group...</code> and type <code>geiser</code> at the prompt. Click on <code>Geiser Implementation</code> and change the default implementation to <code>chez</code>. Optionally, you could also delete some (or all) of the non-Chez implementations listed under active implementations. Click <code>Apply and Save</code>. Restart Emacs.</p>
+<p>The Chez REPL is launched through Emacs with <code>M-x</code> followed by <code>run-chez</code>. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>. Multi-line expressions, autocomplete, and syntax highlighting are also supported.</p>
+</div>
+<div id="miscellaneous" class="section level3">
+<h3>Miscellaneous</h3>
+<p>In Emacs, there is an option to highlight matching parantheses, which I find very helpful. Select <code>Options/Highlight Matching Parantheses</code> and then <code>Options/Save Options</code>. I’ve also started using <a href="http://company-mode.github.io">company-mode</a> for text completion. I was also pleased to discover that reindenting lines in Emacs is as simple as selecting the section to indent and pressing <kbd>TAB</kbd>.</p>
+<p>Add the following lines to your <code>.emacs</code> file for <code>scheme-mode</code> to recognize the <code>.sc</code> and <code>.sls</code> file extensions that are used with scheme code.</p>
+<pre><code>(add-to-list &#39;auto-mode-alist
+             &#39;(&quot;\\.sls\\&#39;&quot; . scheme-mode)
+             &#39;(&quot;\\.sc\\&#39;&quot; . scheme-mode))</code></pre>
+<p>In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type <code>C-x</code> <code>C-e</code>. If the executed code displays any output, it will be shown in the minibuffer and not the REPL. [If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).] To evaluate several s-expressions, highlight the region and type <code>C-c</code> <code>C-r</code>. To select an s-expression, place your cursor at the beginning of the s-expression and type <code>M-C-space</code> (where space is the space bar). I’ve done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I was excited to discover this last one.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>During installation Ubuntu identified the apparent problem as related to numerous partitions from previous operating systems and provided the option to completely erase the old operating systems before installing Ubuntu. I’m sure that would also have been possible with FreeBSD and Debian, but Ubuntu made it easier to diagnose and address.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>You can also type <code>petite</code> to launch Petite Chez Scheme. See <a href="https://cisco.github.io/ChezScheme/csug9.5/use.html">here</a> for more information on the differences between Chez Scheme and Petite Chez Scheme.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>I’ve written a bit more about using Raven in this <a href="/post/chez-stats-now-available-through-raven">blog post</a>.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

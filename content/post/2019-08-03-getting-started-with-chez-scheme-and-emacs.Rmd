@@ -4,7 +4,7 @@ author: Travis Hinkelman
 date: '2019-08-03'
 slug: getting-started-with-chez-scheme-and-emacs
 categories:
-  - Chez Scheme
+  - ChezScheme
   - Emacs
 tags:
   - REPL
@@ -35,7 +35,7 @@ So far, so good. Nothing tricky about installing Chez Scheme.
 
 ### REPL
 
-To launch the Chez [REPL](https://en.wikipedia.org/wiki/Read–eval–print_loop) on macOS, open a Terminal and type `chez`.^[You can also type `petite` to launch Petite Chez Scheme. See [here](https://cisco.github.io/ChezScheme/csug9.5/use.html) for more information on the differences between Chez Scheme and Petite Chez Scheme.] On Windows, 3 Chez programs were installed (64-bit threaded and 32-bit threaded and unthreaded). Open any of those programs to get a Chez REPL.
+To launch the Chez [REPL](https://en.wikipedia.org/wiki/Read–eval–print_loop) on macOS, open Terminal and type `chez`.^[You can also type `petite` to launch Petite Chez Scheme. See [here](https://cisco.github.io/ChezScheme/csug9.5/use.html) for more information on the differences between Chez Scheme and Petite Chez Scheme.] On Windows, 3 Chez programs were installed (64-bit threaded and 32-bit threaded and unthreaded). Open any of those programs to get a Chez REPL.
 
 Test the REPL with simple expression.
 
