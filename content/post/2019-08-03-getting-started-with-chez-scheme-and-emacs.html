@@ -127,7 +127,7 @@ Type (debug) to enter the debugger.
 <pre><code>/usr/local/Cellar/chezscheme/9.5.2/bin/chez</code></pre>
 <p>On Windows..</p>
 <pre><code>C:\Program Files\Chez Scheme 9.5\bin\ta6nt\scheme</code></pre>
-<p>Click <code>Apply and Save</code>. Click the <code>Geiser</code> link next to <code>Parent groups:</code> Click on <code>Geiser Implementation</code> and change the default implementation to <code>chez</code>. Optionally, you could also delete some (or all) of the non-Chez implementations listed under active implementations. Click <code>Apply and Save</code>. Restart Emacs.</p>
+<p>Click <code>Apply and Save</code>. Click the <code>Geiser</code> link next to <code>Parent groups:</code> Click on <code>Geiser Implementation</code> and change the default implementation to <code>chez</code>. Click <code>Apply and Save</code>. Restart Emacs.</p>
 <p>The Chez REPL is launched through Emacs with <code>M-x</code> followed by <code>run-chez</code>. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>.<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a> Multi-line expressions, autocomplete, and syntax highlighting are also supported.</p>
 </div>
 <div id="library-directory-1" class="section level3">
@@ -145,7 +145,7 @@ Type (debug) to enter the debugger.
 <pre><code>(add-to-list &#39;auto-mode-alist
              &#39;(&quot;\\.sls\\&#39;&quot; . scheme-mode)
              &#39;(&quot;\\.sc\\&#39;&quot; . scheme-mode))</code></pre>
-<p>UPDATE (2019-12-13): In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type <code>C-x</code> <code>C-e</code>. If the executed code displays any output, it will be shown in the minibuffer and not the REPL. [If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).] To evaluate several s-expressions, highlight the region and type <code>C-c</code> <code>C-r</code>. To select an s-expression, place your cursor at the beginning of the s-expression and type <code>M-C-space</code> (where space is the space bar). I’ve done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I’m excited to recently discover this last one.</p>
+<p>UPDATE (2019-12-13): In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type <code>C-x</code> <code>C-e</code>.<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a> If the executed code displays any output, it will be shown in the minibuffer and not the REPL.<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a> To evaluate several s-expressions, highlight the region and type <code>C-c</code> <code>C-r</code>. To select an s-expression, place your cursor at the beginning of the s-expression and type <code>M-C-space</code> (where space is the space bar). I’ve done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I’m excited to recently discover this last one.</p>
 </div>
 </div>
 <div class="footnotes">
@@ -157,5 +157,7 @@ Type (debug) to enter the debugger.
 <li id="fn4"><p>If you are using macOS Catalina, the default shell is Zsh, not Bash. You simply need to replace <code>.bash_profile</code> with <code>.zshenv</code> in the instructions in this post.<a href="#fnref4" class="footnote-back">↩</a></p></li>
 <li id="fn5"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref5" class="footnote-back">↩</a></p></li>
 <li id="fn6"><p>Because my MacBook doesn’t have a physical <kbd>ESC</kbd>, I prefer <code>C-[</code> as an alternative to <kbd>ESC</kbd> and, thus, navigate among previously entered expressions with <code>C-[</code> <code>p</code> and <code>C-[</code> <code>n</code>.<a href="#fnref6" class="footnote-back">↩</a></p></li>
+<li id="fn7"><p>If you are receiving the message, “No Geiser REPL for this buffer”, then Geiser is <a href="http://geiser.nongnu.org/geiser_4.html#The-source-and-the-REPL">struggling to figure out which Scheme implementation to use</a>. One solution is to delete all of the non-Chez implementations by choosing <code>Options/Customize Emacs/Specific Group...</code>, typing <code>geiser</code> at the prompt, selecting <code>Geiser Implementation</code>, and deleting all the non-Chez implementations under <code>Geiser Active Implementations</code>. Click <code>Apply and Save</code>. Restart Emacs.<a href="#fnref7" class="footnote-back">↩</a></p></li>
+<li id="fn8"><p>If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).<a href="#fnref8" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

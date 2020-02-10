@@ -165,12 +165,22 @@ out &lt;- bind_rows(source_list)</code></pre>
 (#f (&quot;map&quot;
       (&quot;(map procedure list1 list2 ...)&quot;
         &quot;https://scheme.com/tspl4/control.html#./control:s30&quot;)))</code></pre>
-<p><code>display-launch</code> takes an association list, <code>data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. <code>display-launch</code> makes a system call to <code>open</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> and requires an internet connection.</p>
+<p><code>display-launch</code> takes an association list, <code>data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. <code>display-launch</code> makes a system call to <code>open</code> (macOS) or <code>xdg-open</code> (Linux) and requires an internet connection if <code>launch?</code> is <code>#t</code>.</p>
 <pre><code>(define (display-launch data-selected launch?)
   (when data-selected
     (display (replace-tilde (string-append (caadr data-selected) &quot;\n&quot;)))
     (when launch?
-      (system (string-append &quot;open &quot; (cadadr data-selected))))))</code></pre>
+      (system (string-append
+               (open-string &quot;(doc proc source launch?)&quot;)
+               (cadadr data-selected))))))</code></pre>
+<p><code>open-string</code> returns the appropriate system call based on the value returned by <code>(machine-type)</code>. I haven’t yet worked out how this should work on Windows.</p>
+<pre><code>(define (open-string proc-string)
+  (let ([mt (machine-type)])
+    (if (member mt &#39;(i3nt ti3nt a6nt ta6nt))
+        (assertion-violation proc-string &quot;Your machine type is not currently supported.&quot;)
+        (if (member mt &#39;(i3osx ti3osx a6osx ta6osx))
+            &quot;open &quot;
+            &quot;xdg-open &quot;))))</code></pre>
 <p>When <code>launch?</code> is <code>#f</code>, <code>display-launch</code> simply displays the form(s) for the specified <code>proc</code>, which is helpful if you can’t remember the order of arguments for a procedure.</p>
 <pre><code>&gt; (display-launch (car (data-lookup &quot;append&quot; &quot;TSPL&quot;)) #f)
 (append)
@@ -205,10 +215,4 @@ out &lt;- bind_rows(source_list)</code></pre>
 <div id="conclusions" class="section level3">
 <h3>Conclusions</h3>
 <p>This was a fun little project. When I first had the idea, I was really excited because I worked out all of the initial code in less than 2 hours. But, when I started to write this blog post, I started to discover all of the little problems that didn’t occur to me initially. Nonetheless, I think that I might have produced something reasonably useful for myself from a modest effort.</p>
-</div>
-<div class="footnotes">
-<hr />
-<ol>
-<li id="fn1"><p>To test if <code>open</code> is available on your system, try running the following command in your shell <code>open https://www.unl.edu</code>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-</ol>
 </div>

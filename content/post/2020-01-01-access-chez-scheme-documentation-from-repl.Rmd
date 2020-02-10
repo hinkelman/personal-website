@@ -208,14 +208,28 @@ If `proc` is only found in one source, and both are requested, then one element 
         "https://scheme.com/tspl4/control.html#./control:s30")))
 ```
 
-`display-launch` takes an association list, `data-selected`, returned by `data-lookup`, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. `display-launch` makes a system call to `open`^[To test if `open` is available on your system, try running the following command in your shell `open https://www.unl.edu`.] and requires an internet connection. 
+`display-launch` takes an association list, `data-selected`, returned by `data-lookup`, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. `display-launch` makes a system call to `open` (macOS) or `xdg-open` (Linux) and requires an internet connection if `launch?` is `#t`.
 
 ```
 (define (display-launch data-selected launch?)
   (when data-selected
     (display (replace-tilde (string-append (caadr data-selected) "\n")))
     (when launch?
-      (system (string-append "open " (cadadr data-selected))))))
+      (system (string-append
+               (open-string "(doc proc source launch?)")
+               (cadadr data-selected))))))
+```
+
+`open-string` returns the appropriate system call based on the value returned by `(machine-type)`. I haven't yet worked out how this should work on Windows.
+
+```
+(define (open-string proc-string)
+  (let ([mt (machine-type)])
+    (if (member mt '(i3nt ti3nt a6nt ta6nt))
+        (assertion-violation proc-string "Your machine type is not currently supported.")
+        (if (member mt '(i3osx ti3osx a6osx ta6osx))
+            "open "
+            "xdg-open "))))
 ```
 
 When `launch?` is `#f`, `display-launch` simply displays the form(s) for the specified `proc`, which is helpful if you can't remember the order of arguments for a procedure.
