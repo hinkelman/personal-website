@@ -15,7 +15,7 @@ tags:
 
 My little statistics library, [`chez-stats`](https://github.com/hinkelman/chez-stats), is now available for installation through [Raven](http://ravensc.com), a package manager for Chez Scheme. Raven aims to provide an easy-to-use tool for local package management. 
 
-Raven's [installation instructions](https://guenchi.gitbooks.io/raven/content/installation.html) are straightforward. However, on macOS Catalina, I had to use `sudo` when making a copy of the Chez Scheme compiler, i.e., `sudo cp chez scheme`.
+Raven's [installation instructions](https://guenchi.gitbooks.io/raven/content/installation.html) are straightforward. However, on macOS Catalina, I had to use `sudo` when making a copy of the Chez Scheme compiler, i.e., `sudo cp chez scheme`. If you are getting [permission errors](https://github.com/guenchi/Raven/issues/11) with `curl -L http://ravensc.com/install | scheme`, then try `curl -o install.sc http://ravensc.com/install && sudo scheme ./install.sc`.
 
 When starting a new project, `raven init` will prompt you to provide the content to populate a `package.sc`^[If you add `*.sc linguist-language=Scheme` in `.gitattributes` for a repository, then GitHub will associate your `.sc` files as Scheme, not Scala, files.] file with the metadata for your project. `raven init` also creates a `lib` folder for housing the packages you install in your project with `raven install PACKAGENAME`. It is not necessary to run `raven init` first. `raven install PACKAGENAME` will also create a `lib` folder and `package.sc` file that you can then edit with your favorite text editor.
 
