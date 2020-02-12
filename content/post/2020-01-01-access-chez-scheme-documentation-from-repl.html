@@ -165,22 +165,18 @@ out &lt;- bind_rows(source_list)</code></pre>
 (#f (&quot;map&quot;
       (&quot;(map procedure list1 list2 ...)&quot;
         &quot;https://scheme.com/tspl4/control.html#./control:s30&quot;)))</code></pre>
-<p><code>display-launch</code> takes an association list, <code>data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. <code>display-launch</code> makes a system call to <code>open</code> (macOS) or <code>xdg-open</code> (Linux) and requires an internet connection if <code>launch?</code> is <code>#t</code>.</p>
+<p><code>display-launch</code> takes an association list, <code>data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. When <code>launch?</code> is <code>#t</code>, <code>display-launch</code> makes a system call to <code>open</code> (macOS), <code>xdg-open</code> (Linux), or <code>start</code> (Windows) and requires an internet connection.</p>
 <pre><code>(define (display-launch data-selected launch?)
   (when data-selected
     (display (replace-tilde (string-append (caadr data-selected) &quot;\n&quot;)))
     (when launch?
-      (system (string-append
-               (open-string &quot;(doc proc source launch?)&quot;)
-               (cadadr data-selected))))))</code></pre>
-<p><code>open-string</code> returns the appropriate system call based on the value returned by <code>(machine-type)</code>. I haven’t yet worked out how this should work on Windows.</p>
-<pre><code>(define (open-string proc-string)
-  (let ([mt (machine-type)])
-    (if (member mt &#39;(i3nt ti3nt a6nt ta6nt))
-        (assertion-violation proc-string &quot;Your machine type is not currently supported.&quot;)
-        (if (member mt &#39;(i3osx ti3osx a6osx ta6osx))
-            &quot;open &quot;
-            &quot;xdg-open &quot;))))</code></pre>
+      (system (string-append open-string (cadadr data-selected))))))</code></pre>
+<p><code>(machine-type)</code> is used to determine the system-specific string, <code>open-string</code>, for use in the system call.</p>
+<pre><code>(define open-string
+  (case (machine-type)
+    [(i3nt ti3nt a6nt ta6nt) &quot;start &quot;]     ; windows
+    [(i3osx ti3osx a6osx ta6osx) &quot;open &quot;]  ; mac
+    [else &quot;xdg-open &quot;]))                   ; linux</code></pre>
 <p>When <code>launch?</code> is <code>#f</code>, <code>display-launch</code> simply displays the form(s) for the specified <code>proc</code>, which is helpful if you can’t remember the order of arguments for a procedure.</p>
 <pre><code>&gt; (display-launch (car (data-lookup &quot;append&quot; &quot;TSPL&quot;)) #f)
 (append)
