@@ -29,7 +29,7 @@ The RSE template doesn't mention anything about the arguably obvious steps of in
 
 1. Install Node with one of the pre-built installers available from the Node website. 
 
-After installing Node, Electron and Electron Forge are installed using `npm` from the command line. On Windows, Node installs a Node.js command prompt that I used for any `npm` and `electron-forge` commands (rather than the default Windows command prompt). The Node installer asks Windows users if they want to install [Chocolatey](https://chocolatey.org/). It is not necessary to install Chocolatey, but it helped me figure out one piece below (which might be obvious to Windows users). If you didn't install Chocolately as part of the Node installation, you can download an installer from the Chocolatey website.
+After installing Node, Electron and Electron Forge are installed using `npm` from the command line. On Windows, Node installs a Node.js command prompt that I used for any `npm` and `electron-forge` commands (rather than the default Windows command prompt). The Node installer provides Windows users with the option to automatically install the necessary tools, including [Chocolatey](https://chocolatey.org/). I checked the box to automatically install these tools, but I'm not sure if this step is necessary to build the Electron app. 
 
 2. Run `npm install -g electron-forge` in the Terminal (macOS)^[On macOS, you may need to provide permission to access `/usr/local/lib/node_modules`. [Solve the permission error](https://flaviocopes.com/npm-fix-missing-write-access-error/) by running `sudo chown -R $USER /usr/local/lib/node_modules` from the Terminal.] or Node.js command prompt (Windows) to install Electron Forge globally. 
 
@@ -63,13 +63,11 @@ It is possible to [build a Windows installer on macOS](https://github.com/dirksc
 
 ### Build process on Windows
 
-If you haven't picked up on it yet, I'm a Mac user. I struggled to figure out how to get set up on a Windows machine and I might not be remembering correctly a few of the details. Hopefully, these instructions are close enough to help you figure it out for yourself.
+As mentioned in the macOS section, I recommend following the steps below to confirm that you can build the executable with the simple Shiny app available through the RSE template before trying your own app.
 
 1. Install [Cygwin](https://cygwin.com/) and the [wget package](https://superuser.com/questions/693284/wget-command-not-working-in-cygwin), which is not installed by default. The `wget` function is used in `./get-r-win.sh`. If you have `wget` from another installation process, then you might be able to skip this step. 
 
-2. Install `innoextract` with Chocolatey by running `choco install innoextract`
-
-As it turns out, the Chocolatey version of `innoextract` (for unpacking installers created by Inno Setup) will not work with the R installer. We need the development version: [innoextract-1.8-dev-2018-09-09-windows.zip](http://constexpr.org/innoextract/files/snapshots/innoextract-1.8-dev-2018-09-09/). After extracting the development version of `innoextract` from the zip file, you can move it to [where Chocolatey installs packages](https://chocolatey.org/faq#where-does-chocolatey-install-by-default). The main point of Chocolatey for me was that it made it easy to find the location of `innoextract` (and `./get-r-win.sh` found it, too).
+2. Install `innoextract` with Chocolatey by running `choco install innoextract` from the command prompt with administrative privileges, i.e., right click on the command prompt and choose `Run as administrator`. `innoextract 1.8` is required. If you have a previous version of innoextract installed, then run `choco upgrade innoextract`.^[If that doesn't work, run `choco uninstall innoextract` and then run `choco install innoextract`.]
 
 3. Open the Node.js command prompt and change the directory to the location of `r-shiny-electron` or `r-shiny-electron-master`.
 
@@ -77,13 +75,11 @@ As it turns out, the Chocolatey version of `innoextract` (for unpacking installe
 
 5. Run `npm install` in the Node.js command prompt to set up the project in the `r-shiny-electron` directory.
 
-6. Download R binary for Windows by running `./get-r-win.sh` in Cygwin.^[If you change the R version in this shell script (or make other changes), don't make the same mistake that I did by using Notepad to edit the file because it will introduce an issue with end of line characters. But that issue is easily [fixed](https://learningintheopen.org/2013/03/07/microsoft-windows-cygwin-error-r-command-not-found/).]
+6. Change the directory to `r-shiny-electron` in Cygwin, e.g., type `cd` in the Cygwin terminal and drag the `r-shiny-electron` folder to Cygwin to paste the path. Use [Notepad++](https://notepad-plus-plus.org) to open `./get-r-win.sh` and confirm that the [EOL characters are in Unix format](https://learningintheopen.org/2013/03/07/microsoft-windows-cygwin-error-r-command-not-found/). Download R binary for Windows by running `./get-r-win.sh` in Cygwin.
 
-7. Identify and download packages used in Shiny app by running `Rscript add-cran-binary-pkgs.R`.
+7. Identify and download packages used in the Shiny app by running `Rscript add-cran-binary-pkgs.R` from the [RStudio Terminal](https://support.rstudio.com/hc/en-us/articles/115010737148-Using-the-RStudio-Terminal). Remember to first change the directory to `r-shiny-electron`. You may also need to install the `automagic` package first.
 
-I unsuccessfully tried to run this line in the default command prompt, the Node.js command prompt, and the Cygwin Terminal. I don't know what I was missing to make that work and I didn't try very hard because I was able to successfully run this line in the [RStudio Terminal](https://support.rstudio.com/hc/en-us/articles/115010737148-Using-the-RStudio-Terminal). Remember to change the directory to `r-shiny-electron`.
-
-8. Run `npm start` in the Node.js command prompt to test if the app launches (and works correctly).
+8. Run `npm start` in the Node.js command prompt to test if the app launches (and works correctly).^[One of the requirements is that `git` is installed. An installer is available [here](https://git-scm.com/download/win).]
 
 9. If the app works correctly, run `electron-forge make` in the Node.js command prompt to build the Windows executable.
 
