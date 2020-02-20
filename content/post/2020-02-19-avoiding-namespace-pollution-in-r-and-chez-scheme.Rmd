@@ -34,7 +34,7 @@ The approach for importing libraries in Chez Scheme is similar to loading packag
 > (import (only (chez-stats chez-stats) mean median))
 ```
 
-We also reduce the potential for namespace conflicts by importing a library with a prefix.
+We can also reduce the potential for namespace conflicts by importing a library with a prefix.
 
 ```
 > (import (prefix (chez-stats chez-stats) cs:))
@@ -42,5 +42,5 @@ We also reduce the potential for namespace conflicts by importing a library with
 3
 ```
 
-My preliminary experience of using the prefix approach greatly improved my autocompletion experience in Emacs. Simiarly, a [discussion of function naming conventions in R packages](https://community.rstudio.com/t/function-naming-conventions-and-best-practice/3381) was largely centered on how function prefixes pair nicely with autocompletion in making an R package friendly to new users.
+My preliminary experience of using the prefix approach greatly improved my autocompletion experience in Emacs. Similarly, a [discussion of function naming conventions in R packages](https://community.rstudio.com/t/function-naming-conventions-and-best-practice/3381) was largely centered on how function prefixes pair nicely with autocompletion in making an R package friendly to new users.
 

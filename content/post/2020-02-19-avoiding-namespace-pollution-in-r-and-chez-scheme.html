@@ -24,11 +24,11 @@ tags:
 <p>When you are using only one function from a package, you might opt for <code>::</code> if you only call that function once or twice and <code>include.only</code> if you call the function many times in a script. For me, <code>MESS::auc</code> is an example where I have typically used the <code>::</code> operator because I want the reminder that <code>auc</code> is found in the <code>MESS</code> packge. Alternatively, I could use <code>library(MESS, include.only = c(&quot;auc&quot;))</code>.</p>
 <p>The approach for importing libraries in Chez Scheme is similar to loading packages in R. To load all the functions in my <a href="https://github.com/hinkelman/chez-stats"><code>chez-stats</code> library</a>, you use <code>(import (chez-stats chez-stats))</code><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> We can import only the <code>mean</code> and <code>median</code> procedures with</p>
 <pre><code>&gt; (import (only (chez-stats chez-stats) mean median))</code></pre>
-<p>We also reduce the potential for namespace conflicts by importing a library with a prefix.</p>
+<p>We can also reduce the potential for namespace conflicts by importing a library with a prefix.</p>
 <pre><code>&gt; (import (prefix (chez-stats chez-stats) cs:))
 &gt; (cs:mean &#39;(1 2 2 3 3 3 4 4 4 4))
 3</code></pre>
-<p>My preliminary experience of using the prefix approach greatly improved my autocompletion experience in Emacs. Simiarly, a <a href="https://community.rstudio.com/t/function-naming-conventions-and-best-practice/3381">discussion of function naming conventions in R packages</a> was largely centered on how function prefixes pair nicely with autocompletion in making an R package friendly to new users.</p>
+<p>My preliminary experience of using the prefix approach greatly improved my autocompletion experience in Emacs. Similarly, a <a href="https://community.rstudio.com/t/function-naming-conventions-and-best-practice/3381">discussion of function naming conventions in R packages</a> was largely centered on how function prefixes pair nicely with autocompletion in making an R package friendly to new users.</p>
 <div class="footnotes">
 <hr />
 <ol>
