@@ -7,8 +7,8 @@ categories:
   - R
   - Racket
 tags:
-  - data structures
-  - data frame
+  - data-structures
+  - dataframe
   - list
 ---
 

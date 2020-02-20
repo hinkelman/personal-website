@@ -9,9 +9,9 @@ categories:
   - R
   - Racket
 tags:
-  - named lists
-  - hash tables
-  - data structures
+  - named-lists
+  - hashtables
+  - data-structures
 ---
 ```{r include=FALSE}
 # this is just a convenience for future reference to nuke these up front vs

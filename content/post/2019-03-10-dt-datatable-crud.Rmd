@@ -11,7 +11,7 @@ categories:
 tags:
   - basketball
   - DataTables
-  - DT package
+  - DT
   - CRUD
 ---
 ```{r include=FALSE}
