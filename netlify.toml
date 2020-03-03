@@ -14,7 +14,7 @@
   
 [[redirects]]
   from = "/post/*"
-  to = "/posts/*"
+  to = "/posts/:splat"
   force = true
   
 # section below from https://github.com/rbind/apreshill/blob/master/netlify.toml  
