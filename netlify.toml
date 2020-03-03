@@ -1,8 +1,5 @@
-# A basic redirect rule
-[[redirects]]
-  from = "/post"
-  to = "/posts"
-  
+# Redirect rules
+
 [[redirects]]
   from = "/post/dsm2-viz-tool/"
   to = "/post/deploy-shiny-electron/"
@@ -14,6 +11,10 @@
 [[redirects]]
   from = "/post/generate-random-numbers-r-racket/"
   to = "/post/generating-random-numbers-r-racket/"
+  
+[[redirects]]
+  from = "/post/*"
+  to = "/posts/*"
   
 # section below from https://github.com/rbind/apreshill/blob/master/netlify.toml  
 [build]
