@@ -1,7 +1,7 @@
 # A basic redirect rule
 [[redirects]]
-  from = "/post/"
-  to = "/posts/"
+  from = "/post"
+  to = "/posts"
   
 [[redirects]]
   from = "/post/dsm2-viz-tool/"
