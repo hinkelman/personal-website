@@ -2,19 +2,20 @@
 
 [[redirects]]
   from = "/post/dsm2-viz-tool/"
-  to = "/post/deploy-shiny-electron/"
+  to = "/posts/deploy-shiny-electron/"
   
 [[redirects]]
   from = "/post/shiny-scorekeeper-datatable-crud/"
-  to = "/post/dt-datatable-crud/"
+  to = "/posts/dt-datatable-crud/"
   
 [[redirects]]
   from = "/post/generate-random-numbers-r-racket/"
-  to = "/post/generating-random-numbers-r-racket/"
+  to = "/posts/generating-random-numbers-r-racket/"
   
 [[redirects]]
   from = "/post/*"
   to = "/posts/*"
+  force = true
   
 # section below from https://github.com/rbind/apreshill/blob/master/netlify.toml  
 [build]
