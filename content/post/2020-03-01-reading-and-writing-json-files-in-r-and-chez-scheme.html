@@ -1,0 +1,237 @@
+---
+title: Reading and writing JSON files in R and Chez Scheme
+author: Travis Hinkelman
+date: '2020-03-01'
+slug: reading-and-writing-json-files-in-r-and-chez-scheme
+categories:
+  - R
+  - ChezScheme
+tags:
+  - data-structures
+  - dataframe
+  - list
+  - association-list
+  - vector
+  - array
+  - object
+---
+
+
+
+<p>I have <a href="/post/reading-writing-json-files-r-racket/">previously written</a> about how to read and write JSON files in R and Racket. In re-reading that old post, I’m struck by how it shows me tinkering without understanding. Now that I have pivoted <a href="/post/exploring-scheme-implementations/">from learning Racket to learning Chez Scheme</a>, I’m revisiting JSON as a data serialization format and actually reading about JSON instead of just playing with JSON packages. This <a href="https://arxiv.org/pdf/1403.2805.pdf">paper</a> on the <a href="https://jeroen.cran.dev/jsonlite/index.html"><code>jsonlite</code> package</a> for R was particularly helpful for improving my understanding. One short section succinctly conveys the most critical ideas.</p>
+<blockquote>
+<p>The JSON format specifies 4 primitive types (string, number, boolean, null) and two universal structures:</p>
+<ul>
+<li>A JSON object: an unordered collection of zero or more name/value pairs, where a name is a string and
+a value is a string, number, boolean, null, object, or array.</li>
+<li>A JSON array: an ordered sequence of zero or more values.</li>
+</ul>
+<p>Both these structures are heterogeneous; i.e. they are allowed to contain elements of different types. Therefore, the native R realization of these structures is a named list for JSON objects, and unnamed list for JSON arrays. However, in practice a list is an awkward, inefficient type to store and manipulate data in R. Most statistical applications work with (homogeneous) vectors, matrices or data frames. In order to give these data structures a JSON representation, we can define certain special cases of JSON structures which get parsed into other, more specific R types.</p>
+</blockquote>
+<div id="r" class="section level3">
+<h3>R</h3>
+<p>A JSON array is defined by square brackets with elements separated by commas. For example, <code>[[1.1,2,3],[4,5,6],[7,8,9]]</code> represents a two-dimensional array comprised of numbers (one of the 4 JSON primitive types). By default, <code>jsonlite</code> reads this JSON array as a matrix and coerces all of the numbers to doubles. If <code>simplifyVector = FALSE</code>, then <code>fromJSON</code> reads the array as an unnamed nested list and coerces each element of the list to the appropriate type, i.e., in this example, only one element of the JSON array is coerced to a double.</p>
+<pre><code>&gt; x1 &lt;- fromJSON(&quot;[[1.1,2,3],[4,5,6],[7,8,9]]&quot;)
+&gt; class(x1)
+[1] &quot;matrix&quot;
+&gt; typeof(x1)
+[1] &quot;double&quot;
+
+&gt; x2 &lt;- fromJSON(&quot;[[1.1,2,3],[4,5,6],[7,8,9]]&quot;, simplifyVector = FALSE)
+&gt; class(x2)
+[1] &quot;list&quot;
+&gt; typeof(x2)
+[1] &quot;list&quot;
+&gt; lapply(lapply(x2, &quot;[[&quot;, 1), typeof) # apply typeof to first element of each sub-list
+[[1]]
+[1] &quot;double&quot;
+[[2]]
+[1] &quot;integer&quot;
+[[3]]
+[1] &quot;integer&quot;</code></pre>
+<p>A JSON object is defined by curly brackets containing key-value pairs separated by commas. <code>fromJSON</code> reads a JSON object as a named list. However, an array of JSON objects is read as a dataframe.</p>
+<pre><code>&gt; fromJSON(&#39;{&quot;ID&quot;: 1, &quot;Species&quot;: &quot;CHN&quot;, &quot;Length&quot;: 43}&#39;)
+$ID
+[1] 1
+
+$Species
+[1] &quot;CHN&quot;
+
+$Length
+[1] 43
+
+&gt; fromJSON(&#39;[{&quot;ID&quot;: 1, &quot;Species&quot;: &quot;CHN&quot;, &quot;Length&quot;: 43}, {&quot;ID&quot;: 2, &quot;Species&quot;: &quot;STH&quot;, &quot;Length&quot;: 131}]&#39;)
+  ID Species Length
+1  1     CHN     43
+2  2     STH    131</code></pre>
+<p>Tabular data can be oriented by rows or columns. The default behavior of <code>fromJSON</code> uses row-based storage.</p>
+<blockquote>
+<p>However, unfortunately R is an exception in its preference for column-based storage: most languages, systems, databases, APIs, etc, are optimized for record based operations. For this reason, the conventional way to store and communicate tabular data in JSON seems to almost exclusively row based.</p>
+</blockquote>
+<pre><code>&gt; toJSON(data.frame(ID = c(1, 2), Species = c(&quot;CHN&quot;, &quot;STH&quot;), Length = c(43, 131)))
+[{&quot;ID&quot;:1,&quot;Species&quot;:&quot;CHN&quot;,&quot;Length&quot;:43},{&quot;ID&quot;:2,&quot;Species&quot;:&quot;STH&quot;,&quot;Length&quot;:131}] </code></pre>
+<p>Setting <code>dataframe = &quot;columns&quot;</code>, though, creates a column-based JSON representation.</p>
+<pre><code>&gt; toJSON(data.frame(ID = c(1, 2), Species = c(&quot;CHN&quot;, &quot;STH&quot;), Length = c(43, 131)), dataframe = &quot;columns&quot;)
+{&quot;ID&quot;:[1,2],&quot;Species&quot;:[&quot;CHN&quot;,&quot;STH&quot;],&quot;Length&quot;:[43,131]} </code></pre>
+<p><code>fromJSON</code> and <code>toJSON</code> are not perfect inverse functions. For example, a dataframe written in a columnar format is read as a named list.</p>
+<pre><code>&gt; fromJSON(toJSON(data.frame(ID = c(1, 2), Species = c(&quot;CHN&quot;, &quot;STH&quot;), Length = c(43, 131)), dataframe = &quot;columns&quot;))
+$ID
+[1] 1 2
+
+$Species
+[1] &quot;CHN&quot; &quot;STH&quot;
+
+$Length
+[1]  43 131</code></pre>
+</div>
+<div id="chez-scheme" class="section level3">
+<h3>Chez Scheme</h3>
+<p>For Chez Scheme, I’ve been exploring the <a href="https://guenchi.github.io/json/"><code>json</code> library</a> for working with JSON files. The <code>json</code> library maps JSON arrays to vectors and JSON objects to association lists. <code>null</code>, <code>true</code>, and <code>false</code> are mapped as symbols rather than <code>'()</code>, <code>#t</code>, and <code>#f</code>.</p>
+<pre><code>&gt; (define x (string-&gt;json &quot;[1.1 2 true]&quot;))
+&gt; x
+#(1.1 2 true)
+&gt; (integer? (vector-ref x 0))
+#f
+&gt; (integer? (vector-ref x 1))
+#t
+&gt; (symbol? (vector-ref x 2))
+#t</code></pre>
+<p>The row-based JSON representation of tabular data is read as a vector of association lists where each association list represents one row. The column-based representation is read as an association list where each key is a column name and the values are a vector.</p>
+<pre><code>&gt; (string-&gt;json &quot;[{ID: 1, Species: CHN, Length: 43}, {ID: 2, Species: STH, Length: 131}]&quot;)   ; row based
+#(((ID . 1) (Species . CHN) (Length . 43))
+  ((ID . 2) (Species . STH) (Length . 131)))
+  
+&gt; (string-&gt;json &quot;{ID:[1,2], Species:[CHN,STH], Length:[43,131]}&quot;)                            ; column based
+((ID . #(1 2)) (Species . #(CHN STH)) (Length . #(43 131)))</code></pre>
+<p>The above examples are not valid JSON, which <code>string-&gt;json</code> doesn’t enforce. However, <code>json-&gt;string</code> requires a valid JSON represention, which, in this example, involves using strings not symbols.</p>
+<pre><code>&gt; (json-&gt;string &#39;((ID . #(1 2)) (Species . #(CHN STH)) (Length . #(43 131))))
+Exception in string-append: ID is not a string
+
+&gt; (display (json-&gt;string &#39;((&quot;ID&quot; . #(1 2)) (&quot;Species&quot; . #(&quot;CHN&quot; &quot;STH&quot;)) (&quot;Length&quot; . #(43 131)))))
+{&quot;ID&quot;:[1,2],&quot;Species&quot;:[&quot;CHN&quot;,&quot;STH&quot;],&quot;Length&quot;:[43,131]}</code></pre>
+<p>What the <code>json</code> library lacks in parsing functionality, it makes up for in tools for working with JSON data structures. The <code>json</code> library provides example JSON data that when parsed by <code>string-&gt;json</code> creates the following object, <code>x</code>.</p>
+<pre><code>#(((&quot;Number&quot; . 1) (&quot;Name&quot; . &quot;Laetetia&quot;) (&quot;Gender&quot; . &quot;female&quot;) (&quot;Age&quot; . 16)
+    (&quot;Father&quot;
+      (&quot;Number&quot; . 2)
+      (&quot;Name&quot; . &quot;Louis&quot;)
+      (&quot;Age&quot; . 48)
+      (&quot;Revenue&quot; . 1000000))
+    (&quot;Mother&quot;
+      (&quot;Number&quot; . 3)
+      (&quot;Name&quot; . &quot;Lamia&quot;)
+      (&quot;Age&quot; . 43)
+      (&quot;Revenue&quot; . 800000))
+    (&quot;Revenue&quot; . 100000)
+    (&quot;Score&quot;
+      (&quot;Math&quot; (&quot;School&quot; . 8) (&quot;Exam&quot; . 9))
+      (&quot;Literature&quot; (&quot;School&quot; . 9) (&quot;Exam&quot; . 9))))
+  ((&quot;Number&quot; . 4) (&quot;Name&quot; . &quot;Tania&quot;) (&quot;Gender&quot; . &quot;female&quot;) (&quot;Age&quot; . 17)
+    (&quot;Father&quot;
+      (&quot;Number&quot; . 5)
+      (&quot;Name&quot; . &quot;Thomas&quot;)
+      (&quot;Age&quot; . 45)
+      (&quot;Revenue&quot; . 150000))
+    (&quot;Mother&quot;
+      (&quot;Number&quot; . 6)
+      (&quot;Name&quot; . &quot;Jenney&quot;)
+      (&quot;Age&quot; . 42)
+      (&quot;Revenue&quot; . 180000))
+    (&quot;Revenue&quot; . 80000)
+    (&quot;Score&quot;
+      (&quot;Math&quot; (&quot;School&quot; . 7) (&quot;Exam&quot; . 8))
+      (&quot;Literature&quot; (&quot;School&quot; . 10) (&quot;Exam&quot; . 6))))
+  ((&quot;Number&quot; . 7) (&quot;Name&quot; . &quot;Anne&quot;) (&quot;Gender&quot; . &quot;female&quot;) (&quot;Age&quot; . 18)
+    (&quot;Father&quot;
+      (&quot;Number&quot; . 8)
+      (&quot;Name&quot; . &quot;Alex&quot;)
+      (&quot;Age&quot; . 40)
+      (&quot;Revenue&quot; . 200000))
+    (&quot;Mother&quot;
+      (&quot;Number&quot; . 9)
+      (&quot;Name&quot; . &quot;Sicie&quot;)
+      (&quot;Age&quot; . 43)
+      (&quot;Revenue&quot; . 50000))
+    (&quot;Revenue&quot; . 120000)
+    (&quot;Score&quot;
+      (&quot;Math&quot; (&quot;School&quot; . 8) (&quot;Exam&quot; . 8))
+      (&quot;Literature&quot; (&quot;School&quot; . 6) (&quot;Exam&quot; . 8)))))</code></pre>
+<p><code>json-ref</code> provides shorthand for extracting pieces of the data structure. The 1st argument to <code>json-ref</code> is the data structure, <code>x</code>, the 2nd argument is a numeric index because we are working with a vector of association lists, and the remaining arguments are the keys listed in the order of nesting in the data structure.</p>
+<pre><code>&gt; (json-ref x 2 &quot;Name&quot;)
+&quot;Anne&quot;
+&gt; (json-ref x 2 &quot;Father&quot;)
+((&quot;Number&quot; . 8)
+  (&quot;Name&quot; . &quot;Alex&quot;)
+  (&quot;Age&quot; . 40)
+  (&quot;Revenue&quot; . 200000))
+&gt; (json-ref x 2 &quot;Score&quot; &quot;Math&quot; &quot;Exam&quot;)
+8</code></pre>
+<p><code>json-set</code> allows for changing elements of the JSON representation. In this example, we rescale the scores from a scale of 0-20 to 0-100. Importantly, <code>json-set</code> is returning a new object, not modifying <code>x</code>. This example also illustrates the use of <code>#t</code> to indicate that the new values are applied to all positions at the specified depth in the data structure, e.g., first <code>#t</code> means use all elements of the vector, the next <code>#t</code> means use all of the math scores, and the final <code>#t</code> means use all of the literature scores. The procedure is then applied to all the values identified by the <code>#t</code>’s and keys.</p>
+<pre><code>&gt; (json-set x #t &quot;Score&quot; #t #t (lambda (x) (* x 5)))
+#(((&quot;Number&quot; . 1) (&quot;Name&quot; . &quot;Laetetia&quot;) (&quot;Gender&quot; . &quot;female&quot;) (&quot;Age&quot; . 16)
+    (&quot;Father&quot;
+      (&quot;Number&quot; . 2)
+      (&quot;Name&quot; . &quot;Louis&quot;)
+      (&quot;Age&quot; . 48)
+      (&quot;Revenue&quot; . 1000000))
+    (&quot;Mother&quot;
+      (&quot;Number&quot; . 3)
+      (&quot;Name&quot; . &quot;Lamia&quot;)
+      (&quot;Age&quot; . 43)
+      (&quot;Revenue&quot; . 800000))
+    (&quot;Revenue&quot; . 100000)
+    (&quot;Score&quot;
+      (&quot;Math&quot; (&quot;School&quot; . 40) (&quot;Exam&quot; . 45))
+      (&quot;Literature&quot; (&quot;School&quot; . 45) (&quot;Exam&quot; . 45))))
+  ((&quot;Number&quot; . 4) (&quot;Name&quot; . &quot;Tania&quot;) (&quot;Gender&quot; . &quot;female&quot;) (&quot;Age&quot; . 17)
+    (&quot;Father&quot;
+      (&quot;Number&quot; . 5)
+      (&quot;Name&quot; . &quot;Thomas&quot;)
+      (&quot;Age&quot; . 45)
+      (&quot;Revenue&quot; . 150000))
+    (&quot;Mother&quot;
+      (&quot;Number&quot; . 6)
+      (&quot;Name&quot; . &quot;Jenney&quot;)
+      (&quot;Age&quot; . 42)
+      (&quot;Revenue&quot; . 180000))
+    (&quot;Revenue&quot; . 80000)
+    (&quot;Score&quot;
+      (&quot;Math&quot; (&quot;School&quot; . 35) (&quot;Exam&quot; . 40))
+      (&quot;Literature&quot; (&quot;School&quot; . 50) (&quot;Exam&quot; . 30))))
+  ((&quot;Number&quot; . 7) (&quot;Name&quot; . &quot;Anne&quot;) (&quot;Gender&quot; . &quot;female&quot;) (&quot;Age&quot; . 18)
+    (&quot;Father&quot;
+      (&quot;Number&quot; . 8)
+      (&quot;Name&quot; . &quot;Alex&quot;)
+      (&quot;Age&quot; . 40)
+      (&quot;Revenue&quot; . 200000))
+    (&quot;Mother&quot;
+      (&quot;Number&quot; . 9)
+      (&quot;Name&quot; . &quot;Sicie&quot;)
+      (&quot;Age&quot; . 43)
+      (&quot;Revenue&quot; . 50000))
+    (&quot;Revenue&quot; . 120000)
+    (&quot;Score&quot;
+      (&quot;Math&quot; (&quot;School&quot; . 40) (&quot;Exam&quot; . 40))
+      (&quot;Literature&quot; (&quot;School&quot; . 30) (&quot;Exam&quot; . 40)))))</code></pre>
+<p>The <code>json</code> library also includes the following procedures for working with JSON data: <code>json-drop</code>, <code>json-push</code>, and <code>json-reduce</code>. See the <a href="https://guenchi.github.io/json/">documentation</a> for more information on these procedures.</p>
+<p>All of the examples have involved reading JSON from strings and displaying JSON in the REPL. The following procedures can be used to read and write JSON files.</p>
+<pre><code>;; modified from http://rosettacode.org/wiki/Read_entire_file#Scheme
+(define (file-&gt;string path)
+  (with-input-from-file path
+    (lambda ()
+      (let loop ((char (read-char))
+                 (result &#39;()))
+        (cond [(eof-object? char)
+               (list-&gt;string (reverse result))]
+              [(member char (list #\newline #\return))
+               (loop (read-char) result)]
+              [else
+               (loop (read-char) (cons char result))])))))
+
+(define (read-json path)
+  (string-&gt;json (file-&gt;string path)))
+  
+(define (write-json obj path)
+  (call-with-output-file path
+    (lambda (output-port)
+      (display (json-&gt;string obj) output-port))))</code></pre>
+</div>

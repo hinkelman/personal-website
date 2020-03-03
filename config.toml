@@ -13,7 +13,7 @@ baseurl = "https://www.travishinkelman.com/"
 
 # Enter a copyright notice to display in the site footer.
 # To display a copyright symbol, type `&copy;`.
-copyright = "&copy; 2018-2019 Travis Hinkelman"
+copyright = "&copy; 2018-2020 Travis Hinkelman"
 
 # Enable analytics by entering your Google Analytics tracking ID
 googleAnalytics = "UA-129874255-1"
