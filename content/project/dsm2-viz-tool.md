@@ -24,6 +24,7 @@ DSM2 produces output in two file formats: [HEC-DSS](http://www.hec.usace.army.mi
 * [shinyWidgets](https://dreamrs.github.io/shinyWidgets/index.html)
 * [shinyFiles](https://github.com/thomasp85/shinyFiles)
 * [shinyjs](https://deanattali.com/shinyjs/)
+* [shinybusy](https://dreamrs.github.io/shinybusy/)
 * [leaflet](https://rstudio.github.io/leaflet/)
 * [DT](https://rstudio.github.io/DT/)
 * [rhdf5](https://www.bioconductor.org/packages/release/bioc/html/rhdf5.html)
@@ -38,3 +39,4 @@ DSM2 produces output in two file formats: [HEC-DSS](http://www.hec.usace.army.mi
 * [Cairo](https://cran.r-project.org/web/packages/Cairo/index.html)
 * [fs](https://fs.r-lib.org)
 * [MESS](https://github.com/ekstroem/MESS)
+
