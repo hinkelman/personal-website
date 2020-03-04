@@ -28,9 +28,9 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]  # Warning from
 	github = "https://github.com/hinkelman"
   twitter = "https://twitter.com/travishinkelman"
 	linkedin = "https://www.linkedin.com/in/travis-hinkelman-36604955/"
-	orcid = "https://orcid.org/0000-0002-8157-8407"
-	google-scholar = "https://scholar.google.com/citations?user=_Bb54NMAAAAJ&hl=en"
-	impactstory = "https://profiles.impactstory.org/u/0000-0002-8157-8407"
+#	orcid = "https://orcid.org/0000-0002-8157-8407"
+#	google-scholar = "https://scholar.google.com/citations?user=_Bb54NMAAAAJ&hl=en"
+#	impactstory = "https://profiles.impactstory.org/u/0000-0002-8157-8407"
 
 
 # Add your Disqus shortname here.
