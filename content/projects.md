@@ -6,28 +6,19 @@ type: section
 
 ## Chez Scheme Libraries
 
-#### [chez-stats](https://github.com/hinkelman/chez-stats)
+### [chez-stats](https://github.com/hinkelman/chez-stats)
 
-Read/write CSV files, compute descriptive statistics, and generate random variates in Chez Scheme.
+Read/write CSV files, compute descriptive statistics, and generate random variates in Chez Scheme. ([related blog posts](/categories/chez-stats/))
 
-Related blog posts:  
-[Writing a Chez Scheme library](/post/writing-chez-scheme-library/)  
-[Reading and writing CSV files in Chez Scheme](/post/reading-writing-csv-files-chez-scheme/)  
-[chez-stats is now available through Raven](/post/chez-stats-now-available-through-raven/)
+### [chez-docs](https://github.com/hinkelman/chez-docs)
 
-#### [chez-docs](https://github.com/hinkelman/chez-docs)
-
-Access Chez Scheme documentation from the REPL. 
-
-Related blog posts:  
-[Access Chez Scheme documentation from the REPL](/post/access-chez-scheme-documentation-from-repl/)  
-[Adding string matching to chez-docs](/post/adding-string-matching-to-chez-docs/)
+Access Chez Scheme documentation from the REPL. ([related blog posts](/categories/chez-docs/))
 
 ----
 
 ## R Packages
 
-#### [CDECRetrieveGUI](https://github.com/fishsciences/CDECRetrieveGUI)
+### [CDECRetrieveGUI](https://github.com/fishsciences/CDECRetrieveGUI)
 
 A map-based interface to the [CDECRetrieve package](https://github.com/FlowWest/CDECRetrieve). The goal of this [Shiny Gadget](https://shiny.rstudio.com/articles/gadgets.html) is to aid discovery of [CDEC](http://cdec.water.ca.gov) gaging stations, sensors available at each station, and dates of availability.
 
@@ -35,10 +26,10 @@ A map-based interface to the [CDECRetrieve package](https://github.com/FlowWest/
 
 ## Shiny Apps
 
-#### [Shiny Scorekeeper](/project/shiny-scorekeeper)
+### [Shiny Scorekeeper](/project/shiny-scorekeeper)
 
 A basketball scorekeeper app taken on as a hobby project and learning exercise.
 
-#### [DSM2 HYDRO Visualization Tool](/project/dsm2-viz-tool)
+### [DSM2 HYDRO Visualization Tool](/project/dsm2-viz-tool)
 
 A tool for visualizing [DSM2](http://baydeltaoffice.water.ca.gov/modeling/deltamodeling/models/dsm2/dsm2.cfm) HYDRO output (HDF5 files) distributed as a desktop application with [Electron](https://electronjs.org/) using the [R Shiny Electron template](https://github.com/dirkschumacher/r-shiny-electron).
