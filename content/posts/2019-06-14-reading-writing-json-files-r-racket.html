@@ -7,6 +7,7 @@ categories:
   - R
   - Racket
 tags:
+  - JSON
   - data-structures
   - dataframe
   - hashtable
@@ -18,7 +19,7 @@ tags:
 
 
 
-<p>In learning about <a href="/post/reading-csv-files-in-r-and-racket/">reading CSV files in Racket</a>, I have started to reconsider whether storing small(ish) datasets in CSV files is the best default behavior.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> My default was set by primarily working in R, where reading and writing CSV files plays a central role in data analysis. When working solely in R, I expect that my old habits will die hard and CSV files will continue to play a prominent role. However, when passing small(ish) data between R and Racket, I think JSON might be a better alternative.</p>
+<p>In learning about <a href="/post/reading-csv-files-in-r-and-racket/">reading CSV files in Racket</a>, I have started to reconsider whether storing small(ish) datasets in CSV files is the best default behavior.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> My default was set by primarily working in R, where reading and writing CSV files plays a central role in data analysis. When working solely in R, I expect that my old habits will die hard and CSV files will continue to play a prominent role. However, when passing small(ish) data between R and Racket, I think JSON might be a better alternative.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
 <p>Before we jump into a bunch of code examples, let’s define some wrapper functions to make the subsequent code a bit more concise. In R, we are using the <a href="https://github.com/jeroen/jsonlite"><code>jsonlite</code> package</a> and a little function to write the JSON object to file.</p>
 <pre><code>library(jsonlite)
 
@@ -156,7 +157,7 @@ $B$Five
 
 $B$Six
 [1] 6</code></pre>
-<p>Racket reads the nested list as a nested hash table<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> rather than a list of hash tables as with the data frame. As with reading the data frame above, the keys are listed in alphabetical order.</p>
+<p>Racket reads the nested list as a nested hash table<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> rather than a list of hash tables as with the data frame. As with reading the data frame above, the keys are listed in alphabetical order.</p>
 <pre><code>&gt; (read-json-wrapper &quot;R_list.json&quot;)
 &#39;#hasheq((A . #hasheq((One . (1)) (Three . (3)) (Two . (2))))
          (B . #hasheq((Five . (5)) (Four . (4)) (Six . (6)))))</code></pre>
@@ -299,6 +300,7 @@ $B$F
 <hr />
 <ol>
 <li id="fn1"><p>I even used CSV files as a <a href="/post/dt-datatable-crud/">database replacement</a> in my <a href="/project/shiny-scorekeeper/">Shiny Scorekeeper app</a>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>See also <a href="/post/named-lists-hash-tables/">previous post</a> on the similarity of nested lists in R and nested hash tables in Racket.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>See also <a href="/posts/reading-and-writing-json-files-in-r-and-chez-scheme/">this post</a> for more on reading and writing JSON files.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>See also <a href="/post/named-lists-hash-tables/">previous post</a> on the similarity of nested lists in R and nested hash tables in Racket.<a href="#fnref3" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
