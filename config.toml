@@ -33,7 +33,7 @@ googleAnalytics = "UA-129874255-1"
   twitter = "https://twitter.com/travishinkelman"
 	linkedin = "https://www.linkedin.com/in/travis-hinkelman-36604955/"
 	orcid = "https://orcid.org/0000-0002-8157-8407"
-	google-scholar = "https://scholar.google.com/citations?user=_Bb54NMAAAAJ&hl=en"
+	googlescholar = "https://scholar.google.com/citations?user=_Bb54NMAAAAJ&hl=en"
 	impactstory = "https://profiles.impactstory.org/u/0000-0002-8157-8407"
 
 # Menu links along the sidebar navigation.
