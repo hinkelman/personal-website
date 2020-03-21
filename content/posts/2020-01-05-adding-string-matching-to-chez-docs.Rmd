@@ -73,22 +73,44 @@ This is the first time that I've used `do` loops in Scheme. In the example below
 
 ```
 (define (string-match s t)
-  (define (loop s-list t-sub)
-    (cond [(null? s-list) #t]
-          [(< (length t-sub) (length s-list)) #f]
-          [(char=? (car s-list) (car t-sub))
-           (loop (cdr s-list) (cdr t-sub))]
-          [else #f]))
-  (let* ([s-list-temp (string->list s)]
-         [starts-with? (char=? (car s-list-temp) #\^)]
-         [s-list (if starts-with? (cdr s-list-temp) s-list-temp)]
+  (let* ([s-list (string->list s)]
          [t-list (string->list t)])
-    (cond [(and starts-with? (not (char=? (car s-list) (car t-list)))) #f]
-          [(not (for-all (lambda (x) (member x t-list)) s-list)) #f]  
-          [else (loop s-list (member (car s-list) t-list))])))
+    (if (char=? (car s-list) #\^)
+        (string-match-helper (cdr s-list) t-list)
+        (not (for-all (lambda (x) (equal? x #f))
+                      (map (lambda (t-sub) (string-match-helper s-list t-sub))
+                           (potential-matches (car s-list) t-list)))))))
+
+;; loop through characters in search string
+;; to check if search string is found in target string
+(define (string-match-helper s-list t-list)
+  (cond [(not t-list) #f] 
+        [(null? s-list) #t]
+        [(< (length t-list) (length s-list)) #f]
+        [(char=? (car s-list) (car t-list))
+         (string-match-helper (cdr s-list) (cdr t-list))]
+        [else #f]))
+
+;; loop through target string
+;; to find all potential substring matches
+(define (potential-matches char t-list)
+  (define (loop t-list results)
+    (cond [(null? t-list)
+           (remove-duplicates (reverse results))]
+          [else
+           (loop (cdr t-list) (cons (member char t-list) results))]))
+  (loop t-list '()))
+  
+(define (remove-duplicates ls)
+  (cond [(null? ls)
+         '()]
+        [(member (car ls) (cdr ls))
+         (remove-duplicates (cdr ls))]
+        [else
+         (cons (car ls) (remove-duplicates (cdr ls)))]))
 ```
 
-`member` is the workhorse of `string-match`. It's an interesting turn for me because when I first started using `member` in my Scheme code I was puzzled by why it didn't work like `%in%` in R. For example, `(member 2 '(1 2 3))` returns `(2 3)`, but `2 %in% c(1, 2, 3)` returns `TRUE`. Because all values other than `#f` count as `#t` in Scheme, `member` can be used as a predicate, e.g., `(if (member 2 '(1 2 3)) 1 0)` returns `1`. Nonetheless, it wasn't obvious to me how `member`'s behavior was useful...until I started writing `string-match`. Those experiences make programming fun.
+`member` is the workhorse of `string-match` (via `potential-matches`). It's an interesting turn for me because when I first started using `member` in my Scheme code I was puzzled by why it didn't work like `%in%` in R. For example, `(member 2 '(1 2 3))` returns `(2 3)`, but `2 %in% c(1, 2, 3)` returns `TRUE`. Because all values other than `#f` count as `#t` in Scheme, `member` can be used as a predicate, e.g., `(if (member 2 '(1 2 3)) 1 0)` returns `1`. Nonetheless, it wasn't obvious to me how `member`'s behavior was useful...until I started writing `string-match`. Those experiences make programming fun.
 
 `string-match` returns a boolean value.
 
@@ -169,7 +191,7 @@ The `^` indicates that only search strings found at the start of the procedure s
 ("file-access-time" "file-buffer-size" "file-change-time")
 
 > (find-proc "let" 5)
-("delete-directory" "delete-file" "let*" "let*-values" "let-syntax")
+("delete-directory" "delete-file" "eq-hashtable-delete!" "fluid-let" "fluid-let-syntax")
 > (find-proc "^let")
 ("let*" "let*-values" "let-syntax" "let-values" "letrec" "letrec*" "letrec-syntax")
 ```
