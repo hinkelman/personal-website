@@ -16,7 +16,7 @@ Access Chez Scheme documentation from the REPL. ([related blog posts](/categorie
 
 ### [dataframe](https://hinkelman.github.io/dataframe/)
 
-A dataframe record type for Chez Scheme with procedures to select, drop, and rename columns, and filter, sort, split, append, modify, and aggregate dataframes.
+A dataframe record type for Chez Scheme with procedures to select, drop, and rename columns, and filter, sort, split, append, modify, and aggregate dataframes. ([related blog posts](/categories/dataframe/))
 
 ----
 
