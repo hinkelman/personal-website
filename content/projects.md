@@ -18,6 +18,10 @@ Access Chez Scheme documentation from the REPL. ([related blog posts](/categorie
 
 A dataframe record type for Chez Scheme with procedures to select, drop, and rename columns, and filter, sort, split, append, modify, and aggregate dataframes. ([related blog posts](/categories/dataframe/))
 
+### [gnuplot-pipe](https://hinkelman.github.io/gnuplot-pipe/)
+
+Port of [gnuplot-pipe](https://gitlab.com/montanari/gnuplot-pipe/) [egg](http://wiki.call-cc.org/eggref/5/gnuplot-pipe) for Chicken Scheme to Chez Scheme.
+
 ----
 
 ## R Packages
