@@ -83,7 +83,7 @@ With `dplyr::select`, columns can be renamed during selection, but `dplyr::renam
   ((a 1 2 3) (Bee 4 5 6) (Sea 7 8 9)) (a Bee Sea) (3 . 3)]
 ```
 
-To rename all of the columns, then `dataframe-rename-all` allows for specifying all new names as a list rather than `(old-name new-name)` pairs. 
+When renaming all of the columns, `dataframe-rename-all` allows for specifying all new names as a list rather than `(old-name new-name)` pairs. 
 
 ```
 > (dataframe-rename-all df '(A B C))
