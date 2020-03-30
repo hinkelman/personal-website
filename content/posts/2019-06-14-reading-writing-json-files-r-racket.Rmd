@@ -49,7 +49,7 @@ In Racket, we are using the [`json` module](https://docs.racket-lang.org/json/in
 
 #### Data Frame
 
-The data frame is the central data structure in R, which corresponds well to flat, delimited text files (in contrast to JSON). In this code chunk, we use the same [example CSV file](/post/example-data/example.csv) as in the [CSV reading post](/post/reading-csv-files-in-r-and-racket/). 
+The data frame is the central data structure in R, which corresponds well to flat, delimited text files (in contrast to JSON). In this code chunk, we use the same [example CSV file](/data/example.csv) as in the [CSV reading post](/post/reading-csv-files-in-r-and-racket/). 
 
 ```
 > write_json(head(read.csv("example.csv")), "R_dataframe.json")

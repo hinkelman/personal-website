@@ -28,7 +28,7 @@ close(pb)
 
 In this code, we initialize a progress bar and assign it to `pb`. As the loop progresses, updates are sent to the progress bar that change the value and label of the progress bar. When the loop is complete, the progress bar is closed. On macOS^[[XQuartz](https://www.xquartz.org) is required to display the widget on macOS.], the progress bar looks like this:
 
-![](/post/progress/progress_r.png)
+<img src="/img/progress-r.png" width="50%"/>
 
 In Racket, we can build a progress bar widget using the [GUI toolkit](https://docs.racket-lang.org/gui/).^[For more on building GUI's in Racket, see also [Alex Harsányi's blog](https://alex-hhh.github.io/index.html).] In my first try, I was able to write code (not shown here) to create the progress bar, but I struggled to see how to make it easily reusable. As usual, I reached out to the [Racket mailing list](https://groups.google.com/forum/#!topic/racket-users/qKijYKGdo4U). After some gentle nudging from the mailing list, I realized that it was straightforward to return a GUI object from a function (also not shown here but see mailing list link). However, another mailing list member provided an alternative implementation based on defining a new class, which I think is the more natural way to approach this task.
 
@@ -80,4 +80,4 @@ The `progress-bar%` class includes a single method, `set-value`, for updating bo
 
 A [`frame%`](https://docs.racket-lang.org/gui/frame_.html?q=set-label) is defined as a top-level container for `progress`. The `frame` is shown or hidden by sending `#t` or `#f`, respectively, with the `show` method. As in R, the value of the progress bar and label is updated on each iteration. On macOS, the progress bar looks like this:
 
-![](/post/progress/progress_racket.png)
+<img src="/img/progress-racket.png" width="50%"/>

@@ -12,7 +12,7 @@ tags:
   - list
 ---
 
-In a [previous post](/post/data-serialization-in-r-and-racket/), I wrote about reading and writing data to file while retaining the structure and attributes of the data (i.e., data serialization). However, I more commonly pass data around as text files (usually, CSV files). For this post, I created an [example CSV file](/post/example-data/example.csv) with a [tool for generating test data](http://convertcsv.com/generate-test-data.htm), which allows for including different data types (e.g., dates, integers, names, phone numbers) in the output file.
+In a [previous post](/post/data-serialization-in-r-and-racket/), I wrote about reading and writing data to file while retaining the structure and attributes of the data (i.e., data serialization). However, I more commonly pass data around as text files (usually, CSV files). For this post, I created an [example CSV file](/data/example.csv) with a [tool for generating test data](http://convertcsv.com/generate-test-data.htm), which allows for including different data types (e.g., dates, integers, names, phone numbers) in the output file.
 
 ### R
 
@@ -81,7 +81,7 @@ Classes ‘spec_tbl_df’, ‘tbl_df’, ‘tbl’ and 'data.frame':	25 obs. of 
 
 `readr` flexibly parses many data types. In our example file, `readr` converts the `bool` column of `"true"` and `"false"` to R's logical type represented as `TRUE` and `FALSE`. `readr` is also capable of automatically parsing dates, but, apparently, not when the dates are in the `mm/dd/yyyy` format.^[`readr` correctly parses dates stored as strings in the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601).] Interestingly, `readr` parses the `integer` column in this example file as a `double` rather than `integer`, perhaps because the integer values are so large.
 
-If you are dealing with large datasets with slow read times, [`fread`](https://www.rdocumentation.org/packages/data.table/versions/1.12.2/topics/fread) from the [`data.table` package](http://r-datatable.com) and the [`vroom` package](http://vroom.r-lib.org) provide fast reading of delimited files. Jim Hester, maintainer of both the `readr` and `vroom` packages, made a [helpful video](https://www.youtube.com/watch?v=ZP_y5eaAc60) comparing the performance of the `readr`, `vroom`, and `data.table` packages on a variety of tasks related to reading delimited files.
+If you are dealing with large datasets with slow read times, [`fread`](https://www.rdocumentation.org/packages/data.table/versions/1.12.2/topics/fread) from the [`data.table` package](https://rdatatable.gitlab.io/data.table/) and the [`vroom` package](http://vroom.r-lib.org) provide fast reading of delimited files. Jim Hester, maintainer of both the `readr` and `vroom` packages, made a [helpful video](https://www.youtube.com/watch?v=ZP_y5eaAc60) comparing the performance of the `readr`, `vroom`, and `data.table` packages on a variety of tasks related to reading delimited files.
 
 ### Racket 
 

@@ -25,7 +25,7 @@ for(i in 1:100) {
 }
 close(pb)</code></pre>
 <p>In this code, we initialize a progress bar and assign it to <code>pb</code>. As the loop progresses, updates are sent to the progress bar that change the value and label of the progress bar. When the loop is complete, the progress bar is closed. On macOS<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, the progress bar looks like this:</p>
-<p><img src="/post/progress/progress_r.png" /></p>
+<p><img src="/img/progress-r.png" width="50%"/></p>
 <p>In Racket, we can build a progress bar widget using the <a href="https://docs.racket-lang.org/gui/">GUI toolkit</a>.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> In my first try, I was able to write code (not shown here) to create the progress bar, but I struggled to see how to make it easily reusable. As usual, I reached out to the <a href="https://groups.google.com/forum/#!topic/racket-users/qKijYKGdo4U">Racket mailing list</a>. After some gentle nudging from the mailing list, I realized that it was straightforward to return a GUI object from a function (also not shown here but see mailing list link). However, another mailing list member provided an alternative implementation based on defining a new class, which I think is the more natural way to approach this task.</p>
 <pre><code>#lang racket/gui
 
@@ -66,7 +66,7 @@ close(pb)</code></pre>
   (send progress set-value i))
 (send frame show #f)</code></pre>
 <p>A <a href="https://docs.racket-lang.org/gui/frame_.html?q=set-label"><code>frame%</code></a> is defined as a top-level container for <code>progress</code>. The <code>frame</code> is shown or hidden by sending <code>#t</code> or <code>#f</code>, respectively, with the <code>show</code> method. As in R, the value of the progress bar and label is updated on each iteration. On macOS, the progress bar looks like this:</p>
-<p><img src="/post/progress/progress_racket.png" /></p>
+<p><img src="/img/progress-racket.png" width="50%"/></p>
 <div class="footnotes">
 <hr />
 <ol>

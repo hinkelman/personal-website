@@ -42,7 +42,7 @@ write_json &lt;- function(object, filename){
 <h3>R Data Structures</h3>
 <div id="data-frame" class="section level4">
 <h4>Data Frame</h4>
-<p>The data frame is the central data structure in R, which corresponds well to flat, delimited text files (in contrast to JSON). In this code chunk, we use the same <a href="/post/example-data/example.csv">example CSV file</a> as in the <a href="/post/reading-csv-files-in-r-and-racket/">CSV reading post</a>.</p>
+<p>The data frame is the central data structure in R, which corresponds well to flat, delimited text files (in contrast to JSON). In this code chunk, we use the same <a href="/data/example.csv">example CSV file</a> as in the <a href="/post/reading-csv-files-in-r-and-racket/">CSV reading post</a>.</p>
 <pre><code>&gt; write_json(head(read.csv(&quot;example.csv&quot;)), &quot;R_dataframe.json&quot;)
 &gt; fromJSON(&quot;R_dataframe.json&quot;)
         date integer         float  bool char      word yn
