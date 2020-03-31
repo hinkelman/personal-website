@@ -13,6 +13,10 @@
   to = "/posts/generating-random-numbers-r-racket/"
   
 [[redirects]]
+  from = "/posts/selecting-dropping-renaming-dataframe-columns-chez-scheme/""
+  to = "/posts/select-drop-rename-dataframe-columns-chez-scheme/""
+  
+[[redirects]]
   from = "/post/*"
   to = "/posts/:splat"
   force = true

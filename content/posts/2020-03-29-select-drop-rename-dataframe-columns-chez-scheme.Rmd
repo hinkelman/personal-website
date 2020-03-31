@@ -1,8 +1,8 @@
 ---
-title: Selecting, dropping, and renaming dataframe columns in Chez Scheme
+title: Select, drop, and rename dataframe columns in Chez Scheme
 author: Travis Hinkelman
 date: '2020-03-29'
-slug: selecting-dropping-renaming-dataframe-columns-chez-scheme
+slug: select-drop-rename-dataframe-columns-chez-scheme
 categories:
   - dataframe
   - ChezScheme
@@ -92,3 +92,5 @@ When renaming all of the columns, `dataframe-rename-all` allows for specifying a
 ```
 
 I haven't included any code showing how the procedures from the `dataframe` library are implemented becuse they are so simple. They are simple because they don't do much. For example, `dplyr::select` includes functionality that requires three procedures: `dataframe-select`, `dataframe-drop`, and `dataframe-rename`. However, with simple Scheme code, I was able to implement procedures that cover cases representing 90% of *my* usage of `dplyr::select` and `dplyr::rename`.
+
+In the next post, I will show how to split, bind, and append dataframes. 

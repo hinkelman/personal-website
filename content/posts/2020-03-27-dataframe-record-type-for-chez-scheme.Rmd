@@ -13,7 +13,7 @@ tags:
 draft: no
 ---
 
-As an exercise in my Chez Scheme learning journey, I have implemented a [dataframe record type](https://hinkelman.github.io/dataframe/) and procedures to work with the dataframe record type. In this post, I will introduce the dataframe record type and basic procedures for working with dataframes. In subsequent posts, I will describe other dataframe procedures, e.g., filter, sort, aggregate, etc.
+As an exercise in my Chez Scheme learning journey, I have implemented a [dataframe record type](https://hinkelman.github.io/dataframe/) and procedures to work with the dataframe record type. Dataframes are column-oriented, tabular data structures useful for data analysis found in several languages including [R](https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html), [Python](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html), [Julia](https://juliadata.github.io/DataFrames.jl/stable/), and [Go](https://github.com/rocketlaunchr/dataframe-go). In this post, I will introduce the dataframe record type and basic procedures for working with dataframes. In subsequent posts, I will describe other dataframe procedures, e.g., filter, sort, aggregate, etc.
 
 A key design decision was to opt for an immutable data structure. Thus, dataframes are based on association lists (alists) rather than hashtables. I find it easier to reason about immutable data and thought the performance trade-off was worth it for this excercise. Here are the properties of a dataframe:
 
@@ -93,7 +93,7 @@ In R, I frequently use `head` to preview the first few rows of a dataframe and, 
 
 `dataframe-head-tail` illustrates a common pattern in the `dataframe` library: extracting the alist, breaking the alist into sublists, working on the sublists, and then rebuilding the alist and dataframe. In the case of `dataframe-head` and `dataframe-tail`, the core logic is so simple that most of the code involves checking inputs. 
 
-### Tranpose
+### Transpose
 
 Dataframes are a column-oriented data structure. However, the more natural pattern when [reading and writing CSV files](/posts/reading-writing-csv-files-chez-scheme/) is to use a row-oriented list, which I'm calling a `rowtable`. `dataframe->rowtable` and `rowtable->dataframe` allow for switching between row and column orientation.   
 
@@ -170,4 +170,4 @@ If you are working exclusively with dataframes, you can read and write them dire
 #[#{dataframe blgxd6z9um6m4hqkq6eorahbs-3} ((adult 1 3 5) (juv 10 30 50)) (adult juv) (3 . 2)]
 ```
 
-In the [next post](/posts/selecting-dropping-renaming-dataframe-columns-chez-scheme/), I will show how to select, drop, and rename columns. 
+In the [next post](/posts/select-drop-rename-dataframe-columns-chez-scheme/), I will show how to select, drop, and rename columns. 
