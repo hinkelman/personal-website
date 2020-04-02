@@ -35,7 +35,7 @@ So far, so good. Nothing tricky about installing Chez Scheme.
 
 ### REPL
 
-To launch the Chez [REPL](https://en.wikipedia.org/wiki/Read–eval–print_loop) on macOS, open Terminal and type `chez`.^[You can also type `petite` to launch Petite Chez Scheme. See [here](https://cisco.github.io/ChezScheme/csug9.5/use.html) for more information on the differences between Chez Scheme and Petite Chez Scheme.] On Windows, 3 Chez programs were installed (64-bit threaded and 32-bit threaded and unthreaded). Open any of those programs to get a Chez REPL.
+To launch the Chez [REPL](https://en.wikipedia.org/wiki/Read–eval–print_loop) on macOS, open Terminal and type `chez`.^[You can also type `petite` to launch Petite Chez Scheme. See [here](https://cisco.github.io/ChezScheme/csug9.5/use.html) for more information on the differences between Chez Scheme and Petite Chez Scheme.] On Windows, four Chez programs were installed (32- or 64-bit threaded and unthreaded). Open any of those programs to get a Chez REPL.^[Alternatively, add one of the four versions of Chez Scheme to the Windows path environment variable by typing `env` in the search box in the task bar and then opening the program to `Edit the system environment variables`. Then click the `Environment Variables` button. Select the row for `Path` and then click on the `Edit...` button. Then click the `New` button and add the path. For the 64-bit threaded version, use `C:\Program Files\Chez Scheme 9.5\bin\ta6nt`. Now, you can launch Chez Scheme from the command prompt with `start scheme` and run Scheme programs with `start scheme path\to\myschemefile.ss`.]  
 
 Test the REPL with simple expression.
 
@@ -206,7 +206,7 @@ C:\Program Files\Chez Scheme 9.5\bin\ta6nt\scheme
 
 Click `Apply and Save`. Click the `Geiser` link next to `Parent groups:` Click on `Geiser Implementation` and change the default implementation to `chez`. Click `Apply and Save`. Restart Emacs.
   
-The Chez REPL is launched through Emacs with `M-x` followed by `run-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>.^[Because my MacBook doesn't have a physical <kbd>ESC</kbd>, I prefer `C-[` as an alternative to <kbd>ESC</kbd> and, thus, navigate among previously entered expressions with `C-[` `p` and `C-[` `n`.] Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
+The Chez REPL is launched through Emacs with `M-x` followed by `run-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>.^[Because my MacBook doesn't have a physical <kbd>ESC</kbd>, I prefer `C-[` as an alternative to <kbd>ESC</kbd> and, thus, navigate among previously entered expressions with `C-[` `p` and `C-[` `n`. Alternatively, you could use [<kbd>CAPS LOCK</kbd> as <kbd>ESC</kbd>](https://stackoverflow.com/a/40254864).] Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
 
 ### Library Directory
 

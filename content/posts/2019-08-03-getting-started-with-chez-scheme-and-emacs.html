@@ -30,7 +30,7 @@ tags:
 </div>
 <div id="repl" class="section level3">
 <h3>REPL</h3>
-<p>To launch the Chez <a href="https://en.wikipedia.org/wiki/Read–eval–print_loop">REPL</a> on macOS, open Terminal and type <code>chez</code>.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> On Windows, 3 Chez programs were installed (64-bit threaded and 32-bit threaded and unthreaded). Open any of those programs to get a Chez REPL.</p>
+<p>To launch the Chez <a href="https://en.wikipedia.org/wiki/Read–eval–print_loop">REPL</a> on macOS, open Terminal and type <code>chez</code>.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> On Windows, four Chez programs were installed (32- or 64-bit threaded and unthreaded). Open any of those programs to get a Chez REPL.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
 <p>Test the REPL with simple expression.</p>
 <pre><code>&gt; (+ 100 10 1)
 111</code></pre>
@@ -50,7 +50,7 @@ tags:
 </div>
 <div id="library-directory" class="section level3">
 <h3>Library Directory</h3>
-<p>Chez does not come with a package manager, but there are 3rd-party options, e.g., <a href="http://ravensc.com">Raven</a><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> and <a href="https://akkuscm.org">Akku</a>. In this post, though, I will describe manual package management.</p>
+<p>Chez does not come with a package manager, but there are 3rd-party options, e.g., <a href="http://ravensc.com">Raven</a><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> and <a href="https://akkuscm.org">Akku</a>. In this post, though, I will describe manual package management.</p>
 <p><code>library-directories</code> returns the directories where Chez looks for libraries.</p>
 <pre><code>&gt; (library-directories)
 ((&quot;.&quot; . &quot;.&quot;))</code></pre>
@@ -67,7 +67,7 @@ tags:
 ((&quot;.chezscheme.sls&quot; . &quot;.chezscheme.so&quot;) (&quot;.ss&quot; . &quot;.so&quot;)
   (&quot;.sls&quot; . &quot;.so&quot;) (&quot;.scm&quot; . &quot;.so&quot;) (&quot;.sch&quot; . &quot;.so&quot;))</code></pre>
 <p>These are the file extensions that Chez uses when searching the library directories. The authors of Raven recommend the use of <code>.sc</code> so we need to stash that information, too.</p>
-<p>On macOS<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>, I edited <code>.bash_profile</code> to add information on library directories and extensions. From a Terminal window, open <code>.bash_profile</code> with the <a href="https://www.nano-editor.org">Nano text editor</a>.</p>
+<p>On macOS<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>, I edited <code>.bash_profile</code> to add information on library directories and extensions. From a Terminal window, open <code>.bash_profile</code> with the <a href="https://www.nano-editor.org">Nano text editor</a>.</p>
 <pre><code>$ nano .bash_profile</code></pre>
 <p>I added the following lines to my <code>.bash_profile</code>.</p>
 <pre><code>export CHEZSCHEMELIBDIRS=&quot;/Users/username/scheme/lib:&quot;
@@ -105,7 +105,7 @@ Type (debug) to enter the debugger.
 </div>
 <div id="basic-usage" class="section level3">
 <h3>Basic Usage</h3>
-<p>The power of Emacs is in the keyboard shortcuts and customization. I’m too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., <code>C-x</code> <code>C-f</code> corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with <code>M</code> as the shorthand. On my MacBook, the meta key is <kbd>option</kbd>. On Windows, the default meta key is <kbd>ALT</kbd>. Similar to <code>.bash_profile</code>, Emacs can be customized through commands saved in the <code>.emacs</code> file.<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a></p>
+<p>The power of Emacs is in the keyboard shortcuts and customization. I’m too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., <code>C-x</code> <code>C-f</code> corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with <code>M</code> as the shorthand. On my MacBook, the meta key is <kbd>option</kbd>. On Windows, the default meta key is <kbd>ALT</kbd>. Similar to <code>.bash_profile</code>, Emacs can be customized through commands saved in the <code>.emacs</code> file.<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a></p>
 </div>
 <div id="geiser" class="section level3">
 <h3>Geiser</h3>
@@ -128,7 +128,7 @@ Type (debug) to enter the debugger.
 <p>On Windows..</p>
 <pre><code>C:\Program Files\Chez Scheme 9.5\bin\ta6nt\scheme</code></pre>
 <p>Click <code>Apply and Save</code>. Click the <code>Geiser</code> link next to <code>Parent groups:</code> Click on <code>Geiser Implementation</code> and change the default implementation to <code>chez</code>. Click <code>Apply and Save</code>. Restart Emacs.</p>
-<p>The Chez REPL is launched through Emacs with <code>M-x</code> followed by <code>run-chez</code>. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>.<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a> Multi-line expressions, autocomplete, and syntax highlighting are also supported.</p>
+<p>The Chez REPL is launched through Emacs with <code>M-x</code> followed by <code>run-chez</code>. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>.<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a> Multi-line expressions, autocomplete, and syntax highlighting are also supported.</p>
 </div>
 <div id="library-directory-1" class="section level3">
 <h3>Library Directory</h3>
@@ -145,7 +145,7 @@ Type (debug) to enter the debugger.
 <pre><code>(add-to-list &#39;auto-mode-alist
              &#39;(&quot;\\.sls\\&#39;&quot; . scheme-mode)
              &#39;(&quot;\\.sc\\&#39;&quot; . scheme-mode))</code></pre>
-<p>UPDATE (2019-12-13): In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type <code>C-x</code> <code>C-e</code>.<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a> If the executed code displays any output, it will be shown in the minibuffer and not the REPL.<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a> To evaluate several s-expressions, highlight the region and type <code>C-c</code> <code>C-r</code>. To select an s-expression, place your cursor at the beginning of the s-expression and type <code>M-C-space</code> (where space is the space bar). I’ve done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I’m excited to recently discover this last one.</p>
+<p>UPDATE (2019-12-13): In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type <code>C-x</code> <code>C-e</code>.<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a> If the executed code displays any output, it will be shown in the minibuffer and not the REPL.<a href="#fn9" class="footnote-ref" id="fnref9"><sup>9</sup></a> To evaluate several s-expressions, highlight the region and type <code>C-c</code> <code>C-r</code>. To select an s-expression, place your cursor at the beginning of the s-expression and type <code>M-C-space</code> (where space is the space bar). I’ve done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I’m excited to recently discover this last one.</p>
 </div>
 </div>
 <div class="footnotes">
@@ -153,11 +153,12 @@ Type (debug) to enter the debugger.
 <ol>
 <li id="fn1"><p>My experience with Chez Scheme on Windows is limited to installation and set up as described in this post. But I’m under the impression that working with Chez Scheme on Windows involves more friction than on macOS or Linux.<a href="#fnref1" class="footnote-back">↩</a></p></li>
 <li id="fn2"><p>You can also type <code>petite</code> to launch Petite Chez Scheme. See <a href="https://cisco.github.io/ChezScheme/csug9.5/use.html">here</a> for more information on the differences between Chez Scheme and Petite Chez Scheme.<a href="#fnref2" class="footnote-back">↩</a></p></li>
-<li id="fn3"><p>I’ve written a bit more about using Raven in this <a href="/post/chez-stats-now-available-through-raven">blog post</a>.<a href="#fnref3" class="footnote-back">↩</a></p></li>
-<li id="fn4"><p>If you are using macOS Catalina, the default shell is Zsh, not Bash. You simply need to replace <code>.bash_profile</code> with <code>.zshenv</code> in the instructions in this post.<a href="#fnref4" class="footnote-back">↩</a></p></li>
-<li id="fn5"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref5" class="footnote-back">↩</a></p></li>
-<li id="fn6"><p>Because my MacBook doesn’t have a physical <kbd>ESC</kbd>, I prefer <code>C-[</code> as an alternative to <kbd>ESC</kbd> and, thus, navigate among previously entered expressions with <code>C-[</code> <code>p</code> and <code>C-[</code> <code>n</code>.<a href="#fnref6" class="footnote-back">↩</a></p></li>
-<li id="fn7"><p>If you are receiving the message, “No Geiser REPL for this buffer”, then Geiser is <a href="http://geiser.nongnu.org/geiser_4.html#The-source-and-the-REPL">struggling to figure out which Scheme implementation to use</a>. One solution is to delete all of the non-Chez implementations by choosing <code>Options/Customize Emacs/Specific Group...</code>, typing <code>geiser</code> at the prompt, selecting <code>Geiser Implementation</code>, and deleting all the non-Chez implementations under <code>Geiser Active Implementations</code>. Click <code>Apply and Save</code>. Restart Emacs.<a href="#fnref7" class="footnote-back">↩</a></p></li>
-<li id="fn8"><p>If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).<a href="#fnref8" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>Alternatively, add one of the four versions of Chez Scheme to the Windows path environment variable by typing <code>env</code> in the search box in the task bar and then opening the program to <code>Edit the system environment variables</code>. Then click the <code>Environment Variables</code> button. Select the row for <code>Path</code> and then click on the <code>Edit...</code> button. Then click the <code>New</code> button and add the path. For the 64-bit threaded version, use <code>C:\Program Files\Chez Scheme 9.5\bin\ta6nt</code>. Now, you can launch Chez Scheme from the command prompt with <code>start scheme</code> and run Scheme programs with <code>start scheme path\to\myschemefile.ss</code>.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>I’ve written a bit more about using Raven in this <a href="/post/chez-stats-now-available-through-raven">blog post</a>.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p>If you are using macOS Catalina, the default shell is Zsh, not Bash. You simply need to replace <code>.bash_profile</code> with <code>.zshenv</code> in the instructions in this post.<a href="#fnref5" class="footnote-back">↩</a></p></li>
+<li id="fn6"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref6" class="footnote-back">↩</a></p></li>
+<li id="fn7"><p>Because my MacBook doesn’t have a physical <kbd>ESC</kbd>, I prefer <code>C-[</code> as an alternative to <kbd>ESC</kbd> and, thus, navigate among previously entered expressions with <code>C-[</code> <code>p</code> and <code>C-[</code> <code>n</code>. Alternatively, you could use <a href="https://stackoverflow.com/a/40254864"><kbd>CAPS LOCK</kbd> as <kbd>ESC</kbd></a>.<a href="#fnref7" class="footnote-back">↩</a></p></li>
+<li id="fn8"><p>If you are receiving the message, “No Geiser REPL for this buffer”, then Geiser is <a href="http://geiser.nongnu.org/geiser_4.html#The-source-and-the-REPL">struggling to figure out which Scheme implementation to use</a>. One solution is to delete all of the non-Chez implementations by choosing <code>Options/Customize Emacs/Specific Group...</code>, typing <code>geiser</code> at the prompt, selecting <code>Geiser Implementation</code>, and deleting all the non-Chez implementations under <code>Geiser Active Implementations</code>. Click <code>Apply and Save</code>. Restart Emacs.<a href="#fnref8" class="footnote-back">↩</a></p></li>
+<li id="fn9"><p>If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).<a href="#fnref9" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
