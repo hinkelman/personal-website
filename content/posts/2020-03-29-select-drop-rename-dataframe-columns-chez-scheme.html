@@ -27,9 +27,8 @@ draft: no
 2 8 2
 3 9 3</code></pre>
 <p>With <code>dataframe-select</code>, we can also select and re-order columns in a single statement using symbols for column names.</p>
-<pre><code>&gt; (dataframe-select df &#39;c &#39;a)
-#[#{dataframe fkhb7ma1yxo7aszand7h2a9p4-3}
-  ((c 7 8 9) (a 1 2 3)) (c a) (3 . 2)]</code></pre>
+<pre><code>&gt; (dataframe-view (dataframe-select df &#39;c &#39;a))
+((c 7 8 9) (a 1 2 3))</code></pre>
 <p><code>dplyr::select</code> also allows for dropping columns by prefixing column names with <code>-</code>.</p>
 <pre><code>&gt; dplyr::select(df, -b)
   a c
@@ -37,9 +36,8 @@ draft: no
 2 2 8
 3 3 9</code></pre>
 <p>In <code>dataframe</code>, dropping columns requires a separate procedure, <code>dataframe-drop</code>.</p>
-<pre><code>&gt; (dataframe-drop df &#39;b)
-#[#{dataframe fkhb7ma1yxo7aszand7h2a9p4-3}
-  ((a 1 2 3) (c 7 8 9)) (a c) (3 . 2)]</code></pre>
+<pre><code>&gt; (dataframe-view (dataframe-drop df &#39;b))
+((a 1 2 3) (c 7 8 9))</code></pre>
 <p>With <code>dplyr::select</code>, columns can be renamed during selection, but <code>dplyr::rename</code> allows for renaming without selection.</p>
 <pre><code>&gt; dplyr::select(df, Bee = b, c)
   Bee c
@@ -53,12 +51,10 @@ draft: no
 2 2   5   8
 3 3   6   9</code></pre>
 <p><code>dataframe-select</code> does not allow for renaming during selection, but <code>dataframe-rename</code> works similarly to <code>dplyr::rename</code>. However, in the absence of the <code>=</code> syntax (where I think it is intutive for the new name to be on the left), I decided that it was more natural to write <code>'((old-name new-name))</code>.</p>
-<pre><code>&gt; (dataframe-rename df &#39;((b Bee) (c Sea)))
-#[#{dataframe fkhb7ma1yxo7aszand7h2a9p4-3}
-  ((a 1 2 3) (Bee 4 5 6) (Sea 7 8 9)) (a Bee Sea) (3 . 3)]</code></pre>
+<pre><code>&gt; (dataframe-view (dataframe-rename df &#39;((b Bee) (c Sea))))
+((a 1 2 3) (Bee 4 5 6) (Sea 7 8 9)) (a Bee Sea) (3 . 3)]</code></pre>
 <p>When renaming all of the columns, <code>dataframe-rename-all</code> allows for specifying all new names as a list rather than <code>(old-name new-name)</code> pairs.</p>
-<pre><code>&gt; (dataframe-rename-all df &#39;(A B C))
-#[#{dataframe fkhb7ma1yxo7aszand7h2a9p4-3}
-  ((A 1 2 3) (B 4 5 6) (C 7 8 9)) (A B C) (3 . 3)]</code></pre>
+<pre><code>&gt; (dataframe-view (dataframe-rename-all df &#39;(A B C)))
+((A 1 2 3) (B 4 5 6) (C 7 8 9)) (A B C) (3 . 3)]</code></pre>
 <p>I haven’t included any code showing how the procedures from the <code>dataframe</code> library are implemented becuse they are so simple. They are simple because they don’t do much. For example, <code>dplyr::select</code> includes functionality that requires three procedures: <code>dataframe-select</code>, <code>dataframe-drop</code>, and <code>dataframe-rename</code>. However, with simple Scheme code, I was able to implement procedures that cover cases representing 90% of <em>my</em> usage of <code>dplyr::select</code> and <code>dplyr::rename</code>.</p>
 <p>In the next post, I will show how to split, bind, and append dataframes.</p>

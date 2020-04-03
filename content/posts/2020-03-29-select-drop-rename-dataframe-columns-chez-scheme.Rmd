@@ -36,9 +36,8 @@ With `dplyr::select`, we can select and re-order columns in a single statement u
 With `dataframe-select`, we can also select and re-order columns in a single statement using symbols for column names.
 
 ```
-> (dataframe-select df 'c 'a)
-#[#{dataframe fkhb7ma1yxo7aszand7h2a9p4-3}
-  ((c 7 8 9) (a 1 2 3)) (c a) (3 . 2)]
+> (dataframe-view (dataframe-select df 'c 'a))
+((c 7 8 9) (a 1 2 3))
 ```
 
 `dplyr::select` also allows for dropping columns by prefixing column names with `-`.
@@ -54,9 +53,8 @@ With `dataframe-select`, we can also select and re-order columns in a single sta
 In `dataframe`, dropping columns requires a separate procedure, `dataframe-drop`.
 
 ```
-> (dataframe-drop df 'b)
-#[#{dataframe fkhb7ma1yxo7aszand7h2a9p4-3}
-  ((a 1 2 3) (c 7 8 9)) (a c) (3 . 2)]
+> (dataframe-view (dataframe-drop df 'b))
+((a 1 2 3) (c 7 8 9))
 ```
 
 With `dplyr::select`, columns can be renamed during selection, but `dplyr::rename` allows for renaming without selection.
@@ -78,17 +76,15 @@ With `dplyr::select`, columns can be renamed during selection, but `dplyr::renam
 `dataframe-select` does not allow for renaming during selection, but `dataframe-rename` works similarly to `dplyr::rename`. However, in the absence of the `=` syntax (where I think it is intutive for the new name to be on the left), I decided that it was more natural to write `'((old-name new-name))`. 
 
 ```
-> (dataframe-rename df '((b Bee) (c Sea)))
-#[#{dataframe fkhb7ma1yxo7aszand7h2a9p4-3}
-  ((a 1 2 3) (Bee 4 5 6) (Sea 7 8 9)) (a Bee Sea) (3 . 3)]
+> (dataframe-view (dataframe-rename df '((b Bee) (c Sea))))
+((a 1 2 3) (Bee 4 5 6) (Sea 7 8 9)) (a Bee Sea) (3 . 3)]
 ```
 
 When renaming all of the columns, `dataframe-rename-all` allows for specifying all new names as a list rather than `(old-name new-name)` pairs. 
 
 ```
-> (dataframe-rename-all df '(A B C))
-#[#{dataframe fkhb7ma1yxo7aszand7h2a9p4-3}
-  ((A 1 2 3) (B 4 5 6) (C 7 8 9)) (A B C) (3 . 3)]
+> (dataframe-view (dataframe-rename-all df '(A B C)))
+((A 1 2 3) (B 4 5 6) (C 7 8 9)) (A B C) (3 . 3)]
 ```
 
 I haven't included any code showing how the procedures from the `dataframe` library are implemented becuse they are so simple. They are simple because they don't do much. For example, `dplyr::select` includes functionality that requires three procedures: `dataframe-select`, `dataframe-drop`, and `dataframe-rename`. However, with simple Scheme code, I was able to implement procedures that cover cases representing 90% of *my* usage of `dplyr::select` and `dplyr::rename`.
