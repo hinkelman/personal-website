@@ -86,7 +86,7 @@ I'm using `append` to refer to a `cbind` operation in R.
 6   a   y   2   5    6
 ```
 
-In Chez Scheme, we bind dataframes wtih equal numbers of rows via `dataframe-append`.
+In Chez Scheme, we append dataframes with equal numbers of rows via `dataframe-append`.
 
 ```
 > (dataframe-view (dataframe-append df1 df2))
