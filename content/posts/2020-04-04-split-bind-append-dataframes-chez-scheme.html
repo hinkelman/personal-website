@@ -1,0 +1,224 @@
+---
+title: Split, bind, and append dataframes in Chez Scheme
+author: Travis Hinkelman
+date: '2020-04-04'
+slug: split-bind-append-dataframes-chez-scheme
+categories:
+  - ChezScheme
+  - dataframe
+tags:
+  - dataframe
+  - data-structures
+  - association-list
+  - replicate
+  - rep
+  - cbind
+  - dplyr
+  - bind_rows
+draft: no
+---
+
+
+
+<p>This post is the third in a <a href="/categories/dataframe/">series</a> on the <a href="https://hinkelman.github.io/dataframe/">dataframe library</a> for Chez Scheme. In this post, I will contrast the <code>dataframe</code> library with functions from base R and the <a href="https://dplyr.tidyverse.org"><code>dplyr</code> package</a> for splitting, binding, and appending columns.</p>
+<div id="set-up" class="section level3">
+<h3>Set up</h3>
+<p>First, let’s create a couple of dataframes in both languages.</p>
+<pre><code>df1 &lt;- data.frame(trt = rep(c(&quot;a&quot;, &quot;b&quot;), each = 6),
+                  grp = rep(rep(c(&quot;x&quot;, &quot;y&quot;), each = 3), times = 2),
+                  rsp = rep(1:4, each = 3))
+
+df2 &lt;- data.frame(asc = 0:11, desc = 11:0)
+                 
+(define df1
+  (make-dataframe
+   (list (cons &#39;trt (append (make-list 6 &quot;a&quot;) (make-list 6 &quot;b&quot;)))
+         (cons &#39;grp (append (make-list 3 &quot;x&quot;) (make-list 3 &quot;y&quot;)
+                            (make-list 3 &quot;x&quot;) (make-list 3 &quot;y&quot;)))
+         (cons &#39;rsp (append (make-list 3 1) (make-list 3 2)
+                            (make-list 3 3) (make-list 3 4))))))
+
+(define df2
+  (make-dataframe
+   (list (cons &#39;asc (iota 12))
+         (cons &#39;desc (reverse (iota 12))))))</code></pre>
+<p>I think the Scheme code for creating <code>df1</code> is clear, but I like the conciseness of the R code. I’m taking this post on a little detour to write a <code>replicate</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> procedure to replicate (pun intended) the functionality of <code>rep</code>.</p>
+<pre><code>(define (replicate ls n type)
+  (cond [(symbol=? type &#39;each)
+         (apply append (map (lambda (x) (make-list n x)) ls))]
+        [(symbol=? type &#39;times)
+         (replicate-times ls n)]
+        [else
+         (assertion-violation &quot;(replicate ls n type)&quot;
+                              &quot;type must be &#39;each or &#39;times&quot;)]))
+
+(define (replicate-times ls n)
+  (define (loop ls-out n)
+    (if (= n 1) ls-out (loop (append ls ls-out) (sub1 n))))
+  (loop ls n))
+
+(define df1
+  (make-dataframe
+   (list (cons &#39;trt (replicate &#39;(&quot;a&quot; &quot;b&quot;) 6 &#39;each))
+         (cons &#39;grp (replicate (replicate &#39;(&quot;x&quot; &quot;y&quot;) 3 &#39;each) 2 &#39;times))
+         (cons &#39;rsp (replicate &#39;(1 2 3 4) 3 &#39;each)))))</code></pre>
+<p>The <code>each</code> case was a simple <code>map</code>, but I couldn’t think of a way to use higher-order functions for the <code>times</code> case. Instead, I wrote a separate recursive procedure, <code>replicate-times</code>, to handle that case.</p>
+</div>
+<div id="append" class="section level3">
+<h3>Append</h3>
+<p>I’m using <code>append</code> to refer to a <code>cbind</code> operation in R.</p>
+<pre><code>&gt; head(cbind(df1, df2))
+  trt grp rsp asc desc
+1   a   x   1   0   11
+2   a   x   1   1   10
+3   a   x   1   2    9
+4   a   y   2   3    8
+5   a   y   2   4    7
+6   a   y   2   5    6</code></pre>
+<p>In Chez Scheme, we bind dataframes wtih equal numbers of rows via <code>dataframe-append</code>.</p>
+<pre><code>&gt; (dataframe-view (dataframe-append df1 df2))
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
+  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;)
+  (rsp 1 1 1 2 2 2 3 3 3 4)
+  (asc 0 1 2 3 4 5 6 7 8 9)
+  (desc 11 10 9 8 7 6 5 4 3 2))</code></pre>
+<p>I chose <code>dataframe-append</code> as the name because alists, which are at the heart of dataframes, are straightforwardly combined with <code>append</code> in Chez Scheme.</p>
+<pre><code>&gt; (append &#39;((a 1 2 3)) &#39;((b 4 5 6)))
+((a 1 2 3) (b 4 5 6))</code></pre>
+</div>
+<div id="split" class="section level3">
+<h3>Split</h3>
+<p><code>split</code> returns a named list of dataframes where the names are based on the column names defining the groups.</p>
+<pre><code>&gt; split(df1, list(df1$trt, df1$grp))
+$a.x
+  trt grp rsp
+1   a   x   1
+2   a   x   1
+3   a   x   1
+
+$b.x
+  trt grp rsp
+7   b   x   3
+8   b   x   3
+9   b   x   3
+
+$a.y
+  trt grp rsp
+4   a   y   2
+5   a   y   2
+6   a   y   2
+
+$b.y
+   trt grp rsp
+10   b   y   4
+11   b   y   4
+12   b   y   4</code></pre>
+<p><code>dataframe-split</code> returns a list of dataframes (displayed here as a list of alists for easier reading).</p>
+<pre><code>&gt; (map dataframe-view (dataframe-split df1 &#39;trt &#39;grp))
+(((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;) (rsp 1 1 1))
+  ((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;y&quot; &quot;y&quot; &quot;y&quot;) (rsp 2 2 2))
+  ((trt &quot;b&quot; &quot;b&quot; &quot;b&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;) (rsp 3 3 3))
+  ((trt &quot;b&quot; &quot;b&quot; &quot;b&quot;) (grp &quot;y&quot; &quot;y&quot; &quot;y&quot;) (rsp 4 4 4)))</code></pre>
+<div id="implementation" class="section level4">
+<h4>Implementation</h4>
+<p>The first step in <code>dataframe-split</code> is to find the unique values of the grouping columns.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
+<pre><code>&gt; (dataframe-view (dataframe-unique (dataframe-select df1 &#39;trt &#39;grp)))
+((trt &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot;) (grp &quot;x&quot; &quot;y&quot; &quot;x&quot; &quot;y&quot;))</code></pre>
+<p><code>dataframe-unique</code> involves transposing the alist to a row-based structure to remove duplicates and then transposing back to the column-based structure. This is another example of me choosing a straightforward solution over an efficient one.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<pre><code>(define (transpose ls) (apply map list ls))
+
+;; https://stackoverflow.com/questions/8382296/scheme-remove-duplicated-numbers-from-list
+(define (remove-duplicates ls)
+  (cond [(null? ls)
+         &#39;()]
+        [(member (car ls) (cdr ls))
+         (remove-duplicates (cdr ls))]
+        [else
+         (cons (car ls) (remove-duplicates (cdr ls)))]))
+         
+&gt; (remove-duplicates &#39;((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;)))
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;))
+
+&gt; (transpose &#39;((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;)))
+((trt grp) (&quot;a&quot; &quot;x&quot;) (&quot;a&quot; &quot;x&quot;) (&quot;a&quot; &quot;x&quot;))
+
+&gt; (remove-duplicates (cdr (transpose &#39;((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;)))))
+((&quot;a&quot; &quot;x&quot;))</code></pre>
+<p>Next, we loop through the rows of the unique groups and partition the dataframe.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> <code>dataframe-partition</code> returns two dataframes. The <code>keep</code> and <code>drop</code> dataframes contain the rows where the <code>filter-expr</code> is <code>#t</code> and <code>#f</code>, respectively. The <code>keep</code> dataframe becomes the first dataframe in the list of dataframes returned by <code>dataframe-split</code>. The algorithm continues looping through the rows of unique groups and partitions the <code>drop</code> dataframe in each subsequent iteration.</p>
+<pre><code>&gt; (define-values (keep drop)
+    (dataframe-partition
+     df1 (filter-expr (trt grp) (and (string=? trt &quot;a&quot;) (string=? grp &quot;x&quot;)))))
+&gt; (dataframe-view keep)
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;) (rsp 1 1 1))
+&gt; (dataframe-view drop)
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
+  (grp &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot;)
+  (rsp 2 2 2 3 3 3 4 4 4))</code></pre>
+</div>
+</div>
+<div id="bind" class="section level3">
+<h3>Bind</h3>
+<p>For binding by rows, we will use functions from <code>dplyr</code>. In the first example, all dataframes in the list have the same columns.</p>
+<pre><code>&gt; dplyr::bind_rows(split(df1, list(df1$trt, df1$grp)))
+   trt grp rsp
+1    a   x   1
+2    a   x   1
+3    a   x   1
+4    b   x   3
+5    b   x   3
+6    b   x   3
+7    a   y   2
+8    a   y   2
+9    a   y   2
+10   b   y   4
+11   b   y   4
+12   b   y   4</code></pre>
+<p><code>dataframe-bind</code> works similarly to <code>dplyr::bind_rows</code>, but we need to use <code>apply</code> to bust open the list of dataframes created by <code>dataframe-split</code>.</p>
+<pre><code>&gt; (dataframe-view (apply dataframe-bind (dataframe-split df1 &#39;trt &#39;grp)))
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
+  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;)
+  (rsp 1 1 1 2 2 2 3 3 3 4))</code></pre>
+<p>To show how to bind dataframes with different columns, let’s split up <code>df1</code>.</p>
+<pre><code>df_a &lt;- dplyr::filter(df1, trt == &quot;a&quot;)
+df_b &lt;- dplyr::filter(df1, trt == &quot;b&quot;)
+
+(define-values (df-a df-b)
+  (dataframe-partition df1 (filter-expr (trt) (string=? trt &quot;a&quot;))))</code></pre>
+<p><code>dplyr::bind_rows</code> fills missing columns with <code>NA</code>.</p>
+<pre><code>dplyr::bind_rows(df_a, df_b[,c(&quot;trt&quot;, &quot;grp&quot;)])
+   trt grp rsp
+1    a   x   1
+2    a   x   1
+3    a   x   1
+4    a   y   2
+5    a   y   2
+6    a   y   2
+7    b   x  NA
+8    b   x  NA
+9    b   x  NA
+10   b   y  NA
+11   b   y  NA
+12   b   y  NA</code></pre>
+<p>Because Chez Scheme doesn’t have explicit missing values, I created a separate procedure, <code>dataframe-bind-all</code>, for binding dataframes where missing columns are filled by the specified missing value.</p>
+<pre><code>&gt; (dataframe-view (dataframe-bind-all -999 df-a (dataframe-drop df-b &#39;rsp)))
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
+  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;)
+  (rsp 1 1 1 2 2 2 -999 -999 -999 -999))</code></pre>
+<p>In contrast, <code>datframe-bind</code> will drop all columns not shared acrossed the dataframes being bound.</p>
+<pre><code>&gt; (dataframe-view (dataframe-bind df-a (dataframe-drop df-b &#39;rsp)))
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
+  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;))</code></pre>
+</div>
+<div id="final-thoughts" class="section level3">
+<h3>Final thoughts</h3>
+<p>With the exception of <code>dataframe-split</code>, all of the procedures described in the first three posts in the <a href="/categories/dataframe/">dataframe series</a> involve straightforward composition of Scheme’s fundamental procedures (e.g., <code>map</code>, <code>apply</code>, <code>append</code>, <code>cons</code>, <code>car</code>, <code>cdr</code>, etc.) on Scheme’s core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., <code>filter-expr</code>) and familiarity/consistency with Chez Scheme’s standard library. In the next post, I will describe how to filter, partition, and sort dataframes in Chez Scheme.</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>In my Scheme code, I prefer more descriptive names and, thus, chose <code>replicate</code> over <code>rep</code>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>I’m illustrating the ideas with the user-facing <code>dataframe</code> procedures, but inside <code>dataframe-split</code>, and most <code>dataframe</code> procedures, are procedures that work directly on alists to avoid the overhead of unwrapping and rewrapping the alists as dataframes.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>This is not to say that I know a more efficient solution, but, rather, that I opted for a straightforward solution even though it contains the (significant?) overhead of transposing the list a couple of times.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p><code>dataframe-partition</code> will be covered in the next post of this series.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
