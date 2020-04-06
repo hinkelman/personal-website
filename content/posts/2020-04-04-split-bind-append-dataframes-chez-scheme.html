@@ -144,7 +144,7 @@ $b.y
 
 &gt; (remove-duplicates (cdr (transpose &#39;((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;)))))
 ((&quot;a&quot; &quot;x&quot;))</code></pre>
-<p>Next, we loop through the rows of the unique groups and partition the dataframe.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> <code>dataframe-partition</code> returns two dataframes. The <code>keep</code> and <code>drop</code> dataframes contain the rows where the <code>filter-expr</code> is <code>#t</code> and <code>#f</code>, respectively. The <code>keep</code> dataframe becomes the first dataframe in the list of dataframes returned by <code>dataframe-split</code>. The algorithm continues looping through the rows of unique groups and partitions the <code>drop</code> dataframe in each subsequent iteration.</p>
+<p>We loop through the rows of the unique groups and partition the dataframe.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> <code>dataframe-partition</code> returns two dataframes. The <code>keep</code> and <code>drop</code> dataframes contain the rows where the <code>filter-expr</code> is <code>#t</code> and <code>#f</code>, respectively.</p>
 <pre><code>&gt; (define-values (keep drop)
     (dataframe-partition
      df1 (filter-expr (trt grp) (and (string=? trt &quot;a&quot;) (string=? grp &quot;x&quot;)))))
@@ -154,6 +154,7 @@ $b.y
 ((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
   (grp &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot;)
   (rsp 2 2 2 3 3 3 4 4 4))</code></pre>
+<p>The <code>keep</code> dataframe becomes the first dataframe in the list of dataframes returned by <code>dataframe-split</code>. The algorithm continues looping through the rows of unique groups and partitions the <code>drop</code> dataframe in each subsequent iteration.</p>
 </div>
 </div>
 <div id="bind" class="section level3">
@@ -204,7 +205,7 @@ df_b &lt;- dplyr::filter(df1, trt == &quot;b&quot;)
 ((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
   (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;)
   (rsp 1 1 1 2 2 2 -999 -999 -999 -999))</code></pre>
-<p>In contrast, <code>datframe-bind</code> will drop all columns not shared acrossed the dataframes being bound.</p>
+<p>In contrast, <code>datframe-bind</code> will drop all columns not shared across the dataframes being bound.</p>
 <pre><code>&gt; (dataframe-view (dataframe-bind df-a (dataframe-drop df-b &#39;rsp)))
 ((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
   (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;))</code></pre>

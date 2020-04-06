@@ -178,9 +178,7 @@ The first step in `dataframe-split` is to find the unique values of the grouping
 (("a" "x"))
 ```
 
-
-
-Next, we loop through the rows of the unique groups and partition the dataframe.^[`dataframe-partition` will be covered in the next post of this series.] `dataframe-partition` returns two dataframes. The `keep` and `drop` dataframes contain the rows where the `filter-expr` is `#t` and `#f`, respectively. The `keep` dataframe becomes the first dataframe in the list of dataframes returned by `dataframe-split`. The algorithm continues looping through the rows of unique groups and partitions the `drop` dataframe in each subsequent iteration.  
+We loop through the rows of the unique groups and partition the dataframe.^[`dataframe-partition` will be covered in the next post of this series.] `dataframe-partition` returns two dataframes. The `keep` and `drop` dataframes contain the rows where the `filter-expr` is `#t` and `#f`, respectively. 
 
 ```
 > (define-values (keep drop)
@@ -193,6 +191,8 @@ Next, we loop through the rows of the unique groups and partition the dataframe.
   (grp "y" "y" "y" "x" "x" "x" "y" "y" "y")
   (rsp 2 2 2 3 3 3 4 4 4))
 ```
+
+The `keep` dataframe becomes the first dataframe in the list of dataframes returned by `dataframe-split`. The algorithm continues looping through the rows of unique groups and partitions the `drop` dataframe in each subsequent iteration. 
 
 ### Bind
 
@@ -262,7 +262,7 @@ Because Chez Scheme doesn't have explicit missing values, I created a separate p
   (rsp 1 1 1 2 2 2 -999 -999 -999 -999))
 ```
 
-In contrast, `datframe-bind` will drop all columns not shared acrossed the dataframes being bound.
+In contrast, `datframe-bind` will drop all columns not shared across the dataframes being bound.
 
 ```
 > (dataframe-view (dataframe-bind df-a (dataframe-drop df-b 'rsp)))
