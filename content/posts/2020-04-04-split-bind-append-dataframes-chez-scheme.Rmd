@@ -18,7 +18,7 @@ tags:
 draft: no
 ---
 
-This post is the third in a [series](/categories/dataframe/) on the [dataframe library](https://hinkelman.github.io/dataframe/) for Chez Scheme. In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for splitting, binding, and appending columns.
+This post is the third in a [series](/categories/dataframe/) on the [dataframe library](https://hinkelman.github.io/dataframe/) for Chez Scheme. In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for splitting, binding, and appending dataframes.
 
 ### Set up
 
