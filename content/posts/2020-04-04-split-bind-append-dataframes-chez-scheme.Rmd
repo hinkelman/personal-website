@@ -106,7 +106,7 @@ I chose `dataframe-append` as the name because alists, which are at the heart of
 
 ### Split
 
-`split` returns a named list of dataframes where the names are based on the column names defining the groups.
+In R, `split` returns a named list of dataframes where the names are based on the column names defining the groups.
 
 ```
 > split(df1, list(df1$trt, df1$grp))

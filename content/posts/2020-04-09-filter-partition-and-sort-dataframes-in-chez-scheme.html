@@ -1,0 +1,187 @@
+---
+title: Filter, partition, and sort dataframes in Chez Scheme
+author: Travis Hinkelman
+date: '2020-04-09'
+slug: filter-partition-and-sort-dataframes-in-chez-scheme
+categories:
+  - ChezScheme
+  - dataframe
+tags:
+  - dataframe
+  - data-structures
+  - association-list
+  - dplyr
+  - arrange
+  - macros
+draft: no
+---
+
+
+
+<p>This post is the fourth in a <a href="/categories/dataframe/">series</a> on the <a href="https://hinkelman.github.io/dataframe/">dataframe library</a> for Chez Scheme. In this post, I will contrast the <code>dataframe</code> library with functions from the <a href="https://dplyr.tidyverse.org"><code>dplyr</code> R package</a> for filtering, partitioning, and sorting dataframes. And discuss implementation decisions in the <code>dataframe</code> library.</p>
+<div id="set-up" class="section level3">
+<h3>Set up</h3>
+<p>First, let’s create a dataframe in both languages. The <code>replicate</code> procedure was introduced in the <a href="/posts/split-bind-append-dataframes-chez-scheme/">previous post</a>, but it is not part of the <code>dataframe</code> library.</p>
+<pre><code>df &lt;- data.frame(trt = rep(c(&quot;a&quot;, &quot;b&quot;), each = 6),
+                 grp = rep(rep(c(&quot;x&quot;, &quot;y&quot;), each = 3), times = 2),
+                 rsp = rep(1:4, each = 3),
+                 ind = 0:11)
+                 
+(define df
+  (make-dataframe
+   (list (cons &#39;trt (replicate &#39;(&quot;a&quot; &quot;b&quot;) 6 &#39;each))
+         (cons &#39;grp (replicate (replicate &#39;(&quot;x&quot; &quot;y&quot;) 3 &#39;each) 2 &#39;times))
+         (cons &#39;rsp (replicate &#39;(1 2 3 4) 3 &#39;each))
+         (cons &#39;ind (iota 12)))))</code></pre>
+</div>
+<div id="filter" class="section level3">
+<h3>Filter</h3>
+<p>In R, <code>dplyr::filter</code> takes an expression and returns the rows of the dataframe where the expression is <code>TRUE</code>.</p>
+<pre><code>&gt; dplyr::filter(df, trt == &quot;a&quot; &amp; grp == &quot;y&quot;)
+  trt grp rsp ind
+1   a   y   2   3
+2   a   y   2   4
+3   a   y   2   5</code></pre>
+<p>Similarly, <code>dataframe-filter</code> takes a <code>filter-expr</code> (see more below) and returns the rows where the <code>filter-expr</code> is <code>#t</code>.</p>
+<pre><code>&gt; (dataframe-view
+   (dataframe-filter df (filter-expr (trt grp)
+                                     (and (string=? trt &quot;a&quot;)
+                                          (string=? grp &quot;y&quot;)))))
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;)
+  (grp &quot;y&quot; &quot;y&quot; &quot;y&quot;)
+  (rsp 2 2 2)
+  (ind 3 4 5))</code></pre>
+<div id="implementation" class="section level4">
+<h4>Implementation</h4>
+<p><code>filter-expr</code> is a macro that allows for a slightly more concise syntax when writing the expressions used to filter a dataframe.</p>
+<pre><code>(define-syntax filter-expr
+  (syntax-rules ()
+    [(_ names expr)
+     (list (quote names) (lambda names expr))]))</code></pre>
+<p>I spent a lot of time wrestling with whether I should use <code>eval</code> or macros to simplify the syntax in my <code>dataframe</code> procedures. Or whether I should just stick to passing lambda expressions around. I pretty quickly concluded that I should avoid <code>eval</code> thanks to some guidance from <a href="https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/">Reddit</a> and was intrigued by some suggested neat tricks that didn’t involve <code>eval</code> or macros. Eventually, though, a better phrased <a href="https://stackoverflow.com/questions/60625913/chez-scheme-macro-for-hiding-lambdas">StackOverflow question</a> prompted comments and answers that gave me clarity on understanding simple macros.</p>
+<p>The following <code>filter-expr</code></p>
+<pre><code>(filter-expr (trt grp)
+             (and (string=? trt &quot;a&quot;)
+                  (string=? grp &quot;y&quot;)))</code></pre>
+<p>expands to</p>
+<pre><code>&#39;((trt grp) (lambda (trt grp)
+              (and (string=? trt &quot;a&quot;)
+                   (string=? grp &quot;y&quot;))))</code></pre>
+<p>Admittedly, that is not a very compelling simplification. My primary concern with the expanded form was that passing names (e.g., <code>(trt grp)</code>) separately and as part of the <code>lambda</code> expression introduces a potential source of errors (e.g, names provided in different order).</p>
+<p>In <code>filter-map</code>, the <code>names</code> and <code>proc</code> are extracted from the expanded <code>filter-expr</code> and <code>proc</code> is mapped over the dataframe columns identified by names. <code>filter-map</code> returns a list of boolean values.</p>
+<pre><code>(define (filter-map df filter-expr)
+  (let ([names (car filter-expr)]
+        [proc (cadr filter-expr)])
+    (apply check-df-names df &quot;(dataframe-filter df filter-expr)&quot; names)
+    (apply map proc (dataframe-values-map df names))))</code></pre>
+<p>The boolean values from <code>filter-map</code> are used to filter each column with <code>filter-vals</code>.</p>
+<pre><code>(define (filter-vals bools vals)
+  (let ([bools-vals (map cons bools vals)])
+    (map cdr (filter (lambda (x) (car x)) bools-vals))))</code></pre>
+<p>Because <code>filter</code> only accepts one list, I first zip the <code>bools</code> to the <code>vals</code> with <code>cons</code>, filter on the <code>bools</code> with <code>car</code>, and then unzip with <code>cdr</code> to get the filtered <code>vals</code>.</p>
+<p>Throughout my posts on writing Chez Scheme libraries, you will find frequent disclaimers about how my libraries are not written with performance in mind. I simply don’t understand Chez Scheme well enough to have good intuition about performance pitfalls. For example, you may have noticed that filtering a dataframe involves zipping the <em>same</em> list of boolean values to every column before filtering each column. If dataframes were row based, then the <code>bools</code> could be added to the begining of every row with <code>cons</code> and the whole dataframe filtered in one pass. That seems obviously better. However, a row-based structure makes <code>filter-map</code> trickier. Or, rather, it makes the part where you extract columns trickier.</p>
+<p>Instead of filtering on every column separately, I could transpose the dataframe to the row-based form, add the <code>bools</code>, filter on the whole dataframe at once, remove the <code>bools</code>, and transpose back to the column-based form. My guess is that transposing a dataframe to row based and back might generally be faster than zipping and unzipping every column with <code>bools</code>, particularly if a dataframe has lots of columns, but I find it easier to think about operating on columns and I was striving for internal consistency across the dataframe procedures.</p>
+</div>
+</div>
+<div id="partition" class="section level3">
+<h3>Partition</h3>
+<p>Because R doesn’t allow multiple return values, you would partition a dataframe with two <code>dplyr::filter</code> statements.</p>
+<pre><code>&gt; dplyr::filter(df, grp == &quot;x&quot;)
+  trt grp rsp ind
+1   a   x   1   0
+2   a   x   1   1
+3   a   x   1   2
+4   b   x   3   6
+5   b   x   3   7
+6   b   x   3   8
+
+&gt; dplyr::filter(df, grp == &quot;y&quot;)
+  trt grp rsp ind
+1   a   y   2   3
+2   a   y   2   4
+3   a   y   2   5
+4   b   y   4   9
+5   b   y   4  10
+6   b   y   4  11</code></pre>
+<p>As mentioned in the <a href="/posts/split-bind-append-dataframes-chez-scheme/">previous post</a>, <code>dataframe-partition</code> allows for partitioning a dataframe based on the <code>filter-expr</code>.</p>
+<pre><code>&gt; (define-values (keep drop)
+    (dataframe-partition df (filter-expr (grp) (string=? grp &quot;x&quot;))))
+  
+&gt; (dataframe-view keep)
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
+  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot;)
+  (rsp 1 1 1 3 3 3)
+  (ind 0 1 2 6 7 8))
+  
+&gt; (dataframe-view drop)
+((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
+  (grp &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot;)
+  (rsp 2 2 2 4 4 4)
+  (ind 3 4 5 9 10 11))</code></pre>
+<p>The dirty little secret of <code>dataframe-partition</code> is that it is simply two calls to <code>dataframe-filter</code> under the covers and, thus, requires two passes over the whole dataframe (more inefficiency!).</p>
+</div>
+<div id="sort" class="section level3">
+<h3>Sort</h3>
+<p>In <code>dplyr</code>, dataframes are sorted on multiple columns with <code>arrange</code>. By default, columns are sorted in ascending order with <code>desc</code> used to indicate descending order. The dataframe is sorted in the order that column names are listed (left to right).</p>
+<pre><code>&gt; dplyr::arrange(df, grp, desc(ind))
+   trt grp rsp ind
+1    b   x   3   8
+2    b   x   3   7
+3    b   x   3   6
+4    a   x   1   2
+5    a   x   1   1
+6    a   x   1   0
+7    b   y   4  11
+8    b   y   4  10
+9    b   y   4   9
+10   a   y   2   5
+11   a   y   2   4
+12   a   y   2   3</code></pre>
+<p>Similarly, <code>dataframe-sort</code> takes a <code>sort-expr</code> (see more below) and sorts the dataframe in the order that predicates and column names are listed (left to right) in the <code>sort-expr</code>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+<pre><code>&gt; (dataframe-alist
+   (dataframe-sort df (sort-expr (string&lt;? grp)
+                                 (&gt; ind))))
+((trt &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot;)
+  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot;)
+  (rsp 3 3 3 1 1 1 4 4 4 2 2 2)
+  (ind 8 7 6 2 1 0 11 10 9 5 4 3))</code></pre>
+<div id="implementation-1" class="section level4">
+<h4>Implementation</h4>
+<p><code>sort-expr</code> is a very simple macro.</p>
+<pre><code>(define-syntax sort-expr
+  (syntax-rules ()
+    [(_ (predicate name) ...)
+     (list
+      (list predicate ...)
+      (list (quote name) ...))]))</code></pre>
+<p>The following <code>sort-expr</code></p>
+<pre><code>(sort-expr (string&lt;? grp) (&gt; ind))</code></pre>
+<p>expands to</p>
+<pre><code>(list (list string&lt;? &gt;) &#39;(grp ind))</code></pre>
+<p>The justification for this macro is similar to <code>filter-expr</code>, i.e., passing predicates and names together reduces likelihood of mixing up the order of the predicate list and the column name list. The macro is also slightly shorter than this alternative:</p>
+<pre><code>(list (cons string&lt;? &#39;grp) (cons &gt; &#39;ind))</code></pre>
+<p>Does that save enough keystrokes to justify using a macro? It will be interesting to see where I stand on this issue after I become a more experience Scheme programmer.</p>
+<p>Here are the steps involved in <code>dataframe-sort</code>:</p>
+<ol style="list-style-type: decimal">
+<li>Extract the columns selected for sorting from the dataframe.</li>
+<li>Calculate the weights for each column.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>
+<ol style="list-style-type: lower-alpha">
+<li>Pick arbitrary weight for first column.</li>
+<li>Loop through the rest of the columns and set weight of next column to the weight of the previous column divided by the length of unique values in the next column.</li>
+</ol></li>
+<li>Sort unique values in each column by the predicate provided for that column.</li>
+<li>Enumerate (rank) each unique value and multiply rank by weight.</li>
+<li>Match weighted ranks for unique values to all values in the column.</li>
+<li>Sum weighted ranks across columns for each row.</li>
+<li>Sort all columns in the dataframe by the weighted rank sums.</li>
+</ol>
+<p><code>dataframe-sort</code> is applied to each column and carries the same potential performance pitfalls described above for <code>dataframe-filter</code>.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>I’ve confused myself several times with respect to how to interpret <code>&lt;</code> and <code>&gt;</code> in a sort. I guess the intuition is that <code>&lt;</code> is ascending because the smaller value is on the left (and vice versa with <code>&gt;</code>).<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>The objective is to weight subsequent columns less and less to maintain sorting priority.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

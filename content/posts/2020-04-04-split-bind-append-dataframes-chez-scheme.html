@@ -88,7 +88,7 @@ df2 &lt;- data.frame(asc = 0:11, desc = 11:0)
 </div>
 <div id="split" class="section level3">
 <h3>Split</h3>
-<p><code>split</code> returns a named list of dataframes where the names are based on the column names defining the groups.</p>
+<p>In R, <code>split</code> returns a named list of dataframes where the names are based on the column names defining the groups.</p>
 <pre><code>&gt; split(df1, list(df1$trt, df1$grp))
 $a.x
   trt grp rsp
