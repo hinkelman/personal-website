@@ -68,24 +68,23 @@ Exception in (make-dataframe alist): names are not symbols</code></pre>
 <h3>Head and tail</h3>
 <p>In R, I frequently use <code>head</code> to preview the first few rows of a dataframe and, less frequently, use <code>tail</code> to view the last few rows. Chez Scheme provides <code>list-head</code> and <code>list-tail</code> with similar functionality. However, <code>tail</code> in R returns the last <code>n</code> rows of the dataframe whereas <code>list-tail</code> in Chez Scheme returns the rest of the list starting at a given index. My first instinct was to write <code>dataframe-tail</code> to use the R behavior, but eventually decided that <code>dataframe-tail</code> should follow the behavior established by <code>list-tail</code>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
 <pre><code>(define (dataframe-head df n)
-  (dataframe-head-tail df n &quot;head&quot;))
+  (let ([proc-string  &quot;(dataframe-head df n)&quot;])
+    (check-dataframe df proc-string)
+    (check-integer-positive n &quot;n&quot; proc-string)
+    (check-index n (car (dataframe-dim df)) proc-string)
+    (make-dataframe (alist-head-tail (dataframe-alist df) n list-head))))
 
 ;; dataframe-tail is based on list-tail, which does not work the same as tail in R
 (define (dataframe-tail df n)
-  (dataframe-head-tail df n &quot;tail&quot;))
-
-(define (dataframe-head-tail df n type)
-  (let ([proc-string (string-append &quot;(dataframe-&quot; type &quot; df n)&quot;)]
-        [check-integer (if (string=? type &quot;head&quot;) check-integer-positive check-integer-gte-zero)]
-        [proc (if (string=? type &quot;head&quot;) list-head list-tail)])
+  (let ([proc-string  &quot;(dataframe-tail df n)&quot;])
     (check-dataframe df proc-string)
-    (check-integer n &quot;n&quot; proc-string)
-    (check-index n (car (dataframe-dim df)) proc-string)
-    (make-dataframe (alist-head-tail (dataframe-alist df) n proc))))
+    (check-integer-gte-zero n &quot;n&quot; proc-string)
+    (check-index (sub1 n) (car (dataframe-dim df)) proc-string)
+    (make-dataframe (alist-head-tail (dataframe-alist df) n list-tail))))
 
 (define (alist-head-tail alist n proc)
   (map (lambda (col) (cons (car col) (proc (cdr col) n))) alist))</code></pre>
-<p><code>dataframe-head-tail</code> illustrates a common pattern in the <code>dataframe</code> library: extracting the alist, breaking the alist into sublists, working on the sublists, and then rebuilding the alist and dataframe. In the case of <code>dataframe-head</code> and <code>dataframe-tail</code>, the core logic is so simple that most of the code involves checking inputs.</p>
+<p><code>dataframe-head</code> and <code>dataframe-tail</code> illustrate a common pattern in the <code>dataframe</code> library: extracting the alist, breaking the alist into sublists, working on the sublists, and then rebuilding the alist and dataframe. In the case of <code>dataframe-head</code> and <code>dataframe-tail</code>, the core logic is so simple that most of the code involves checking inputs.</p>
 </div>
 <div id="transpose" class="section level3">
 <h3>Transpose</h3>
