@@ -45,31 +45,31 @@ df2 <- data.frame(asc = 0:11, desc = 11:0)
          (cons 'desc (reverse (iota 12))))))
 ```
 
-I think the Scheme code for creating `df1` is clear, but I like the conciseness of the R code. I'm taking this post on a little detour to write a `replicate`^[In my Scheme code, I prefer more descriptive names and, thus, chose `replicate` over `rep`.] procedure to replicate (pun intended) the functionality of `rep`. 
+I think the Scheme code for creating `df1` is clear, but I like the conciseness of the R code. I'm taking this post on a little detour to write a `rep` procedure to replicate (pun intended) the functionality of `rep`. 
 
 ```
-(define (replicate ls n type)
+(define (rep ls n type)
   (cond [(symbol=? type 'each)
          (apply append (map (lambda (x) (make-list n x)) ls))]
         [(symbol=? type 'times)
-         (replicate-times ls n)]
+         (rep-times ls n)]
         [else
-         (assertion-violation "(replicate ls n type)"
+         (assertion-violation "(rep ls n type)"
                               "type must be 'each or 'times")]))
 
-(define (replicate-times ls n)
+(define (rep-times ls n)
   (define (loop ls-out n)
     (if (= n 1) ls-out (loop (append ls ls-out) (sub1 n))))
   (loop ls n))
 
 (define df1
   (make-dataframe
-   (list (cons 'trt (replicate '("a" "b") 6 'each))
-         (cons 'grp (replicate (replicate '("x" "y") 3 'each) 2 'times))
-         (cons 'rsp (replicate '(1 2 3 4) 3 'each)))))
+   (list (cons 'trt (rep '("a" "b") 6 'each))
+         (cons 'grp (rep (rep '("x" "y") 3 'each) 2 'times))
+         (cons 'rsp (rep '(1 2 3 4) 3 'each)))))
 ```
 
-The `each` case was a simple `map`, but I couldn't think of a way to use higher-order functions for the `times` case. Instead, I wrote a separate recursive procedure, `replicate-times`, to handle that case.
+The `each` case was a simple `map`, but I couldn't think of a way to use higher-order functions for the `times` case. Instead, I wrote a separate recursive procedure, `rep-times`, to handle that case.
 
 ### Append
 

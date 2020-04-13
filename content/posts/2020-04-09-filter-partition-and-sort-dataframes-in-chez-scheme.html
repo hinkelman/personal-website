@@ -29,9 +29,9 @@ draft: no
                  
 (define df
   (make-dataframe
-   (list (cons &#39;trt (replicate &#39;(&quot;a&quot; &quot;b&quot;) 6 &#39;each))
-         (cons &#39;grp (replicate (replicate &#39;(&quot;x&quot; &quot;y&quot;) 3 &#39;each) 2 &#39;times))
-         (cons &#39;rsp (replicate &#39;(1 2 3 4) 3 &#39;each))
+   (list (cons &#39;trt (rep &#39;(&quot;a&quot; &quot;b&quot;) 6 &#39;each))
+         (cons &#39;grp (rep (rep &#39;(&quot;x&quot; &quot;y&quot;) 3 &#39;each) 2 &#39;times))
+         (cons &#39;rsp (rep &#39;(1 2 3 4) 3 &#39;each))
          (cons &#39;ind (iota 12)))))</code></pre>
 </div>
 <div id="filter" class="section level3">

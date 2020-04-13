@@ -42,27 +42,27 @@ df2 &lt;- data.frame(asc = 0:11, desc = 11:0)
   (make-dataframe
    (list (cons &#39;asc (iota 12))
          (cons &#39;desc (reverse (iota 12))))))</code></pre>
-<p>I think the Scheme code for creating <code>df1</code> is clear, but I like the conciseness of the R code. I’m taking this post on a little detour to write a <code>replicate</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> procedure to replicate (pun intended) the functionality of <code>rep</code>.</p>
-<pre><code>(define (replicate ls n type)
+<p>I think the Scheme code for creating <code>df1</code> is clear, but I like the conciseness of the R code. I’m taking this post on a little detour to write a <code>rep</code> procedure to replicate (pun intended) the functionality of <code>rep</code>.</p>
+<pre><code>(define (rep ls n type)
   (cond [(symbol=? type &#39;each)
          (apply append (map (lambda (x) (make-list n x)) ls))]
         [(symbol=? type &#39;times)
-         (replicate-times ls n)]
+         (rep-times ls n)]
         [else
-         (assertion-violation &quot;(replicate ls n type)&quot;
+         (assertion-violation &quot;(rep ls n type)&quot;
                               &quot;type must be &#39;each or &#39;times&quot;)]))
 
-(define (replicate-times ls n)
+(define (rep-times ls n)
   (define (loop ls-out n)
     (if (= n 1) ls-out (loop (append ls ls-out) (sub1 n))))
   (loop ls n))
 
 (define df1
   (make-dataframe
-   (list (cons &#39;trt (replicate &#39;(&quot;a&quot; &quot;b&quot;) 6 &#39;each))
-         (cons &#39;grp (replicate (replicate &#39;(&quot;x&quot; &quot;y&quot;) 3 &#39;each) 2 &#39;times))
-         (cons &#39;rsp (replicate &#39;(1 2 3 4) 3 &#39;each)))))</code></pre>
-<p>The <code>each</code> case was a simple <code>map</code>, but I couldn’t think of a way to use higher-order functions for the <code>times</code> case. Instead, I wrote a separate recursive procedure, <code>replicate-times</code>, to handle that case.</p>
+   (list (cons &#39;trt (rep &#39;(&quot;a&quot; &quot;b&quot;) 6 &#39;each))
+         (cons &#39;grp (rep (rep &#39;(&quot;x&quot; &quot;y&quot;) 3 &#39;each) 2 &#39;times))
+         (cons &#39;rsp (rep &#39;(1 2 3 4) 3 &#39;each)))))</code></pre>
+<p>The <code>each</code> case was a simple <code>map</code>, but I couldn’t think of a way to use higher-order functions for the <code>times</code> case. Instead, I wrote a separate recursive procedure, <code>rep-times</code>, to handle that case.</p>
 </div>
 <div id="append" class="section level3">
 <h3>Append</h3>
@@ -123,14 +123,14 @@ $b.y
   ((trt &quot;b&quot; &quot;b&quot; &quot;b&quot;) (grp &quot;y&quot; &quot;y&quot; &quot;y&quot;) (rsp 4 4 4)))</code></pre>
 <div id="implementation" class="section level4">
 <h4>Implementation</h4>
-<p>The first step in <code>dataframe-split</code> is to find the unique values of the grouping columns.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
+<p>The first step in <code>dataframe-split</code> is to find the unique values of the grouping columns.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
 <pre><code>&gt; (dataframe-display (dataframe-unique (dataframe-select df1 &#39;trt &#39;grp)))
        trt       grp
          a         x
          a         y
          b         x
          b         y</code></pre>
-<p><code>dataframe-unique</code> involves transposing the alist to a row-based structure to remove duplicates and then transposing back to the column-based structure. This is another example of me choosing a straightforward solution over an efficient one.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<p><code>dataframe-unique</code> involves transposing the alist to a row-based structure to remove duplicates and then transposing back to the column-based structure. This is another example of me choosing a straightforward solution over an efficient one.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
 <pre><code>(define (transpose ls) (apply map list ls))
 
 ;; https://stackoverflow.com/questions/8382296/scheme-remove-duplicated-numbers-from-list
@@ -150,7 +150,7 @@ $b.y
 
 &gt; (remove-duplicates (cdr (transpose &#39;((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;)))))
 ((&quot;a&quot; &quot;x&quot;))</code></pre>
-<p>We loop through the rows of the unique groups and partition the dataframe.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> <code>dataframe-partition</code> returns two dataframes. The <code>keep</code> and <code>drop</code> dataframes contain the rows where the <code>filter-expr</code> is <code>#t</code> and <code>#f</code>, respectively.</p>
+<p>We loop through the rows of the unique groups and partition the dataframe.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> <code>dataframe-partition</code> returns two dataframes. The <code>keep</code> and <code>drop</code> dataframes contain the rows where the <code>filter-expr</code> is <code>#t</code> and <code>#f</code>, respectively.</p>
 <pre><code>&gt; (define-values (keep drop)
     (dataframe-partition
      df1 (filter-expr (trt grp) (and (string=? trt &quot;a&quot;) (string=? grp &quot;x&quot;)))))
@@ -267,9 +267,8 @@ df_b &lt;- dplyr::filter(df1, trt == &quot;b&quot;)
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>In my Scheme code, I prefer more descriptive names and, thus, chose <code>replicate</code> over <code>rep</code>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>I’m illustrating the ideas with the user-facing <code>dataframe</code> procedures, but inside <code>dataframe-split</code>, and most <code>dataframe</code> procedures, are procedures that work directly on alists to avoid the overhead of unwrapping and rewrapping the alists as dataframes.<a href="#fnref2" class="footnote-back">↩</a></p></li>
-<li id="fn3"><p>This is not to say that I know a more efficient solution, but, rather, that I opted for a straightforward solution even though it contains the (significant?) overhead of transposing the list a couple of times.<a href="#fnref3" class="footnote-back">↩</a></p></li>
-<li id="fn4"><p><code>dataframe-partition</code> will be covered in the next post of this series.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>I’m illustrating the ideas with the user-facing <code>dataframe</code> procedures, but inside <code>dataframe-split</code>, and most <code>dataframe</code> procedures, are procedures that work directly on alists to avoid the overhead of unwrapping and rewrapping the alists as dataframes.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>This is not to say that I know a more efficient solution, but, rather, that I opted for a straightforward solution even though it contains the (significant?) overhead of transposing the list a couple of times.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p><code>dataframe-partition</code> will be covered in the next post of this series.<a href="#fnref3" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

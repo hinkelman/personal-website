@@ -30,9 +30,9 @@ df <- data.frame(trt = rep(c("a", "b"), each = 6),
                  
 (define df
   (make-dataframe
-   (list (cons 'trt (replicate '("a" "b") 6 'each))
-         (cons 'grp (replicate (replicate '("x" "y") 3 'each) 2 'times))
-         (cons 'rsp (replicate '(1 2 3 4) 3 'each))
+   (list (cons 'trt (rep '("a" "b") 6 'each))
+         (cons 'grp (rep (rep '("x" "y") 3 'each) 2 'times))
+         (cons 'rsp (rep '(1 2 3 4) 3 'each))
          (cons 'ind (iota 12)))))
 ```
 
