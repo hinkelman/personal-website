@@ -51,14 +51,14 @@ In R, `dplyr::filter` takes an expression and returns the rows of the dataframe 
 Similarly, `dataframe-filter` takes a `filter-expr` (see more below) and returns the rows where the `filter-expr` is `#t`. 
 
 ```
-> (dataframe-view
+> (dataframe-display
    (dataframe-filter df (filter-expr (trt grp)
                                      (and (string=? trt "a")
                                           (string=? grp "y")))))
-((trt "a" "a" "a")
-  (grp "y" "y" "y")
-  (rsp 2 2 2)
-  (ind 3 4 5))
+       trt       grp       rsp       ind
+         a         y         2         3
+         a         y         2         4
+         a         y         2         5
 ```
 
 #### Implementation
@@ -146,17 +146,23 @@ As mentioned in the [previous post](/posts/split-bind-append-dataframes-chez-sch
 > (define-values (keep drop)
     (dataframe-partition df (filter-expr (grp) (string=? grp "x"))))
   
-> (dataframe-view keep)
-((trt "a" "a" "a" "b" "b" "b")
-  (grp "x" "x" "x" "x" "x" "x")
-  (rsp 1 1 1 3 3 3)
-  (ind 0 1 2 6 7 8))
+> (dataframe-display keep)
+       trt       grp       rsp       ind
+         a         x         1         0
+         a         x         1         1
+         a         x         1         2
+         b         x         3         6
+         b         x         3         7
+         b         x         3         8
   
-> (dataframe-view drop)
-((trt "a" "a" "a" "b" "b" "b")
-  (grp "y" "y" "y" "y" "y" "y")
-  (rsp 2 2 2 4 4 4)
-  (ind 3 4 5 9 10 11))
+> (dataframe-display drop)
+       trt       grp       rsp       ind
+         a         y         2         3
+         a         y         2         4
+         a         y         2         5
+         b         y         4         9
+         b         y         4        10
+         b         y         4        11
 ```
 
 The dirty little secret of `dataframe-partition` is that it is simply two calls to `dataframe-filter` under the covers and, thus, requires two passes over the whole dataframe (more inefficiency!).
@@ -185,13 +191,23 @@ In `dplyr`, dataframes are sorted on multiple columns with `arrange`. By default
 Similarly, `dataframe-sort` takes a `sort-expr` (see more below) and sorts the dataframe in the order that predicates and column names are listed (left to right) in the `sort-expr`.^[I've confused myself several times with respect to how to interpret `<` and `>` in a sort. I guess the intuition is that `<` is ascending because the smaller value is on the left (and vice versa with `>`).]
 
 ```
-> (dataframe-alist
+> (dataframe-display
    (dataframe-sort df (sort-expr (string<? grp)
-                                 (> ind))))
-((trt "b" "b" "b" "a" "a" "a" "b" "b" "b" "a" "a" "a")
-  (grp "x" "x" "x" "x" "x" "x" "y" "y" "y" "y" "y" "y")
-  (rsp 3 3 3 1 1 1 4 4 4 2 2 2)
-  (ind 8 7 6 2 1 0 11 10 9 5 4 3))
+                                 (> ind)))
+   12)
+       trt       grp       rsp       ind
+         b         x         3         8
+         b         x         3         7
+         b         x         3         6
+         a         x         1         2
+         a         x         1         1
+         a         x         1         0
+         b         y         4        11
+         b         y         4        10
+         b         y         4         9
+         a         y         2         5
+         a         y         2         4
+         a         y         2         3
 ```
 
 #### Implementation

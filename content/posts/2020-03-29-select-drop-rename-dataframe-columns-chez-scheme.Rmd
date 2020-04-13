@@ -41,8 +41,11 @@ With `dplyr::select`, we can select and re-order columns in a single statement u
 With `dataframe-select`, we can also select and re-order columns in a single statement using symbols for column names.
 
 ```
-> (dataframe-view (dataframe-select df 'c 'a))
-((c 7 8 9) (a 1 2 3))
+> (dataframe-display (dataframe-select df 'c 'a))
+         c         a
+         7         1
+         8         2
+         9         3
 ```
 
 ### Drop
@@ -60,8 +63,11 @@ With `dataframe-select`, we can also select and re-order columns in a single sta
 In `dataframe`, dropping columns requires a separate procedure, `dataframe-drop`.
 
 ```
-> (dataframe-view (dataframe-drop df 'b))
-((a 1 2 3) (c 7 8 9))
+> (dataframe-display (dataframe-drop df 'b))
+         a         c
+         1         7
+         2         8
+         3         9
 ```
 
 ### Rename
@@ -85,15 +91,21 @@ With `dplyr::select`, columns can be renamed during selection, but `dplyr::renam
 `dataframe-select` does not allow for renaming during selection, but `dataframe-rename` works similarly to `dplyr::rename`. However, in the absence of the `=` syntax (where I think it is intutive for the new name to be on the left), I decided that it was more natural to write `'((old-name new-name))`. 
 
 ```
-> (dataframe-view (dataframe-rename df '((b Bee) (c Sea))))
-((a 1 2 3) (Bee 4 5 6) (Sea 7 8 9)) (a Bee Sea) (3 . 3)]
+> (dataframe-display (dataframe-rename df '((b Bee) (c Sea))))
+         a       Bee       Sea
+         1         4         7
+         2         5         8
+         3         6         9
 ```
 
 When renaming all of the columns, `dataframe-rename-all` allows for specifying all new names as a list rather than `(old-name new-name)` pairs. 
 
 ```
-> (dataframe-view (dataframe-rename-all df '(A B C)))
-((A 1 2 3) (B 4 5 6) (C 7 8 9)) (A B C) (3 . 3)]
+> (dataframe-display (dataframe-rename-all df '(A B C)))
+         A         B         C
+         1         4         7
+         2         5         8
+         3         6         9
 ```
 
 ### Final thoughts

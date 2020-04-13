@@ -43,14 +43,14 @@ draft: no
 2   a   y   2   4
 3   a   y   2   5</code></pre>
 <p>Similarly, <code>dataframe-filter</code> takes a <code>filter-expr</code> (see more below) and returns the rows where the <code>filter-expr</code> is <code>#t</code>.</p>
-<pre><code>&gt; (dataframe-view
+<pre><code>&gt; (dataframe-display
    (dataframe-filter df (filter-expr (trt grp)
                                      (and (string=? trt &quot;a&quot;)
                                           (string=? grp &quot;y&quot;)))))
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;)
-  (grp &quot;y&quot; &quot;y&quot; &quot;y&quot;)
-  (rsp 2 2 2)
-  (ind 3 4 5))</code></pre>
+       trt       grp       rsp       ind
+         a         y         2         3
+         a         y         2         4
+         a         y         2         5</code></pre>
 <div id="implementation" class="section level4">
 <h4>Implementation</h4>
 <p><code>filter-expr</code> is a macro that allows for a slightly more concise syntax when writing the expressions used to filter a dataframe.</p>
@@ -107,17 +107,23 @@ draft: no
 <pre><code>&gt; (define-values (keep drop)
     (dataframe-partition df (filter-expr (grp) (string=? grp &quot;x&quot;))))
   
-&gt; (dataframe-view keep)
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
-  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot;)
-  (rsp 1 1 1 3 3 3)
-  (ind 0 1 2 6 7 8))
+&gt; (dataframe-display keep)
+       trt       grp       rsp       ind
+         a         x         1         0
+         a         x         1         1
+         a         x         1         2
+         b         x         3         6
+         b         x         3         7
+         b         x         3         8
   
-&gt; (dataframe-view drop)
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
-  (grp &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot;)
-  (rsp 2 2 2 4 4 4)
-  (ind 3 4 5 9 10 11))</code></pre>
+&gt; (dataframe-display drop)
+       trt       grp       rsp       ind
+         a         y         2         3
+         a         y         2         4
+         a         y         2         5
+         b         y         4         9
+         b         y         4        10
+         b         y         4        11</code></pre>
 <p>The dirty little secret of <code>dataframe-partition</code> is that it is simply two calls to <code>dataframe-filter</code> under the covers and, thus, requires two passes over the whole dataframe (more inefficiency!).</p>
 </div>
 <div id="sort" class="section level3">
@@ -138,13 +144,23 @@ draft: no
 11   a   y   2   4
 12   a   y   2   3</code></pre>
 <p>Similarly, <code>dataframe-sort</code> takes a <code>sort-expr</code> (see more below) and sorts the dataframe in the order that predicates and column names are listed (left to right) in the <code>sort-expr</code>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
-<pre><code>&gt; (dataframe-alist
+<pre><code>&gt; (dataframe-display
    (dataframe-sort df (sort-expr (string&lt;? grp)
-                                 (&gt; ind))))
-((trt &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot;)
-  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot;)
-  (rsp 3 3 3 1 1 1 4 4 4 2 2 2)
-  (ind 8 7 6 2 1 0 11 10 9 5 4 3))</code></pre>
+                                 (&gt; ind)))
+   12)
+       trt       grp       rsp       ind
+         b         x         3         8
+         b         x         3         7
+         b         x         3         6
+         a         x         1         2
+         a         x         1         1
+         a         x         1         0
+         b         y         4        11
+         b         y         4        10
+         b         y         4         9
+         a         y         2         5
+         a         y         2         4
+         a         y         2         3</code></pre>
 <div id="implementation-1" class="section level4">
 <h4>Implementation</h4>
 <p><code>sort-expr</code> is a very simple macro.</p>

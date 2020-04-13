@@ -33,8 +33,11 @@ draft: no
 2 8 2
 3 9 3</code></pre>
 <p>With <code>dataframe-select</code>, we can also select and re-order columns in a single statement using symbols for column names.</p>
-<pre><code>&gt; (dataframe-view (dataframe-select df &#39;c &#39;a))
-((c 7 8 9) (a 1 2 3))</code></pre>
+<pre><code>&gt; (dataframe-display (dataframe-select df &#39;c &#39;a))
+         c         a
+         7         1
+         8         2
+         9         3</code></pre>
 </div>
 <div id="drop" class="section level3">
 <h3>Drop</h3>
@@ -45,8 +48,11 @@ draft: no
 2 2 8
 3 3 9</code></pre>
 <p>In <code>dataframe</code>, dropping columns requires a separate procedure, <code>dataframe-drop</code>.</p>
-<pre><code>&gt; (dataframe-view (dataframe-drop df &#39;b))
-((a 1 2 3) (c 7 8 9))</code></pre>
+<pre><code>&gt; (dataframe-display (dataframe-drop df &#39;b))
+         a         c
+         1         7
+         2         8
+         3         9</code></pre>
 </div>
 <div id="rename" class="section level3">
 <h3>Rename</h3>
@@ -63,11 +69,17 @@ draft: no
 2 2   5   8
 3 3   6   9</code></pre>
 <p><code>dataframe-select</code> does not allow for renaming during selection, but <code>dataframe-rename</code> works similarly to <code>dplyr::rename</code>. However, in the absence of the <code>=</code> syntax (where I think it is intutive for the new name to be on the left), I decided that it was more natural to write <code>'((old-name new-name))</code>.</p>
-<pre><code>&gt; (dataframe-view (dataframe-rename df &#39;((b Bee) (c Sea))))
-((a 1 2 3) (Bee 4 5 6) (Sea 7 8 9)) (a Bee Sea) (3 . 3)]</code></pre>
+<pre><code>&gt; (dataframe-display (dataframe-rename df &#39;((b Bee) (c Sea))))
+         a       Bee       Sea
+         1         4         7
+         2         5         8
+         3         6         9</code></pre>
 <p>When renaming all of the columns, <code>dataframe-rename-all</code> allows for specifying all new names as a list rather than <code>(old-name new-name)</code> pairs.</p>
-<pre><code>&gt; (dataframe-view (dataframe-rename-all df &#39;(A B C)))
-((A 1 2 3) (B 4 5 6) (C 7 8 9)) (A B C) (3 . 3)]</code></pre>
+<pre><code>&gt; (dataframe-display (dataframe-rename-all df &#39;(A B C)))
+         A         B         C
+         1         4         7
+         2         5         8
+         3         6         9</code></pre>
 </div>
 <div id="final-thoughts" class="section level3">
 <h3>Final thoughts</h3>

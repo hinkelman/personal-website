@@ -48,10 +48,7 @@ draft: no
 &gt; (dataframe? &#39;((a 1 2 3) (b 4 5 6)))
 #f
 
-&gt; (dataframe-view df)    ; returns up to 10 rows of the alist
-((a 1 2 3) (b 4 5 6))
-
-&gt; (dataframe-alist df)   ; returns full alist
+&gt; (dataframe-alist df)  
 ((a 1 2 3) (b 4 5 6))
 
 &gt; (dataframe-names df)
@@ -61,8 +58,13 @@ draft: no
 (3 . 2)                  ; (rows . columns)
 
 &gt; (define df (make-dataframe &#39;((&quot;a&quot; 1 2 3) (&quot;b&quot; 4 5 6))))
+Exception in (make-dataframe alist): names are not symbols
 
-Exception in (make-dataframe alist): names are not symbols</code></pre>
+&gt; (dataframe-display df)
+         a         b
+         1         4
+         2         5
+         3         6</code></pre>
 </div>
 <div id="head-and-tail" class="section level3">
 <h3>Head and tail</h3>
@@ -94,14 +96,19 @@ Exception in (make-dataframe alist): names are not symbols</code></pre>
 &gt; (dataframe-&gt;rowtable df)
 ((a b c) (100 4 700) (300 6 900))
 
-&gt; (dataframe-view (rowtable-&gt;dataframe &#39;((a b c) (1 4 7) (2 5 8) (3 6 9)) #t))
-((a 1 2 3) (b 4 5 6) (c 7 8 9))
+&gt; (dataframe-display (rowtable-&gt;dataframe &#39;((a b c) (1 4 7) (2 5 8) (3 6 9)) #t))
+         a         b         c
+         1         4         7
+         2         5         8
+         3         6         9
 
-&gt; (dataframe-view (rowtable-&gt;dataframe &#39;((1 4 7) (2 5 8) (3 6 9)) #f))
-((V0 1 2 3) (V1 4 5 6) (V2 7 8 9))
+&gt; (dataframe-display (rowtable-&gt;dataframe &#39;((1 4 7) (2 5 8) (3 6 9)) #f))
+        V0        V1        V2
+         1         4         7
+         2         5         8
+         3         6         9
 
 &gt; (rowtable-&gt;dataframe &#39;((&quot;a&quot; &quot;b&quot; &quot;c&quot;) (1 4 7) (2 5 8) (3 6 9)) #t)
-
 Exception in (make-dataframe alist): names are not symbols</code></pre>
 </div>
 <div id="read-and-write" class="section level3">
@@ -144,14 +151,17 @@ Exception in (make-dataframe alist): names are not symbols</code></pre>
                                (adult 1 2 3 4 5)
                                (juv 10 20 30 40 50))))
 
-&gt; (dataframe-view (dataframe-ref df &#39;(0 2 4)))
-((grp &quot;a&quot; &quot;b&quot; &quot;b&quot;)
-  (trt &quot;a&quot; &quot;a&quot; &quot;b&quot;)
-  (adult 1 3 5)
-  (juv 10 30 50))
+&gt; (dataframe-display (dataframe-ref df &#39;(0 2 4)))
+       grp       trt     adult       juv
+         a         a         1        10
+         b         a         3        30
+         b         b         5        50
 
-&gt; (dataframe-view (dataframe-ref df &#39;(0 2 4) &#39;adult &#39;juv))
-((adult 1 3 5) (juv 10 30 50))</code></pre>
+&gt; (dataframe-display (dataframe-ref df &#39;(0 2 4) &#39;adult &#39;juv))
+     adult       juv
+         1        10
+         3        30
+         5        50</code></pre>
 <p>In the <a href="/posts/select-drop-rename-dataframe-columns-chez-scheme/">next post</a>, I will show how to select, drop, and rename columns.</p>
 </div>
 <div class="footnotes">

@@ -76,12 +76,14 @@ df2 &lt;- data.frame(asc = 0:11, desc = 11:0)
 5   a   y   2   4    7
 6   a   y   2   5    6</code></pre>
 <p>In Chez Scheme, we append dataframes with equal numbers of rows via <code>dataframe-append</code>.</p>
-<pre><code>&gt; (dataframe-view (dataframe-append df1 df2))
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
-  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;)
-  (rsp 1 1 1 2 2 2 3 3 3 4)
-  (asc 0 1 2 3 4 5 6 7 8 9)
-  (desc 11 10 9 8 7 6 5 4 3 2))</code></pre>
+<pre><code>&gt; (dataframe-display (dataframe-append df1 df2) 6)
+       trt       grp       rsp       asc      desc
+         a         x         1         0        11
+         a         x         1         1        10
+         a         x         1         2         9
+         a         y         2         3         8
+         a         y         2         4         7
+         a         y         2         5         6</code></pre>
 <p>I chose <code>dataframe-append</code> as the name because alists, which are at the heart of dataframes, are straightforwardly combined with <code>append</code> in Chez Scheme.</p>
 <pre><code>&gt; (append &#39;((a 1 2 3)) &#39;((b 4 5 6)))
 ((a 1 2 3) (b 4 5 6))</code></pre>
@@ -114,7 +116,7 @@ $b.y
 11   b   y   4
 12   b   y   4</code></pre>
 <p><code>dataframe-split</code> returns a list of dataframes (displayed here as a list of alists for easier reading).</p>
-<pre><code>&gt; (map dataframe-view (dataframe-split df1 &#39;trt &#39;grp))
+<pre><code>&gt; (map dataframe-alist (dataframe-split df1 &#39;trt &#39;grp))
 (((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;) (rsp 1 1 1))
   ((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;y&quot; &quot;y&quot; &quot;y&quot;) (rsp 2 2 2))
   ((trt &quot;b&quot; &quot;b&quot; &quot;b&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;) (rsp 3 3 3))
@@ -122,8 +124,12 @@ $b.y
 <div id="implementation" class="section level4">
 <h4>Implementation</h4>
 <p>The first step in <code>dataframe-split</code> is to find the unique values of the grouping columns.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
-<pre><code>&gt; (dataframe-view (dataframe-unique (dataframe-select df1 &#39;trt &#39;grp)))
-((trt &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot;) (grp &quot;x&quot; &quot;y&quot; &quot;x&quot; &quot;y&quot;))</code></pre>
+<pre><code>&gt; (dataframe-display (dataframe-unique (dataframe-select df1 &#39;trt &#39;grp)))
+       trt       grp
+         a         x
+         a         y
+         b         x
+         b         y</code></pre>
 <p><code>dataframe-unique</code> involves transposing the alist to a row-based structure to remove duplicates and then transposing back to the column-based structure. This is another example of me choosing a straightforward solution over an efficient one.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
 <pre><code>(define (transpose ls) (apply map list ls))
 
@@ -148,12 +154,24 @@ $b.y
 <pre><code>&gt; (define-values (keep drop)
     (dataframe-partition
      df1 (filter-expr (trt grp) (and (string=? trt &quot;a&quot;) (string=? grp &quot;x&quot;)))))
-&gt; (dataframe-view keep)
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot;) (grp &quot;x&quot; &quot;x&quot; &quot;x&quot;) (rsp 1 1 1))
-&gt; (dataframe-view drop)
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
-  (grp &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot;)
-  (rsp 2 2 2 3 3 3 4 4 4))</code></pre>
+     
+&gt; (dataframe-display keep)
+       trt       grp       rsp
+         a         x         1
+         a         x         1
+         a         x         1
+
+&gt; (dataframe-display drop)
+       trt       grp       rsp
+         a         y         2
+         a         y         2
+         a         y         2
+         b         x         3
+         b         x         3
+         b         x         3
+         b         y         4
+         b         y         4
+         b         y         4</code></pre>
 <p>The <code>keep</code> dataframe becomes the first dataframe in the list of dataframes returned by <code>dataframe-split</code>. The algorithm continues looping through the rows of unique groups and partitions the <code>drop</code> dataframe in each subsequent iteration.</p>
 </div>
 </div>
@@ -175,10 +193,21 @@ $b.y
 11   b   y   4
 12   b   y   4</code></pre>
 <p><code>dataframe-bind</code> works similarly to <code>dplyr::bind_rows</code>, but we need to use <code>apply</code> to bust open the list of dataframes created by <code>dataframe-split</code>.</p>
-<pre><code>&gt; (dataframe-view (apply dataframe-bind (dataframe-split df1 &#39;trt &#39;grp)))
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
-  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;)
-  (rsp 1 1 1 2 2 2 3 3 3 4))</code></pre>
+<pre><code>&gt; (dataframe-display (apply dataframe-bind (dataframe-split df1 &#39;trt &#39;grp)) 12)
+&gt; (dataframe-display (apply dataframe-bind (dataframe-split df1 &#39;trt &#39;grp)) 12)
+       trt       grp       rsp
+         a         x         1
+         a         x         1
+         a         x         1
+         a         y         2
+         a         y         2
+         a         y         2
+         b         x         3
+         b         x         3
+         b         x         3
+         b         y         4
+         b         y         4
+         b         y         4</code></pre>
 <p>To show how to bind dataframes with different columns, let’s split up <code>df1</code>.</p>
 <pre><code>df_a &lt;- dplyr::filter(df1, trt == &quot;a&quot;)
 df_b &lt;- dplyr::filter(df1, trt == &quot;b&quot;)
@@ -201,14 +230,35 @@ df_b &lt;- dplyr::filter(df1, trt == &quot;b&quot;)
 11   b   y  NA
 12   b   y  NA</code></pre>
 <p>Because Chez Scheme doesn’t have explicit missing values, I created a separate procedure, <code>dataframe-bind-all</code>, for binding dataframes where missing columns are filled by the specified missing value.</p>
-<pre><code>&gt; (dataframe-view (dataframe-bind-all -999 df-a (dataframe-drop df-b &#39;rsp)))
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
-  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;)
-  (rsp 1 1 1 2 2 2 -999 -999 -999 -999))</code></pre>
-<p>In contrast, <code>datframe-bind</code> will drop all columns not shared across the dataframes being bound.</p>
-<pre><code>&gt; (dataframe-view (dataframe-bind df-a (dataframe-drop df-b &#39;rsp)))
-((trt &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot; &quot;b&quot;)
-  (grp &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot; &quot;y&quot; &quot;y&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;y&quot;))</code></pre>
+<pre><code>&gt; (dataframe-display (dataframe-bind-all -999 df-a (dataframe-drop df-b &#39;rsp)) 12)
+       trt       grp       rsp
+         a         x         1
+         a         x         1
+         a         x         1
+         a         y         2
+         a         y         2
+         a         y         2
+         b         x      -999
+         b         x      -999
+         b         x      -999
+         b         y      -999
+         b         y      -999
+         b         y      -999</code></pre>
+<p>In contrast, <code>dataframe-bind</code> will drop all columns not shared across the dataframes being bound.</p>
+<pre><code>&gt; (dataframe-display (dataframe-bind df-a (dataframe-drop df-b &#39;rsp)), 12)
+       trt       grp
+         a         x
+         a         x
+         a         x
+         a         y
+         a         y
+         a         y
+         b         x
+         b         x
+         b         x
+         b         y
+         b         y
+         b         y</code></pre>
 </div>
 <div id="final-thoughts" class="section level3">
 <h3>Final thoughts</h3>
