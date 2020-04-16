@@ -13,7 +13,7 @@ tags:
   - dplyr
   - arrange
   - macros
-draft: no
+draft: false
 ---
 
 This post is the fourth in a [series](/categories/dataframe/) on the [dataframe library](https://hinkelman.github.io/dataframe/) for Chez Scheme. In this post, I will contrast the `dataframe` library with functions from the [`dplyr` R package](https://dplyr.tidyverse.org) for filtering, partitioning, and sorting dataframes. And discuss implementation decisions in the `dataframe` library.

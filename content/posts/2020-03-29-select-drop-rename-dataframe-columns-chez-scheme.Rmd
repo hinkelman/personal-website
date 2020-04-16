@@ -11,7 +11,7 @@ tags:
   - data-structures
   - association-list
   - dplyr
-draft: no
+draft: false
 ---
 
 This post is the second in a [series](/categories/dataframe/) on the [dataframe library](https://hinkelman.github.io/dataframe/) for Chez Scheme. In this post, I will contrast the `dataframe` library with functions from the [`dplyr` R package](https://dplyr.tidyverse.org) for selecting, dropping, and renaming columns.

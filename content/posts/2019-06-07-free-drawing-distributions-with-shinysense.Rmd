@@ -8,6 +8,7 @@ categories:
   - Shiny
 tags:
   - distributions
+draft: false
 ---
 One of the [areas of expertise at Cramer Fish Sciences](https://www.fishsciences.net/expertise/) is watershed and habitat restoration. In the context of that work, we are often faced with estimating how much rearing habitat is needed to support a specified number of juvenile salmonids (or how many juvenile salmonids are supported by a specified amount of rearing habitat). Our typical approach for generating these estimates is to use the territory size-fork length relationship from [Grant and Kramer (1990)](https://doi.org/10.1139/f90-197). To simplify that calculation, we often assume that all the fish are the same size. 
 

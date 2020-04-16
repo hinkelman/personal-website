@@ -13,6 +13,7 @@ tags:
   - flnormal-sample
   - flvector
   - distributions
+draft: false
 ---
 R makes it easy to generate random numbers from a wide variety of distributions with a consistent interface. For example, `runif`, `rnorm`, and `rpois` generate random numbers from uniform, normal, and Poisson distributions, respectively. 
 

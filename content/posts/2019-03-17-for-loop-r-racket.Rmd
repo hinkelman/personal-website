@@ -11,7 +11,9 @@ categories:
 tags:
   - Beverton-Holt
   - recursion
+draft: false
 ---
+
 ```{r include=FALSE}
 # this is just a convenience for future reference to nuke these up front vs
 # add to individual chunk options

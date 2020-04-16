@@ -12,6 +12,7 @@ tags:
   - ifelse
   - map
   - sapply
+draft: false
 ---
 
 In a [previous post](/post/for-loop-r-racket/), I wrote that Racket's `if` is similar to `ifelse` in R. That's not quite right. This is a short post to clarify the comparison. The more accurate description is that this Racket code

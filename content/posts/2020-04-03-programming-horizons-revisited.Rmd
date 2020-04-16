@@ -19,7 +19,7 @@ tags:
   - C++
   - JavaScript
   - Red
-draft: no
+draft: false
 ---
 
 In my [second post on this blog](/posts/programming-horizons/), I wrote about my interest in learning new programming languages and my thoughts on how to choose the next language to learn. It's been over a year since that post and I thought it would be worthwhile to reflect on what I've learned.

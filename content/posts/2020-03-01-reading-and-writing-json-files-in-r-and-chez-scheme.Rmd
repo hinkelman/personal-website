@@ -15,6 +15,7 @@ tags:
   - vector
   - array
   - object
+draft: false
 ---
 
 I have [previously written](/post/reading-writing-json-files-r-racket/) about how to read and write JSON files in R and Racket. In re-reading that old post, I'm struck by how it shows me tinkering without understanding. Now that I have pivoted [from learning Racket to learning Chez Scheme](/post/exploring-scheme-implementations/), I'm revisiting JSON as a data serialization format and actually reading about JSON instead of just playing with JSON packages. This [paper](https://arxiv.org/pdf/1403.2805.pdf) on the [`jsonlite` package](https://jeroen.cran.dev/jsonlite/index.html) for R was particularly helpful for improving my understanding. One short section succinctly conveys the most critical ideas.

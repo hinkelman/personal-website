@@ -10,6 +10,7 @@ tags:
   - Rcpp
   - TypedRacket
   - timing
+draft: false
 ---
 
 On my journey to [learn Racket](/categories/racket/), I look for small pieces of R code to try to implement in Racket. A [blog post](https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html) about speeding up population simulations in R with the [Rcpp package](http://www.rcpp.org) seemed like a good candidate for implementing in Racket. I was particularly interested in the (superficial?) parallels between R/Rcpp and Racket/[Typed Racket](https://docs.racket-lang.org/ts-guide/). 

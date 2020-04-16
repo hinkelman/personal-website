@@ -14,6 +14,7 @@ tags:
   - Raven
   - geiser
   - Linux
+draft: false
 ---
 
 I've been an enthusiastic Mac user for about 12 years, but hardware problems with a recent MacBook Pro and friction surrounding the Catalina upgrade pushed me to evaluate other Unix-like systems. I pulled out an old ASUS laptop that originally had Windows 7(?) installed, but was most recently running [CloudReady](https://www.neverware.com/freedownload). I first tried installing [FreeBSD](https://www.freebsd.org) because it seemed like an intriguing alternative, but the installation failed on the old hardware. I then tried [Debian](https://www.debian.org), but also failed. Finally, I reached for [Ubuntu](https://ubuntu.com) and, true to its reputation as being beginner friendly, was able to successfully complete the installation.^[During installation Ubuntu identified the apparent problem as related to numerous partitions from previous operating systems and provided the option to completely erase the old operating systems before installing Ubuntu. I'm sure that would also have been possible with FreeBSD and Debian, but Ubuntu made it easier to diagnose and address.]   

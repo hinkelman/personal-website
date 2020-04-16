@@ -10,6 +10,7 @@ tags:
   - libraries
   - packages
   - statistics
+draft: false
 ---
 
 I have added functionality for reading and writing CVS files to my Chez Scheme library, [`chez-stats`](https://github.com/hinkelman/chez-stats). In a [previous post](/post/reading-csv-files-in-r-and-racket/), I compared reading CSV files in R and Racket and made the following observation.

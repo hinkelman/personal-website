@@ -11,6 +11,7 @@ tags:
   - libraries
   - packages
   - statistics
+draft: false
 ---
 
 My little statistics library, [`chez-stats`](https://github.com/hinkelman/chez-stats), is now available for installation through [Raven](http://ravensc.com), a package manager for Chez Scheme. Raven aims to provide an easy-to-use tool for local package management. 

@@ -14,6 +14,7 @@ tags:
   - raart
   - table
   - time-apply
+draft: false
 ---
 In a [previous post](/post/stochastic-population-model-r-racket/), I wrote a function to perform repeated timings of untyped and typed versions of the same Racket functions. 
 

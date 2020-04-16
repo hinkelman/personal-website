@@ -13,6 +13,7 @@ tags:
   - extensions
   - Raven
   - geiser
+draft: false
 ---
 
 I [recently decided](/post/exploring-scheme-implementations/) to switch my attention from learning [Racket](https://racket-lang.org) to [Chez Scheme](https://cisco.github.io/ChezScheme/). One of the reasons that I [chose Racket](/post/programming-horizons/) was because of how easy it is to get up and running. Setting up a development environment for Chez requires jumping through a few more hoops. In this post, I document those hoops. Disclaimer: The suggestions in this post may not represent best practice. I will update the post as I become more experienced with Chez and Emacs.

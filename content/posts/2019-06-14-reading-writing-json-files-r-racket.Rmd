@@ -15,6 +15,7 @@ tags:
   - matrix
   - array
   - vector
+draft: false
 ---
 
 In learning about [reading CSV files in Racket](/post/reading-csv-files-in-r-and-racket/), I have started to reconsider whether storing small(ish) datasets in CSV files is the best default behavior.^[I even used CSV files as a [database replacement](/post/dt-datatable-crud/) in my [Shiny Scorekeeper app](/project/shiny-scorekeeper/).] My default was set by primarily working in R, where reading and writing CSV files plays a central role in data analysis. When working solely in R, I expect that my old habits will die hard and CSV files will continue to play a prominent role. However, when passing small(ish) data between R and Racket, I think JSON might be a better alternative.^[See also [this post](/posts/reading-and-writing-json-files-in-r-and-chez-scheme/) for more on reading and writing JSON files.]
