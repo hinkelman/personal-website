@@ -166,6 +166,21 @@ a:visited {
   color: $gray-medium;
 }
 
+.category {
+  margin-right: 0.75em;
+  margin-bottom: 1em;
+  line-height: 1.75em;
+  color: $gray-light;
+}
+
+.category:visited {
+  color: $gray-light;
+}
+
+.category:hover {
+  color: $gray-medium;
+}
+
 // ARTICLE FORMATTING
 time {
   margin-right: 1.5em;

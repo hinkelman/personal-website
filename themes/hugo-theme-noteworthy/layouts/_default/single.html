@@ -1,20 +1,26 @@
 {{ define "main" }}
 <h1 class="post-title">{{ .Title }}</h1>
-    <time>{{ .Date.Format "January 2, 2006" }}</time>
+    <time>{{ .Date.Format "January 02, 2006" }}</time>
     <div>
         <p>
         {{ .Content }}
         </p>
     </div>
     {{ template "_internal/disqus.html" . }}
-
+            
     <div class="page-footer">
-        {{if .Params.tags}}
-        <hr class="footer-divider">
-        {{ range .Params.tags }}
-            <a class="tag" href="/tags/{{ . | urlize }}">#{{.}}</a>
+      <hr class="footer-divider">
+        {{if .Params.categories}}
+          {{ range .Params.categories }}
+              <a class="category" href="/categories/{{ . | urlize }}">{{.}}</a>
+          {{ end }}
         {{ end }}
-      {{ end }}
+        
+        {{if .Params.tags}}
+          {{ range .Params.tags }}
+              <a class="tag" href="/tags/{{ . | urlize }}">#{{.}}</a>
+          {{ end }}
+        {{ end }}
     </div>
 
 {{end}}

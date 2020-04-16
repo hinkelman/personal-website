@@ -1,0 +1,37 @@
+{{ define "main" }}
+<!-- Page that displays after clicking on a post's category -->
+  <h1>Categorized as "{{ .Data.Term }}"</h1>
+  {{range .Pages}}
+  
+    <!-- Display the posts with the category -->
+    <article>
+            <h2>
+                <a href="{{ .Permalink }}">
+                    {{ .Title }}
+                </a>
+            </h2>
+            <div>
+                <p>
+                {{ .Summary }}
+                </p>
+            </div>
+            <div class="post-footer">
+            <time>{{ .Date.Format "January 02, 2006" }}</time>
+            <!-- Display categories -->
+            {{if .Params.categories}}
+                {{ range .Params.categories }}
+                   <a class="category" href="/categories/{{ . | urlize }}">{{.}}</a>
+                {{ end }}
+            {{ end }}
+            
+            <!-- Display tags -->
+            {{if .Params.tags}}
+                {{ range .Params.tags }}
+                    <a class="tag" href="/tags/{{ . | urlize }}">#{{.}}</a>
+                {{ end }}
+            {{ end }}
+            </div> 
+        </article>
+    {{ end }}
+
+{{ end }}

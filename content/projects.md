@@ -1,6 +1,6 @@
 ---
-date: "2020-03-02"
 title: Projects
+layout: page
 type: section
 ---
 
