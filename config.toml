@@ -3,8 +3,8 @@ languageCode = "en-us"
 title = "Travis Hinkelman"
 theme = "hugo-theme-noteworthy"
 enableRobotsTXT = true
-paginate = 5 # Set the number of posts to show before overflowing to the next page.
-summaryLength = 20 # Configure how long the post summary should be on the homepage.
+paginate = 3 # Set the number of posts to show before overflowing to the next page.
+summaryLength = 30 # Configure how long the post summary should be on the homepage.
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]  # Warning from blogdown(?) recommended to add this line
 # Add your Disqus shortname here.
 disqusShortname = ""      
