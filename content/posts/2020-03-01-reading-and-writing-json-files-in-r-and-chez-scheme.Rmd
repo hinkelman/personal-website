@@ -3,9 +3,7 @@ title: Reading and writing JSON files in R and Chez Scheme
 author: Travis Hinkelman
 date: '2020-03-01'
 slug: reading-and-writing-json-files-in-r-and-chez-scheme
-categories:
-  - R
-  - ChezScheme
+categories: ["R", "Chez Scheme"]
 tags:
   - JSON
   - data-structures

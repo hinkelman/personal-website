@@ -3,10 +3,7 @@ title: Exploring Scheme implementations
 author: Travis Hinkelman
 date: '2019-07-28'
 slug: exploring-scheme-implementations
-categories:
-  - Racket
-  - Chicken
-  - ChezScheme
+categories: ["Chez Scheme", "Racket", "Chicken"]
 tags: []
 draft: false
 ---

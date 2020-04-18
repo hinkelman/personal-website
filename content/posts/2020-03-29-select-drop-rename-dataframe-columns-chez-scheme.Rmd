@@ -3,9 +3,7 @@ title: Select, drop, and rename dataframe columns in Chez Scheme
 author: Travis Hinkelman
 date: '2020-03-29'
 slug: select-drop-rename-dataframe-columns-chez-scheme
-categories:
-  - dataframe
-  - ChezScheme
+categories: ["dataframe", "Chez Scheme"]
 tags:
   - dataframe
   - data-structures

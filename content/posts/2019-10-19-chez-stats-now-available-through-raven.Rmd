@@ -3,10 +3,7 @@ title: chez-stats is now available through Raven
 author: Travis Hinkelman
 date: '2019-10-19'
 slug: chez-stats-now-available-through-raven
-categories:
-  - ChezScheme
-  - chez-stats
-  - Raven
+categories: ["chez-stats", "Raven", "Chez Scheme"]
 tags:
   - libraries
   - packages

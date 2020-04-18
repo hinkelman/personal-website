@@ -3,10 +3,8 @@ title: Filter, partition, and sort dataframes in Chez Scheme
 author: Travis Hinkelman
 date: '2020-04-09'
 slug: filter-partition-and-sort-dataframes-in-chez-scheme
-categories:
-  - ChezScheme
-  - dataframe
-tags:
+categories: ["dataframe", "Chez Scheme"]
+tags: 
   - dataframe
   - data-structures
   - association-list
