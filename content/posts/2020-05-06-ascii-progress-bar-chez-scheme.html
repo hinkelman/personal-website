@@ -15,9 +15,10 @@ draft: false
 
 
 
-<p>As an impatient person, I typically use progress bars for any code that takes more than a few minutes to run. In a <a href="/posts/ascii-progress-bar-in-r-and-racket">previous post</a>, I wrote about creating ASCII progress bars in R and Racket. The Racket version depended on the <a href="https://docs.racket-lang.org/raart/index.html"><code>raart</code> module</a>, which “provides an algebraic model of ASCII that can be used for art, user interfaces, and diagrams.” Because I’m not aware of any such library for Chez Scheme,<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, I was left feeling stuck.</p>
+<p>As an impatient person, I typically use progress bars for any code that takes more than a few minutes to run. In a <a href="/posts/ascii-progress-bar-in-r-and-racket">previous post</a>, I wrote about creating ASCII progress bars in R and Racket. The Racket version depended on the <a href="https://docs.racket-lang.org/raart/index.html"><code>raart</code> module</a>, which “provides an algebraic model of ASCII that can be used for art, user interfaces, and diagrams.” Because I’m not aware of any such library for Chez Scheme,<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> I was left feeling stuck.</p>
 <p>Eventually, I found the correct combination of search terms and learned that the <a href="https://unix.stackexchange.com/questions/43075/how-to-change-the-contents-of-a-line-on-the-terminal-as-opposed-to-writing-a-new">solution is simple</a>.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> The carriage return (<code>\r</code>) resets the cursor to the beginning of the line of output and allows for overwriting the previous content, which creates the animated effect of a progress bar advancing.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
-<p>Armed with this new knowledge, I modified my old Racket code to make a progress bar that works in Chez Scheme and Racket. In the old Racket code, I wrote inflexible procedures that required the user to provide percent progress as an integer. We will relax that requirement and provide an option to change the width of the progress bar. The first step is to write a procedure that will generate the text for a single iteration of the progress bar.</p>
+<p>Armed with this new knowledge, I modified my old Racket code to make a progress bar that works in Chez Scheme and Racket. In the old Racket code, I wrote inflexible procedures that required the user to provide percent progress as an integer. We will relax that requirement and provide an option to change the width of the progress bar.</p>
+<p>The first step is to write a procedure that will generate the text for a single iteration of the progress bar.</p>
 <pre><code>;; tick doesn&#39;t mean iteration here
 ;; it means number of symbols displayed on progress bar
 (define (generate-bar tick percent total-width)
@@ -38,7 +39,7 @@ draft: false
      places-string
      (number-&gt;string percent)
      &quot;%&quot;)))</code></pre>
-<p><code>generate-bar</code> simply draws the inputs without doing any calculations. <code>total-width</code> is measured in the number of characters. A <code>tick</code> is a single character to indicate completion.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> The <code>places-string</code> is used to make sure that the percent completed number always fills 3 characters so that the total length of the bar doesn’t change and distract from the intended animation effect.</p>
+<p><code>generate-bar</code> simply draws the inputs without doing any calculations. <code>total-width</code> is measured in the number of characters. A <code>tick</code> is a single character to indicate completion.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> The <code>places-string</code> keeps the percent completed number at 3 characters so that the total length of the bar doesn’t change and distract from the intended animation effect.</p>
 <pre><code>&gt; (display (generate-bar 8 20 40))
   [=======&gt;--------------------------------] 20%</code></pre>
 <p>Now, we need a procedure that will draw a new progress bar on every iteration. I’m using <code>case-lambda</code> to make the <code>total-width</code> argument optional.<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> <code>case-lambda</code> matches on the number of arguments to select which branch to follow. In this case, I use recursion for the branch where <code>total-width</code> is not specified. At other times, I’ve used a helper procedure that contains all the core logic and uses all of the arguments. In that case, <code>case-lambda</code> is a wrapper for the helper procedure and is not recursive.</p>
@@ -58,7 +59,7 @@ draft: false
           [else (progress i n)
                 (sleep (make-time &#39;time-duration (flonum-&gt;fixnum 1e8) 0))
                 (loop (add1 i))])))</code></pre>
-<p>As an alternative to a progress bar, you could just update a counter. In the example below, if you call <code>(use-progress-simple 10)</code>, then the first number in the string, <code>Rep 0 of 10</code>, will be replaced in each iteration.<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a></p>
+<p>As an alternative to a progress bar, you could just update a counter. In the example below, if you call <code>(use-progress-simple 10)</code>, then the first number in the string, <code>Rep 0 of 10</code>, will be incremented in each iteration.</p>
 <pre><code>(define (use-progress-simple n)
   (let ([n-string (number-&gt;string n)])
     (let loop ([i 0])
@@ -85,6 +86,5 @@ draft: false
 <li id="fn3"><p>After filling my carriage return knowledge gap, it is clear that the <code>raart</code> module was overkill for this simple progress bar.<a href="#fnref3" class="footnote-back">↩</a></p></li>
 <li id="fn4"><p>I’ve chosen <code>=</code> as the completion character following the style of R’s <a href="https://github.com/r-lib/progress"><code>progress</code> package</a>.<a href="#fnref4" class="footnote-back">↩</a></p></li>
 <li id="fn5"><p>I chose 80 as the default <code>total-width</code> because that is the default width of the macOS Terminal app. If the <code>total-width</code> is wider than your terminal width, then your bar will flow over to the next line and the overwriting will happen on the wrong line.<a href="#fnref5" class="footnote-back">↩</a></p></li>
-<li id="fn6"><p>Actually, the whole string is replaced, but it looks like just the first number is replaced.<a href="#fnref6" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

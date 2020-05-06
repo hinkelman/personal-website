@@ -13,11 +13,13 @@ tags:
 draft: false
 ---
 
-As an impatient person, I typically use progress bars for any code that takes more than a few minutes to run. In a [previous post](/posts/ascii-progress-bar-in-r-and-racket), I wrote about creating ASCII progress bars in R and Racket. The Racket version depended on the [`raart` module](https://docs.racket-lang.org/raart/index.html), which "provides an algebraic model of ASCII that can be used for art, user interfaces, and diagrams." Because I'm not aware of any such library for Chez Scheme,^[I also made a [GUI progress bar for Racket](/posts/progress-bar-widget-in-r-and-racket/) but Chez Scheme doesn't have easy (any?) GUI capabilities so that was not an option here.], I was left feeling stuck.
+As an impatient person, I typically use progress bars for any code that takes more than a few minutes to run. In a [previous post](/posts/ascii-progress-bar-in-r-and-racket), I wrote about creating ASCII progress bars in R and Racket. The Racket version depended on the [`raart` module](https://docs.racket-lang.org/raart/index.html), which "provides an algebraic model of ASCII that can be used for art, user interfaces, and diagrams." Because I'm not aware of any such library for Chez Scheme,^[I also made a [GUI progress bar for Racket](/posts/progress-bar-widget-in-r-and-racket/) but Chez Scheme doesn't have easy (any?) GUI capabilities so that was not an option here.] I was left feeling stuck.
 
 Eventually, I found the correct combination of search terms and learned that the [solution is simple](https://unix.stackexchange.com/questions/43075/how-to-change-the-contents-of-a-line-on-the-terminal-as-opposed-to-writing-a-new).^[I subsequently noticed that the carriage return "trick" was included in [code for a C++ progress bar](http://navjodh.com/general-programming/creating-an-ascii-progress-bar-in-c/), but carriage return was not explicitly mentioned.] The carriage return (`\r`) resets the cursor to the beginning of the line of output and allows for overwriting the previous content, which creates the animated effect of a progress bar advancing.^[After filling my carriage return knowledge gap, it is clear that the `raart` module was overkill for this simple progress bar.] 
 
-Armed with this new knowledge, I modified my old Racket code to make a progress bar that works in Chez Scheme and Racket. In the old Racket code, I wrote inflexible procedures that required the user to provide percent progress as an integer. We will relax that requirement and provide an option to change the width of the progress bar. The first step is to write a procedure that will generate the text for a single iteration of the progress bar.
+Armed with this new knowledge, I modified my old Racket code to make a progress bar that works in Chez Scheme and Racket. In the old Racket code, I wrote inflexible procedures that required the user to provide percent progress as an integer. We will relax that requirement and provide an option to change the width of the progress bar. 
+
+The first step is to write a procedure that will generate the text for a single iteration of the progress bar.
 
 ```
 ;; tick doesn't mean iteration here
@@ -42,7 +44,7 @@ Armed with this new knowledge, I modified my old Racket code to make a progress 
      "%")))
 ```
 
-`generate-bar` simply draws the inputs without doing any calculations. `total-width` is measured in the number of characters. A `tick` is a single character to indicate completion.^[I've chosen `=` as the completion character following the style of R's [`progress` package](https://github.com/r-lib/progress).] The `places-string` is used to make sure that the percent completed number always fills 3 characters so that the total length of the bar doesn't change and distract from the intended animation effect.
+`generate-bar` simply draws the inputs without doing any calculations. `total-width` is measured in the number of characters. A `tick` is a single character to indicate completion.^[I've chosen `=` as the completion character following the style of R's [`progress` package](https://github.com/r-lib/progress).] The `places-string` keeps the percent completed number at 3 characters so that the total length of the bar doesn't change and distract from the intended animation effect.
 
 ```
 > (display (generate-bar 8 20 40))
@@ -75,7 +77,7 @@ The `progress` procedure does the math to generate the progress bar and uses the
                 (loop (add1 i))])))
 ```
 
-As an alternative to a progress bar, you could just update a counter. In the example below, if you call `(use-progress-simple 10)`, then the first number in the string, `Rep 0 of 10`, will be replaced in each iteration.^[Actually, the whole string is replaced, but it looks like just the first number is replaced.]
+As an alternative to a progress bar, you could just update a counter. In the example below, if you call `(use-progress-simple 10)`, then the first number in the string, `Rep 0 of 10`, will be incremented in each iteration.
 
 ```
 (define (use-progress-simple n)
