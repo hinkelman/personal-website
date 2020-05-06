@@ -24,7 +24,7 @@ for (i in 1:100) {
 
 [==============================&gt;-------------------------------]  50%</code></pre>
 <p>The basic progress bar only requires specifiying the total number of iterations. A default label is produced automatically. The progress bar is customizable (messages, characters, etc.) and works from the command line, Emacs, and RStudio.</p>
-<p>My attempt to create an ASCII progress bar in Racket falls <strong>far</strong> short of the capabilities of the <code>progress</code> package. My Racket ASCII progress bar uses the functionality provided by the <a href="https://docs.racket-lang.org/raart/"><code>raart</code> package</a>, which I also used to format the tabular output of a <a href="/post/microbenchmarking-in-r-and-racket/">microbenchmarking function</a>.</p>
+<p>My attempt to create an ASCII progress bar in Racket falls <strong>far</strong> short of the capabilities of the <code>progress</code> package.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> My Racket ASCII progress bar uses the functionality provided by the <a href="https://docs.racket-lang.org/raart/"><code>raart</code> package</a>, which I also used to format the tabular output of a <a href="/post/microbenchmarking-in-r-and-racket/">microbenchmarking function</a>.</p>
 <pre><code>#lang racket
 
 (require raart)
@@ -133,18 +133,19 @@ for (i in 1:100) {
 [================================================&gt;-] 99%
 &gt; (draw-here (generate-bar 100))
 [=================================================&gt;]100%</code></pre>
-<p><a href="https://docs.racket-lang.org/raart/index.html?q=make-cached-buffer#%28def._%28%28lib._raart%2Fbuffer..rkt%29._make-cached-buffer%29%29"><code>make-cached-buffer</code></a> creates a buffer (1 row x 70 columns) and allows for the progress bar in the buffer to be updated.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> When the loop finishes, <code>newline</code> places the cursor on the next line instead of at the end of the progress bar.</p>
+<p><a href="https://docs.racket-lang.org/raart/index.html?q=make-cached-buffer#%28def._%28%28lib._raart%2Fbuffer..rkt%29._make-cached-buffer%29%29"><code>make-cached-buffer</code></a> creates a buffer (1 row x 70 columns) and allows for the progress bar in the buffer to be updated.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> When the loop finishes, <code>newline</code> places the cursor on the next line instead of at the end of the progress bar.</p>
 <pre><code>(define buffer (make-cached-buffer 1 70))
 (for ([i (in-range 0 101)])
   (sleep 0.05)
   (draw buffer (generate-bar i)))
 (newline)</code></pre>
-<p>I was able to produce a minimal working ASCII progress bar, but it only works from the command line.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> Because Racket programs are generally faster when run from the command line than through DrRacket, this is probably not a limitation. If you have a long-running program that you want to monitor with a progress bar, then you will probably want to run it from the command line anyway.</p>
+<p>I was able to produce a minimal working ASCII progress bar, but it only works from the command line.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> Because Racket programs are generally faster when run from the command line than through DrRacket, this is probably not a limitation. If you have a long-running program that you want to monitor with a progress bar, then you will probably want to run it from the command line anyway.</p>
 <p>Ultimately, I’m not very satisfied with my ASCII progress bar in Racket. But this exercise has given me a new appreciation for the excellence of the R <code>progress</code> package and Racket’s GUI toolkit.</p>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>Using <code>draw-here</code> in the loop would draw 101 progress bars.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>You can run Racket files from the command line with, for example, <code>racket progress.rkt</code> after changing the directory (or specifying the full path to the file).<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>In trying to make a progress bar for Chez Scheme, I realized that Racket’s <code>raart</code> package was overkill for this task. See <a href="/posts/ascii-progress-bar-chez-scheme/">this post</a> for my updated approach with code that works in Chez Scheme and Racket.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>Using <code>draw-here</code> in the loop would draw 101 progress bars.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>You can run Racket files from the command line with, for example, <code>racket progress.rkt</code> after changing the directory (or specifying the full path to the file).<a href="#fnref3" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

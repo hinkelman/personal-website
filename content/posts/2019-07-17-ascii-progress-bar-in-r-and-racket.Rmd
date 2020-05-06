@@ -27,7 +27,7 @@ for (i in 1:100) {
 
 The basic progress bar only requires specifiying the total number of iterations. A default label is produced automatically. The progress bar is customizable (messages, characters, etc.) and works from the command line, Emacs, and RStudio.
 
-My attempt to create an ASCII progress bar in Racket falls **far** short of the capabilities of the `progress` package. My Racket ASCII progress bar uses the functionality provided by the [`raart` package](https://docs.racket-lang.org/raart/), which I also used to format the tabular output of a [microbenchmarking function](/post/microbenchmarking-in-r-and-racket/).
+My attempt to create an ASCII progress bar in Racket falls **far** short of the capabilities of the `progress` package.^[In trying to make a progress bar for Chez Scheme, I realized that Racket's `raart` package was overkill for this task. See [this post](/posts/ascii-progress-bar-chez-scheme/) for my updated approach with code that works in Chez Scheme and Racket.] My Racket ASCII progress bar uses the functionality provided by the [`raart` package](https://docs.racket-lang.org/raart/), which I also used to format the tabular output of a [microbenchmarking function](/post/microbenchmarking-in-r-and-racket/).
 
 ```
 #lang racket
