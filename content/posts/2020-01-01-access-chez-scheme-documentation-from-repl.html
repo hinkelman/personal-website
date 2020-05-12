@@ -6,6 +6,7 @@ slug: access-chez-scheme-documentation-from-repl
 categories: ["chez-docs", "Chez Scheme", "R"]
 tags:
   - rvest
+  - web-scraping
   - tsv
   - association-list
   - system
@@ -15,7 +16,7 @@ draft: false
 
 
 <p>In the process of learning Chez Scheme, I’ve missed R’s ability to quickly pull up documentation from the console via <a href="https://www.r-project.org/help.html"><code>help</code> or <code>?</code></a>. I’ve toyed with the idea of trying to format the contents of the <a href="https://cisco.github.io/ChezScheme/csug9.5/">Chez Scheme User’s Guide</a> for display in the REPL (similar to <a href="https://clojuredocs.org/clojure.repl/doc">Clojure Docs</a>). But that is probably too big of a task for me at this point. It recently occurred to me, though, that I can write a simple library, <a href="https://github.com/hinkelman/chez-docs"><code>chez-docs</code></a>, with only one procedure, <code>doc</code>, that will make it a bit easier to access the Chez Scheme User’s Guide.</p>
-<p>My typical entry point to learning about Chez Scheme is the <a href="https://cisco.github.io/ChezScheme/csug9.5/summary.html">Summary of Forms</a> page of the Chez Scheme User’s Guide. The simple idea behind <code>chez-docs</code> is to scrape the data from the Summary of Forms page and write a procedure that opens links to the documentation from the REPL.</p>
+<p>My typical entry point to learning about Chez Scheme is the <a href="https://cisco.github.io/ChezScheme/csug9.5/summary.html">Summary of Forms</a> page of the Chez Scheme User’s Guide. The simple idea behind <code>chez-docs</code> is to scrape<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> the data from the Summary of Forms page and write a procedure that opens links to the documentation from the REPL.</p>
 <div id="web-scraping-with-r" class="section level3">
 <h3>Web Scraping with R</h3>
 <p>I used the <a href="http://rvest.tidyverse.org"><code>rvest</code> package</a> for R to scrape the data from the Summary of Forms page. First, I downloaded the page and opened it in a text editor to see how the table was structured. Then, I extracted the URLs by drilling down into the nodes of the HTML document and retrieving the contents of the <code>href</code> attribute.</p>
@@ -91,25 +92,19 @@ out &lt;- bind_rows(source_list)</code></pre>
 </div>
 <div id="data-preparation-with-chez-scheme" class="section level3">
 <h3>Data Preparation with Chez Scheme</h3>
-<p>First, I needed to make a small modification to my <a href="https://github.com/hinkelman/chez-stats/blob/dev/csv.ss"><code>csv</code> library</a> to read TSV files. Then, I read each TSV file, dropped the header row, and converted each row into an association list where the first element of the row is the key and values are represented by a list of the other two values in the row (i.e., forms and URLs). The two association lists were then combined to create a nested association list, which was written to file.</p>
+<p>First, I needed to make a small modification to my <a href="https://github.com/hinkelman/chez-stats/blob/dev/csv.ss"><code>csv</code> library</a> to read TSV files. Then, I read each TSV file, dropped the header row, and combine the two lists into a list for writing to file.</p>
 <pre><code>(import (chez-stats chez-stats))
 
-(define csug (cdr (read-tsv &quot;R/CSUG.tsv&quot;)))
-(define tspl (cdr (read-tsv &quot;R/TSPL.tsv&quot;)))
+(define data (list (cons &#39;csug (cdr (read-tsv &quot;R/CSUG.tsv&quot;)))
+                   (cons &#39;tspl (cdr (read-tsv &quot;R/TSPL.tsv&quot;)))))
 
-(define csug-alist (map (lambda (x) (list (car x) (cdr x))) csug))
-(define tspl-alist (map (lambda (x) (list (car x) (cdr x))) tspl))
-
-(define data (list (list &quot;CSUG&quot; csug-alist)
-                   (list &quot;TSPL&quot; tspl-alist)))
-
-(with-output-to-file &quot;data.scm&quot; (lambda () (write data)))</code></pre>
+(with-output-to-file &quot;chez-docs-data.scm&quot; (lambda () (write data)))</code></pre>
 </div>
 <div id="reading-data-in-chez-scheme-library" class="section level3">
 <h3>Reading Data in Chez Scheme Library</h3>
-<p>To read the data when <code>chez-docs</code> is loaded, we need to identify the path where the data is located. For <code>(import (chez-docs docs))</code> to work, the user needs to have installed <code>chez-docs</code> in a directory found by <code>(library-directories)</code> (see this <a href="/post/getting-started-with-chez-scheme-and-emacs/">blog post</a> for more information on library directories). Thus, we can loop through the list of library directories to find the file location and read the data.</p>
+<p>To read the data when <code>chez-docs</code> is loaded, we need to identify the path where the data is located. For <code>(import (chez-docs))</code> to work, the user needs to have <code>chez-docs.ss</code> and <code>chez-docs-data.scm</code> in a directory found by <code>(library-directories)</code><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. Thus, we can loop through the list of library directories to find the file location and read the data.</p>
 <pre><code>(define data-paths
-  (map (lambda (x) (string-append x &quot;/chez-docs/data.scm&quot;))
+  (map (lambda (x) (string-append x &quot;/chez-docs-data.scm&quot;))
        (map car (library-directories))))
 
 (define data
@@ -126,50 +121,54 @@ out &lt;- bind_rows(source_list)</code></pre>
 <p>The main procedure in <code>chez-docs</code> is <code>doc</code>, which uses <code>case-lambda</code> to handle optional arguments with default values.</p>
 <pre><code>(define doc
   (case-lambda
-    [(proc) (doc-helper proc &quot;both&quot; #t)]
-    [(proc source) (doc-helper proc source #t)]
-    [(proc source launch?) (doc-helper proc source launch?)]))</code></pre>
+    [(proc) (doc-helper proc &#39;open-link &#39;both)]
+    [(proc action) (doc-helper proc action &#39;both)]
+    [(proc action source) (doc-helper proc action source)]))</code></pre>
 <p><code>data-lookup</code> checks that the strings passed as arguments are valid and returns a list of the association lists for <code>proc</code> from the <code>data</code> object created above.</p>
 <pre><code>(define (data-lookup proc source)
-  (cond [(or (string=? source &quot;CSUG&quot;) (string=? source &quot;TSPL&quot;))
-         (list (dl-helper proc source))]
-        [(string=? source &quot;both&quot;)
-         (let ([csug (dl-helper proc &quot;CSUG&quot;)]
-               [tspl (dl-helper proc &quot;TSPL&quot;)])
+  (cond [(or (symbol=? source &#39;csug) (symbol=? source &#39;tspl))
+         (let ([result (dl-helper proc source)])
+           (if result
+               (list result) 
+               (assertion-violation &quot;(doc proc action source)&quot;
+                                    (string-append proc &quot; not found in &quot; (symbol-&gt;string source)))))]
+        [(symbol=? source &#39;both)
+         (let ([csug (dl-helper proc &#39;csug)]
+               [tspl (dl-helper proc &#39;tspl)])
            (if (or csug tspl)
                (list csug tspl)
-               (assertion-violation &quot;(doc proc)&quot; &quot;procedure not found&quot;)))]
+               (assertion-violation &quot;(doc proc)&quot; (string-append proc &quot; not found in csug or tspl&quot;))))]
         [else
-         (assertion-violation &quot;(doc proc source)&quot; &quot;source not one of CSUG, TSPL, both&quot;)]))
+         (assertion-violation &quot;(doc proc action source)&quot; &quot;source not one of &#39;csug, &#39;tspl, &#39;both&quot;)]))
          
 ;; data is imported above
 (define (dl-helper proc source)
-  (assoc proc (cadr (assoc source data)))) </code></pre>
-<p>When using <code>data-lookup</code> on <code>&lt;</code>, we see that there is an entry for <code>&lt;</code> in both CSUG and TPSL as there is an association list returned for both elements of the list.</p>
-<pre><code>&gt; (data-lookup &quot;&lt;&quot; &quot;both&quot;)
-((&quot;&lt;&quot; (&quot;(&lt; real1 real2 real3 ...)&quot;
-        &quot;https://cisco.github.io/ChezScheme/csug9.5/numeric.html#./numeric:s67&quot;))
-  (&quot;&lt;&quot; (&quot;(&lt; real1 real2 real3 ...)&quot;
-         &quot;https://scheme.com/tspl4/objects.html#./objects:s88&quot;)))</code></pre>
+  (assoc proc (cdr (assoc source data)))) </code></pre>
+<p>When using <code>data-lookup</code> on <code>&lt;</code>, a 2-element list is returned indicating that there is an entry for <code>&lt;</code> in both CSUG and TPSL.</p>
+<pre><code>&gt; (data-lookup &quot;&lt;&quot; &#39;both)
+((&quot;&lt;&quot; &quot;(&lt; real1 real2 real3 ...)&quot;
+        &quot;https://cisco.github.io/ChezScheme/csug9.5/numeric.html#./numeric:s67&quot;)
+  (&quot;&lt;&quot; &quot;(&lt; real1 real2 real3 ...)&quot;
+         &quot;https://scheme.com/tspl4/objects.html#./objects:s88&quot;))</code></pre>
 <p>If <code>proc</code> is only found in one source, and both are requested, then one element of the returned list will be <code>#f</code>.</p>
-<pre><code>&gt; (data-lookup &quot;map&quot; &quot;both&quot;)
+<pre><code>&gt; (data-lookup &quot;map&quot; &#39;both)
 (#f (&quot;map&quot;
-      (&quot;(map procedure list1 list2 ...)&quot;
-        &quot;https://scheme.com/tspl4/control.html#./control:s30&quot;)))</code></pre>
-<p><code>display-launch</code> takes an association list, <code>data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. When <code>launch?</code> is <code>#t</code>, <code>display-launch</code> makes a system call to <code>open</code> (macOS), <code>xdg-open</code> (Linux), or <code>start</code> (Windows) and requires an internet connection.</p>
-<pre><code>(define (display-launch data-selected launch?)
+      &quot;(map procedure list1 list2 ...)&quot;
+      &quot;https://scheme.com/tspl4/control.html#./control:s30&quot;))</code></pre>
+<p><code>display-form-open</code> takes a list, <code>data-selected</code>, returned by <code>data-lookup</code>, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. When <code>action</code> is <code>'open-link</code>, <code>display-form-open</code> makes a system call to <code>open</code> (macOS), <code>xdg-open</code> (Linux), or <code>start</code> (Windows) and requires an internet connection.</p>
+<pre><code>(define (display-form-open data-selected action)
   (when data-selected
-    (display (replace-tilde (string-append (caadr data-selected) &quot;\n&quot;)))
-    (when launch?
-      (system (string-append open-string (cadadr data-selected))))))</code></pre>
+    (display (replace-tilde (string-append (cadr data-selected) &quot;\n&quot;)))
+    (when (symbol=? action &#39;open-link)
+      (system (string-append open-string (caddr data-selected))))))</code></pre>
 <p><code>(machine-type)</code> is used to determine the system-specific string, <code>open-string</code>, for use in the system call.</p>
 <pre><code>(define open-string
   (case (machine-type)
     [(i3nt ti3nt a6nt ta6nt) &quot;start &quot;]     ; windows
     [(i3osx ti3osx a6osx ta6osx) &quot;open &quot;]  ; mac
     [else &quot;xdg-open &quot;]))                   ; linux</code></pre>
-<p>When <code>launch?</code> is <code>#f</code>, <code>display-launch</code> simply displays the form(s) for the specified <code>proc</code>, which is helpful if you can’t remember the order of arguments for a procedure.</p>
-<pre><code>&gt; (display-launch (car (data-lookup &quot;append&quot; &quot;TSPL&quot;)) #f)
+<p>When <code>action</code> is <code>'display-form</code>, <code>display-form-open</code> simply displays the form(s) for the specified <code>proc</code>, which is helpful if you can’t remember the order of arguments for a procedure.</p>
+<pre><code>&gt; (display-form-open (car (data-lookup &quot;append&quot; &quot;TSPL&quot;)) #f)
 (append)
 (append list ... obj)</code></pre>
 <p>For multi-line display of forms, the <code>~</code> added in R to separate forms is replaced with <code>\n</code> using <code>replace-tilde</code>.</p>
@@ -186,20 +185,29 @@ out &lt;- bind_rows(source_list)</code></pre>
                  (loop (read-char in) (string-append result &quot;\n&quot;))]
                 [else
                  (loop (read-char in) (string-append result (string c)))])))))</code></pre>
-<p>The last piece is <code>doc-helper</code>, which loops through the output of <code>data-lookup</code> and passes it to <code>display-launch</code>.</p>
-<pre><code>(define (doc-helper proc source launch?)
-  (define (loop ls)
+<p>The last piece is <code>doc-helper</code>, which loops through the output of <code>data-lookup</code> and passes it to <code>display-form-open</code>.</p>
+<pre><code>(define (doc-helper proc action source)
+  (unless (or (symbol=? action &#39;open-link)
+              (symbol=? action &#39;display-form))
+    (assertion-violation &quot;(doc proc action)&quot; &quot;action not one of &#39;open-link or &#39;display-form&quot;))
+  (let loop ([ls (data-lookup proc source)])
     (cond [(null? ls) (void)]
           [else
-           (display-launch (car ls) launch?)
-           (loop (cdr ls))]))
-  (loop (data-lookup proc source)))</code></pre>
+           (display-form-open (car ls) action)
+           (loop (cdr ls))])))</code></pre>
 <p>The downside of this approach is that if a <code>proc</code> is found in both sources with the same form, then it will be displayed twice. I decided this behavior isn’t sufficiently annoying to take the extra steps to prevent it from happening.</p>
-<pre><code>&gt; (doc &quot;&lt;&quot; &quot;both&quot; #f)
+<pre><code>&gt; (doc &quot;&lt;&quot; &#39;display-form)
 (&lt; real1 real2 real3 ...)
 (&lt; real1 real2 real3 ...)</code></pre>
 </div>
 <div id="conclusions" class="section level3">
 <h3>Conclusions</h3>
 <p>This was a fun little project. When I first had the idea, I was really excited because I worked out all of the initial code in less than 2 hours. But, when I started to write this blog post, I started to discover all of the little problems that didn’t occur to me initially. Nonetheless, I think that I might have produced something reasonably useful for myself from a modest effort.</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Scraping code is in a <a href="https://github.com/hinkelman/chez-docs-scrape">different repository</a> than <code>chez-docs</code>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>See this <a href="/post/getting-started-with-chez-scheme-and-emacs/">blog post</a> for more information on library directories.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+</ol>
 </div>

@@ -6,6 +6,7 @@ slug: access-chez-scheme-documentation-from-repl
 categories: ["chez-docs", "Chez Scheme", "R"]
 tags:
   - rvest
+  - web-scraping
   - tsv
   - association-list
   - system
@@ -14,7 +15,7 @@ draft: false
 
 In the process of learning Chez Scheme, I've missed R's ability to quickly pull up documentation from the console via [`help` or `?`](https://www.r-project.org/help.html). I've toyed with the idea of trying to format the contents of the [Chez Scheme User's Guide](https://cisco.github.io/ChezScheme/csug9.5/) for display in the REPL (similar to [Clojure Docs](https://clojuredocs.org/clojure.repl/doc)). But that is probably too big of a task for me at this point. It recently occurred to me, though, that I can write a simple library, [`chez-docs`](https://github.com/hinkelman/chez-docs), with only one procedure, `doc`, that will make it a bit easier to access the Chez Scheme User's Guide. 
 
-My typical entry point to learning about Chez Scheme is the [Summary of Forms](https://cisco.github.io/ChezScheme/csug9.5/summary.html) page of the Chez Scheme User's Guide. The simple idea behind `chez-docs` is to scrape the data from the Summary of Forms page and write a procedure that opens links to the documentation from the REPL. 
+My typical entry point to learning about Chez Scheme is the [Summary of Forms](https://cisco.github.io/ChezScheme/csug9.5/summary.html) page of the Chez Scheme User's Guide. The simple idea behind `chez-docs` is to scrape^[Scraping code is in a [different repository](https://github.com/hinkelman/chez-docs-scrape) than `chez-docs`.] the data from the Summary of Forms page and write a procedure that opens links to the documentation from the REPL. 
 
 ### Web Scraping with R
 
@@ -112,30 +113,24 @@ for (j in c("CSUG", "TSPL")){
 
 ### Data Preparation with Chez Scheme
 
-First, I needed to make a small modification to my [`csv` library](https://github.com/hinkelman/chez-stats/blob/dev/csv.ss) to read TSV files. Then, I read each TSV file, dropped the header row, and converted each row into an association list where the first element of the row is the key and values are represented by a list of the other two values in the row (i.e., forms and URLs). The two association lists were then combined to create a nested association list, which was written to file.
+First, I needed to make a small modification to my [`csv` library](https://github.com/hinkelman/chez-stats/blob/dev/csv.ss) to read TSV files. Then, I read each TSV file, dropped the header row, and combine the two lists into a list for writing to file.
 
 ```
 (import (chez-stats chez-stats))
 
-(define csug (cdr (read-tsv "R/CSUG.tsv")))
-(define tspl (cdr (read-tsv "R/TSPL.tsv")))
+(define data (list (cons 'csug (cdr (read-tsv "R/CSUG.tsv")))
+                   (cons 'tspl (cdr (read-tsv "R/TSPL.tsv")))))
 
-(define csug-alist (map (lambda (x) (list (car x) (cdr x))) csug))
-(define tspl-alist (map (lambda (x) (list (car x) (cdr x))) tspl))
-
-(define data (list (list "CSUG" csug-alist)
-                   (list "TSPL" tspl-alist)))
-
-(with-output-to-file "data.scm" (lambda () (write data)))
+(with-output-to-file "chez-docs-data.scm" (lambda () (write data)))
 ```
 
 ### Reading Data in Chez Scheme Library
 
-To read the data when `chez-docs` is loaded, we need to identify the path where the data is located. For `(import (chez-docs docs))` to work, the user needs to have installed `chez-docs` in a directory found by `(library-directories)` (see this [blog post](/post/getting-started-with-chez-scheme-and-emacs/) for more information on library directories). Thus, we can loop through the list of library directories to find the file location and read the data. 
+To read the data when `chez-docs` is loaded, we need to identify the path where the data is located. For `(import (chez-docs))` to work, the user needs to have `chez-docs.ss` and `chez-docs-data.scm` in a directory found by `(library-directories)`^[See this [blog post](/post/getting-started-with-chez-scheme-and-emacs/) for more information on library directories.]. Thus, we can loop through the list of library directories to find the file location and read the data. 
 
 ```
 (define data-paths
-  (map (lambda (x) (string-append x "/chez-docs/data.scm"))
+  (map (lambda (x) (string-append x "/chez-docs-data.scm"))
        (map car (library-directories))))
 
 (define data
@@ -155,58 +150,62 @@ The main procedure in `chez-docs` is `doc`, which uses `case-lambda` to handle o
 ```
 (define doc
   (case-lambda
-    [(proc) (doc-helper proc "both" #t)]
-    [(proc source) (doc-helper proc source #t)]
-    [(proc source launch?) (doc-helper proc source launch?)]))
+    [(proc) (doc-helper proc 'open-link 'both)]
+    [(proc action) (doc-helper proc action 'both)]
+    [(proc action source) (doc-helper proc action source)]))
 ```
 
 `data-lookup` checks that the strings passed as arguments are valid and returns a list of the association lists for `proc` from the `data` object created above.
 
 ```
 (define (data-lookup proc source)
-  (cond [(or (string=? source "CSUG") (string=? source "TSPL"))
-         (list (dl-helper proc source))]
-        [(string=? source "both")
-         (let ([csug (dl-helper proc "CSUG")]
-               [tspl (dl-helper proc "TSPL")])
+  (cond [(or (symbol=? source 'csug) (symbol=? source 'tspl))
+         (let ([result (dl-helper proc source)])
+           (if result
+               (list result) 
+               (assertion-violation "(doc proc action source)"
+                                    (string-append proc " not found in " (symbol->string source)))))]
+        [(symbol=? source 'both)
+         (let ([csug (dl-helper proc 'csug)]
+               [tspl (dl-helper proc 'tspl)])
            (if (or csug tspl)
                (list csug tspl)
-               (assertion-violation "(doc proc)" "procedure not found")))]
+               (assertion-violation "(doc proc)" (string-append proc " not found in csug or tspl"))))]
         [else
-         (assertion-violation "(doc proc source)" "source not one of CSUG, TSPL, both")]))
+         (assertion-violation "(doc proc action source)" "source not one of 'csug, 'tspl, 'both")]))
          
 ;; data is imported above
 (define (dl-helper proc source)
-  (assoc proc (cadr (assoc source data)))) 
+  (assoc proc (cdr (assoc source data)))) 
 ```
 
-When using `data-lookup` on `<`, we see that there is an entry for `<` in both CSUG and TPSL as there is an association list returned for both elements of the list.
+When using `data-lookup` on `<`, a 2-element list is returned indicating that there is an entry for `<` in both CSUG and TPSL.
 
 ```
-> (data-lookup "<" "both")
-(("<" ("(< real1 real2 real3 ...)"
-        "https://cisco.github.io/ChezScheme/csug9.5/numeric.html#./numeric:s67"))
-  ("<" ("(< real1 real2 real3 ...)"
-         "https://scheme.com/tspl4/objects.html#./objects:s88")))
+> (data-lookup "<" 'both)
+(("<" "(< real1 real2 real3 ...)"
+        "https://cisco.github.io/ChezScheme/csug9.5/numeric.html#./numeric:s67")
+  ("<" "(< real1 real2 real3 ...)"
+         "https://scheme.com/tspl4/objects.html#./objects:s88"))
 ```
 
 If `proc` is only found in one source, and both are requested, then one element of the returned list will be `#f`.
 
 ```
-> (data-lookup "map" "both")
+> (data-lookup "map" 'both)
 (#f ("map"
-      ("(map procedure list1 list2 ...)"
-        "https://scheme.com/tspl4/control.html#./control:s30")))
+      "(map procedure list1 list2 ...)"
+      "https://scheme.com/tspl4/control.html#./control:s30"))
 ```
 
-`display-launch` takes an association list, `data-selected`, returned by `data-lookup`, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. When `launch?` is `#t`, `display-launch` makes a system call to `open` (macOS), `xdg-open` (Linux), or `start` (Windows) and requires an internet connection.
+`display-form-open` takes a list, `data-selected`, returned by `data-lookup`, displays the form(s), and optionally opens a link to the relevant section of the documentation in your default browser. When `action` is `'open-link`, `display-form-open` makes a system call to `open` (macOS), `xdg-open` (Linux), or `start` (Windows) and requires an internet connection.
 
 ```
-(define (display-launch data-selected launch?)
+(define (display-form-open data-selected action)
   (when data-selected
-    (display (replace-tilde (string-append (caadr data-selected) "\n")))
-    (when launch?
-      (system (string-append open-string (cadadr data-selected))))))
+    (display (replace-tilde (string-append (cadr data-selected) "\n")))
+    (when (symbol=? action 'open-link)
+      (system (string-append open-string (caddr data-selected))))))
 ```
 
 `(machine-type)` is used to determine the system-specific string, `open-string`, for use in the system call.
@@ -219,10 +218,10 @@ If `proc` is only found in one source, and both are requested, then one element 
     [else "xdg-open "]))                   ; linux
 ```
 
-When `launch?` is `#f`, `display-launch` simply displays the form(s) for the specified `proc`, which is helpful if you can't remember the order of arguments for a procedure.
+When `action` is `'display-form`, `display-form-open` simply displays the form(s) for the specified `proc`, which is helpful if you can't remember the order of arguments for a procedure.
 
 ```
-> (display-launch (car (data-lookup "append" "TSPL")) #f)
+> (display-form-open (car (data-lookup "append" "TSPL")) #f)
 (append)
 (append list ... obj)
 ```
@@ -245,26 +244,28 @@ For multi-line display of forms, the `~` added in R to separate forms is replace
                  (loop (read-char in) (string-append result (string c)))])))))
 ```
 
-The last piece is `doc-helper`, which loops through the output of `data-lookup` and passes it to `display-launch`.
+The last piece is `doc-helper`, which loops through the output of `data-lookup` and passes it to `display-form-open`.
 
 ```
-(define (doc-helper proc source launch?)
-  (define (loop ls)
+(define (doc-helper proc action source)
+  (unless (or (symbol=? action 'open-link)
+              (symbol=? action 'display-form))
+    (assertion-violation "(doc proc action)" "action not one of 'open-link or 'display-form"))
+  (let loop ([ls (data-lookup proc source)])
     (cond [(null? ls) (void)]
           [else
-           (display-launch (car ls) launch?)
-           (loop (cdr ls))]))
-  (loop (data-lookup proc source)))
+           (display-form-open (car ls) action)
+           (loop (cdr ls))])))
 ```
 
 The downside of this approach is that if a `proc` is found in both sources with the same form, then it will be displayed twice. I decided this behavior isn't sufficiently annoying to take the extra steps to prevent it from happening.
 
 ```
-> (doc "<" "both" #f)
+> (doc "<" 'display-form)
 (< real1 real2 real3 ...)
 (< real1 real2 real3 ...)
 ```
 
 ### Conclusions
 
-This was a fun little project. When I first had the idea, I was really excited because I worked out all of the initial code in less than 2 hours. But, when I started to write this blog post, I started to discover all of the little problems that didn't occur to me initially. Nonetheless, I think that I might have produced something reasonably useful for myself from a modest effort. 
+This was a fun little project. When I first had the idea, I was really excited because I worked out all of the initial code in less than 2 hours. But, when I started to write this blog post, I started to discover all of the little problems that didn't occur to me initially. Nonetheless, I think that I might have produced something reasonably useful for myself from a modest effort.

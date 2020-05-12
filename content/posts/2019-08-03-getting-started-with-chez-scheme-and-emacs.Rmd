@@ -61,7 +61,7 @@ When navigating through previous expressions, only the first line of a multi-lin
 
 ### Library Directory
 
-Chez does not come with a package manager, but there are 3rd-party options, e.g., [Raven](http://ravensc.com)^[I've written a bit more about using Raven in this [blog post](/post/chez-stats-now-available-through-raven).] and [Akku](https://akkuscm.org). In this post, though, I will describe manual package management. 
+Chez does not come with a package manager, but there are 3rd-party options, e.g., [Akku](https://akkuscm.org). In this post, though, I will describe manual package management. 
 
 `library-directories` returns the directories where Chez looks for libraries. 
 
@@ -70,23 +70,7 @@ Chez does not come with a package manager, but there are 3rd-party options, e.g.
 (("." . "."))
 ```
 
-The `"."` indicates that Chez is looking in the default directory. You can find the default directory by running `current-directory` in a freshly launched Chez REPL.
-
-On macOS...
-
-```
-> (current-directory)
-"/Users/username"
-```
-
-On Windows...
-
-```
-> (current-directory)
-"C:\\Program Files\\Chez Scheme 9.5"
-```
-
-You probably don't want to put libraries in these default locations. On macOS, I created a library directory at `/Users/username/scheme/lib` and, on Windows, at `C:\scheme\lib`.
+The `"."` indicates that Chez is looking in the current directory.^[You can find the current directory by running `current-directory`]. If you are using a project-based workflow, then you could include your dependencies in the current directory, perhaps in a `lib` folder. For a 'global' approach, I created a library directory at `/Users/username/scheme/lib` on macOS, and at `C:\scheme\lib` on Windows.
 
 Before we go over where to stash that directory information, let's cover library extensions.
 
@@ -96,22 +80,22 @@ Before we go over where to stash that directory information, let's cover library
   (".sls" . ".so") (".scm" . ".so") (".sch" . ".so"))
 ```
 
-These are the file extensions that Chez uses when searching the library directories. The authors of Raven recommend the use of `.sc` so we need to stash that information, too.
+These are the file extensions that Chez uses when searching the library directories.
 
-On macOS^[If you are using macOS Catalina, the default shell is Zsh, not Bash. You simply need to replace `.bash_profile` with `.zshenv` in the instructions in this post.], I edited `.bash_profile` to add information on library directories and extensions. From a Terminal window, open `.bash_profile` with the [Nano text editor](https://www.nano-editor.org). 
+On macOS^[If you are using macOS Catalina, the default shell is Zsh, not Bash. You simply need to replace `.bash_profile` with `.zshenv` in the instructions in this post.], you edit `.bash_profile` to add information on library directories and extensions. From a Terminal window, open `.bash_profile` with the [Nano text editor](https://www.nano-editor.org). 
 
 ```
 $ nano .bash_profile
 ```
 
-I added the following lines to my `.bash_profile`.
+These lines add a new directory to `library-directories` and a new extension to `library-extensions`.
 
 ```
 export CHEZSCHEMELIBDIRS="/Users/username/scheme/lib:"
 export CHEZSCHEMELIBEXTS=".sc::.so:"
 ```
 
-The `:` at the end is used to indicate that the new entries should be appended to the existing entries. Remove the `:` to replace the default values with the new entries. After saving `.bash_profile`, enter the following command in the Terminal (and maybe restart the Terminal).
+The `:` at the end is used to indicate that the new entries should be appended to the existing entries. Remove the `:` to replace the default values with the new entries. After saving `.bash_profile`, enter the following command in the Terminal.
 
 ```
 $ source .bash_profile
@@ -128,7 +112,7 @@ Now, from a Chez REPL, we can see the effect of our changes.
   (".sls" . ".so") (".scm" . ".so") (".sch" . ".so"))
 ```
 
-If we have a library at `/Users/username/scheme/lib/srfi/s1/lists.sls`, then we import the library with `(import (srfi s1 lists))`, i.e., you pass the components of the path to import.
+If we have a library at `/Users/username/scheme/lib/srfi/s1/lists.sls`, then we import the library with `(import (srfi s1 lists))`, i.e., you pass the components of the path to import. If you can't import the library, look at the `library` call at the top of `lists.sls`, for example, because that will give you a clue of where the library expects to be placed in `library-directories`. 
 
 ```
 > (xcons 1 2)

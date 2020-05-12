@@ -86,12 +86,11 @@ This is the first time that I've used `do` loops in Scheme. In the example below
 ;; loop through target string
 ;; to find all potential substring matches
 (define (potential-matches char t-list)
-  (define (loop t-list results)
-    (cond [(null? t-list)
-           (remove-duplicates (reverse results))]
-          [else
-           (loop (cdr t-list) (cons (member char t-list) results))]))
-  (loop t-list '()))
+  (let loop ([t-list t-list]
+             [results '()])
+    (if (null? t-list)
+        (remove-duplicates (reverse results))
+        (loop (cdr t-list) (cons (member char t-list) results)))))
   
 (define (remove-duplicates ls)
   (cond [(null? ls)
@@ -113,32 +112,35 @@ This is the first time that I've used `do` loops in Scheme. In the example below
 
 ### Procedure Discovery
 
-`find-proc` takes a `search-string` and two optional arguments, `max-results` and `fuzzy?`, which default to `10` and `#f`, respectively.
+`find-proc` takes a `search-string` and two optional arguments, `search-type` and `max-results`, which default to `'exact` and `10`, respectively.
 
 ```
 (define find-proc
   (case-lambda
-    [(search-string) (find-proc-helper search-string 10 #f)]
-    [(search-string max-results) (find-proc-helper search-string max-results #f)]
-    [(search-string max-results fuzzy?) (find-proc-helper search-string max-results fuzzy?)]))
+    [(search-string) (find-proc-helper search-string 'exact 10)]
+    [(search-string search-type) (find-proc-helper search-string search-type 10)]
+    [(search-string search-type max-results) (find-proc-helper search-string search-type max-results)]))
 ```
 
 `find-proc-helper` maps either `lev` or `string-match` to the full list of procedures, `proc-list`, and then sorts or filters the results, respectively.
 
 ```
-(define (find-proc-helper search-string max-results fuzzy?)
+(define (find-proc-helper search-string search-type max-results)
   (unless (string? search-string)
     (assertion-violation "(find-proc search-string)" "search-string is not a string"))
-  (cond [fuzzy?
+  (cond [(symbol=? search-type 'fuzzy)
          (let* ([dist-list (map (lambda (x) (lev search-string x)) proc-list)]
                 [dist-proc (map (lambda (dist proc) (cons dist proc)) dist-list proc-list)]
                 [dist-proc-sort (sort (lambda (x y) (< (car x) (car y))) dist-proc)])
            (prepare-results dist-proc-sort max-results))]
-        [else
+        [(symbol=? search-type 'exact)
          (let* ([bool-list (map (lambda (x) (string-match search-string x)) proc-list)]
                 [bool-proc (map (lambda (bool proc) (cons bool proc)) bool-list proc-list)]
                 [bool-proc-filter (filter (lambda (x) (car x)) bool-proc)])
-           (prepare-results bool-proc-filter max-results))]))
+           (prepare-results bool-proc-filter max-results))]
+        [else
+         (assertion-violation "(find-proc search-string search-type)"
+                              "search-type must be either 'exact or 'fuzzy")]))
 
 (define (prepare-results ls max-results)
   (let* ([len (length ls)]
@@ -149,23 +151,23 @@ This is the first time that I've used `do` loops in Scheme. In the example below
 I first realized that Levenshtein distance might not be very useful for `find-proc` when searching for `head`, a commonly used procedure in R.
 
 ```
-> (find-proc "head" 5 #t)
+> (find-proc "head" 'fuzzy 5)
 ("read" "and" "cadr" "car" "cd")
 ```
 
 However, substring matching points us to the relevant function, `list-head`, in Chez Scheme. 
 
 ```
-> (find-proc "head" 5)
+> (find-proc "head" 'exact 5)
 ("list-head" "lookahead-char" "lookahead-u8" "make-boot-header")
 ```
 
 Fuzzy matching is useful, though, for discovery when there are options with similar forms, e.g., `hash-table?` and `hashtable?`.
 
 ```
-> (find-proc "hash-table?" 3)
+> (find-proc "hash-table?" 'exact 3)
 ("hash-table?")
-> (find-proc "hash-table?" 3 #t)
+> (find-proc "hash-table?" 'fuzzy 3)
 ("hash-table?" "hashtable?" "eq-hashtable?")
 ```
 
@@ -177,22 +179,22 @@ The `^` indicates that only search strings found at the start of the procedure s
 > (find-proc "^map")
 ("map")
 
-> (find-proc "file" 3)
+> (find-proc "file" 'exact 3)
 ("&i/o-file-already-exists" "&i/o-file-does-not-exist" "&i/o-file-is-read-only")
-> (find-proc "^file" 3)
+> (find-proc "^file" 'exact 3)
 ("file-access-time" "file-buffer-size" "file-change-time")
 
-> (find-proc "let" 5)
+> (find-proc "let" 'exact 5)
 ("delete-directory" "delete-file" "eq-hashtable-delete!" "fluid-let" "fluid-let-syntax")
-> (find-proc "^let")
+> (find-proc "^let" 'exact)
 ("let*" "let*-values" "let-syntax" "let-values" "letrec" "letrec*" "letrec-syntax")
 ```
 
 Under fuzzy matching, the `^` is included as part of the Levenshtein distance calculation and, thus, should not be included in search strings when using fuzzy matching.
 
 ```
-> (find-proc "map" 5 #t)
+> (find-proc "map" 'fuzzy 5)
 ("map" "max" "*" "+" "-")
-> (find-proc "^map" 5 #t)
+> (find-proc "^map" 'fuzzy 5)
 ("map" "max" "car" "exp" "memp")
 ```

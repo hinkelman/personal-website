@@ -73,12 +73,11 @@ draft: false
 ;; loop through target string
 ;; to find all potential substring matches
 (define (potential-matches char t-list)
-  (define (loop t-list results)
-    (cond [(null? t-list)
-           (remove-duplicates (reverse results))]
-          [else
-           (loop (cdr t-list) (cons (member char t-list) results))]))
-  (loop t-list &#39;()))
+  (let loop ([t-list t-list]
+             [results &#39;()])
+    (if (null? t-list)
+        (remove-duplicates (reverse results))
+        (loop (cdr t-list) (cons (member char t-list) results)))))
   
 (define (remove-duplicates ls)
   (cond [(null? ls)
@@ -94,41 +93,44 @@ draft: false
 </div>
 <div id="procedure-discovery" class="section level3">
 <h3>Procedure Discovery</h3>
-<p><code>find-proc</code> takes a <code>search-string</code> and two optional arguments, <code>max-results</code> and <code>fuzzy?</code>, which default to <code>10</code> and <code>#f</code>, respectively.</p>
+<p><code>find-proc</code> takes a <code>search-string</code> and two optional arguments, <code>search-type</code> and <code>max-results</code>, which default to <code>'exact</code> and <code>10</code>, respectively.</p>
 <pre><code>(define find-proc
   (case-lambda
-    [(search-string) (find-proc-helper search-string 10 #f)]
-    [(search-string max-results) (find-proc-helper search-string max-results #f)]
-    [(search-string max-results fuzzy?) (find-proc-helper search-string max-results fuzzy?)]))</code></pre>
+    [(search-string) (find-proc-helper search-string &#39;exact 10)]
+    [(search-string search-type) (find-proc-helper search-string search-type 10)]
+    [(search-string search-type max-results) (find-proc-helper search-string search-type max-results)]))</code></pre>
 <p><code>find-proc-helper</code> maps either <code>lev</code> or <code>string-match</code> to the full list of procedures, <code>proc-list</code>, and then sorts or filters the results, respectively.</p>
-<pre><code>(define (find-proc-helper search-string max-results fuzzy?)
+<pre><code>(define (find-proc-helper search-string search-type max-results)
   (unless (string? search-string)
     (assertion-violation &quot;(find-proc search-string)&quot; &quot;search-string is not a string&quot;))
-  (cond [fuzzy?
+  (cond [(symbol=? search-type &#39;fuzzy)
          (let* ([dist-list (map (lambda (x) (lev search-string x)) proc-list)]
                 [dist-proc (map (lambda (dist proc) (cons dist proc)) dist-list proc-list)]
                 [dist-proc-sort (sort (lambda (x y) (&lt; (car x) (car y))) dist-proc)])
            (prepare-results dist-proc-sort max-results))]
-        [else
+        [(symbol=? search-type &#39;exact)
          (let* ([bool-list (map (lambda (x) (string-match search-string x)) proc-list)]
                 [bool-proc (map (lambda (bool proc) (cons bool proc)) bool-list proc-list)]
                 [bool-proc-filter (filter (lambda (x) (car x)) bool-proc)])
-           (prepare-results bool-proc-filter max-results))]))
+           (prepare-results bool-proc-filter max-results))]
+        [else
+         (assertion-violation &quot;(find-proc search-string search-type)&quot;
+                              &quot;search-type must be either &#39;exact or &#39;fuzzy&quot;)]))
 
 (define (prepare-results ls max-results)
   (let* ([len (length ls)]
          [max-n (if (&gt; max-results len) len max-results)])
     (map cdr (list-head ls max-n))))</code></pre>
 <p>I first realized that Levenshtein distance might not be very useful for <code>find-proc</code> when searching for <code>head</code>, a commonly used procedure in R.</p>
-<pre><code>&gt; (find-proc &quot;head&quot; 5 #t)
+<pre><code>&gt; (find-proc &quot;head&quot; &#39;fuzzy 5)
 (&quot;read&quot; &quot;and&quot; &quot;cadr&quot; &quot;car&quot; &quot;cd&quot;)</code></pre>
 <p>However, substring matching points us to the relevant function, <code>list-head</code>, in Chez Scheme.</p>
-<pre><code>&gt; (find-proc &quot;head&quot; 5)
+<pre><code>&gt; (find-proc &quot;head&quot; &#39;exact 5)
 (&quot;list-head&quot; &quot;lookahead-char&quot; &quot;lookahead-u8&quot; &quot;make-boot-header&quot;)</code></pre>
 <p>Fuzzy matching is useful, though, for discovery when there are options with similar forms, e.g., <code>hash-table?</code> and <code>hashtable?</code>.</p>
-<pre><code>&gt; (find-proc &quot;hash-table?&quot; 3)
+<pre><code>&gt; (find-proc &quot;hash-table?&quot; &#39;exact 3)
 (&quot;hash-table?&quot;)
-&gt; (find-proc &quot;hash-table?&quot; 3 #t)
+&gt; (find-proc &quot;hash-table?&quot; &#39;fuzzy 3)
 (&quot;hash-table?&quot; &quot;hashtable?&quot; &quot;eq-hashtable?&quot;)</code></pre>
 <p>The <code>^</code> indicates that only search strings found at the start of the procedure should be returned.</p>
 <pre><code>&gt; (find-proc &quot;map&quot;)
@@ -136,19 +138,19 @@ draft: false
 &gt; (find-proc &quot;^map&quot;)
 (&quot;map&quot;)
 
-&gt; (find-proc &quot;file&quot; 3)
+&gt; (find-proc &quot;file&quot; &#39;exact 3)
 (&quot;&amp;i/o-file-already-exists&quot; &quot;&amp;i/o-file-does-not-exist&quot; &quot;&amp;i/o-file-is-read-only&quot;)
-&gt; (find-proc &quot;^file&quot; 3)
+&gt; (find-proc &quot;^file&quot; &#39;exact 3)
 (&quot;file-access-time&quot; &quot;file-buffer-size&quot; &quot;file-change-time&quot;)
 
-&gt; (find-proc &quot;let&quot; 5)
+&gt; (find-proc &quot;let&quot; &#39;exact 5)
 (&quot;delete-directory&quot; &quot;delete-file&quot; &quot;eq-hashtable-delete!&quot; &quot;fluid-let&quot; &quot;fluid-let-syntax&quot;)
-&gt; (find-proc &quot;^let&quot;)
+&gt; (find-proc &quot;^let&quot; &#39;exact)
 (&quot;let*&quot; &quot;let*-values&quot; &quot;let-syntax&quot; &quot;let-values&quot; &quot;letrec&quot; &quot;letrec*&quot; &quot;letrec-syntax&quot;)</code></pre>
 <p>Under fuzzy matching, the <code>^</code> is included as part of the Levenshtein distance calculation and, thus, should not be included in search strings when using fuzzy matching.</p>
-<pre><code>&gt; (find-proc &quot;map&quot; 5 #t)
+<pre><code>&gt; (find-proc &quot;map&quot; &#39;fuzzy 5)
 (&quot;map&quot; &quot;max&quot; &quot;*&quot; &quot;+&quot; &quot;-&quot;)
-&gt; (find-proc &quot;^map&quot; 5 #t)
+&gt; (find-proc &quot;^map&quot; &#39;fuzzy 5)
 (&quot;map&quot; &quot;max&quot; &quot;car&quot; &quot;exp&quot; &quot;memp&quot;)</code></pre>
 </div>
 <div class="footnotes">

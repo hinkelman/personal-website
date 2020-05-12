@@ -49,22 +49,19 @@ draft: false
 </div>
 <div id="library-directory" class="section level3">
 <h3>Library Directory</h3>
-<p>Chez does not come with a package manager, but there are 3rd-party options, e.g., <a href="http://ravensc.com">Raven</a><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> and <a href="https://akkuscm.org">Akku</a>. In this post, though, I will describe manual package management.</p>
+<p>Chez does not come with a package manager, but there are 3rd-party options, e.g., <a href="https://akkuscm.org">Akku</a>. In this post, though, I will describe manual package management.</p>
 <p><code>library-directories</code> returns the directories where Chez looks for libraries.</p>
 <pre><code>&gt; (library-directories)
 ((&quot;.&quot; . &quot;.&quot;))</code></pre>
-<p>The <code>&quot;.&quot;</code> indicates that Chez is looking in the default directory. You can find the default directory by running <code>current-directory</code> in a freshly launched Chez REPL.</p>
-<pre><code>&gt; (current-directory)
-&quot;/home/username&quot;</code></pre>
-<p>You probably don’t want to put libraries in these default locations. I created a library directory at <code>/home/username/chez-lib</code>.</p>
+<p>The <code>&quot;.&quot;</code> indicates that Chez is looking in the current directory.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> If you are using a project-based workflow, then you could include your dependencies in the current directory, perhaps in a <code>lib</code> folder. For a ‘global’ approach, I created a library directory at <code>/home/username/chez-lib</code>.</p>
 <p>Before we go over where to stash that directory information, let’s cover library extensions.</p>
 <pre><code>&gt; (library-extensions)
 ((&quot;.chezscheme.sls&quot; . &quot;.chezscheme.so&quot;) (&quot;.ss&quot; . &quot;.so&quot;)
   (&quot;.sls&quot; . &quot;.so&quot;) (&quot;.scm&quot; . &quot;.so&quot;) (&quot;.sch&quot; . &quot;.so&quot;))</code></pre>
-<p>These are the file extensions that Chez uses when searching the library directories. The authors of Raven recommend the use of <code>.sc</code> so we need to stash that information, too.</p>
+<p>These are the file extensions that Chez uses when searching the library directories.</p>
 <p>I edited <code>.profile</code> to add information on library directories and extensions. From a Terminal window, open <code>.profile</code> with the <a href="https://help.ubuntu.com/community/gedit">gedit text editor</a>.</p>
 <pre><code>$ gedit ~/.profile</code></pre>
-<p>I added the following lines to my <code>.profile</code>.</p>
+<p>These lines add a new directory to <code>library-directories</code> and a new extension to <code>library-extensions</code>.</p>
 <pre><code>export CHEZSCHEMELIBDIRS=&quot;/home/username/chez-lib:&quot;
 export CHEZSCHEMELIBEXTS=&quot;.sc::.so:&quot;</code></pre>
 <p>The <code>:</code> at the end is used to indicate that the new entries should be appended to the existing entries. Remove the <code>:</code> to replace the default values with the new entries. After saving <code>.profile</code>, you need to logout from your user account and login again <a href="https://askubuntu.com/questions/951000/how-to-make-the-changes-to-source-profile-permanent">to make the changes to <code>.profile</code> permanent</a>. For your current session, though, you can source <code>.profile</code>.</p>
@@ -76,7 +73,7 @@ export CHEZSCHEMELIBEXTS=&quot;.sc::.so:&quot;</code></pre>
 &gt; (library-extensions)
 ((&quot;.sc&quot; . &quot;.so&quot;) (&quot;.chezscheme.sls&quot; . &quot;.chezscheme.so&quot;) (&quot;.ss&quot; . &quot;.so&quot;)
   (&quot;.sls&quot; . &quot;.so&quot;) (&quot;.scm&quot; . &quot;.so&quot;) (&quot;.sch&quot; . &quot;.so&quot;))</code></pre>
-<p>If we have a library at <code>home/username/chez-lib/srfi/s1/lists.sls</code>, then we import the library with <code>(import (srfi s1 lists))</code>, i.e., you pass the components of the path to import.</p>
+<p>If we have a library at <code>home/username/chez-lib/srfi/s1/lists.sls</code>, then we import the library with <code>(import (srfi s1 lists))</code>, i.e., you pass the components of the path to import. If you can’t import the library, look at the <code>library</code> call at the top of <code>lists.sls</code>, for example, because that will give you a clue of where the library expects to be placed in <code>library-directories</code>.</p>
 <pre><code>&gt; (xcons 1 2)
 Exception: variable xcons is not bound
 Type (debug) to enter the debugger.
@@ -129,7 +126,7 @@ Type (debug) to enter the debugger.
 <ol>
 <li id="fn1"><p>During installation Ubuntu identified the apparent problem as related to numerous partitions from previous operating systems and provided the option to completely erase the old operating systems before installing Ubuntu. I’m sure that would also have been possible with FreeBSD and Debian, but Ubuntu made it easier to diagnose and address.<a href="#fnref1" class="footnote-back">↩</a></p></li>
 <li id="fn2"><p>You can also type <code>petite</code> to launch Petite Chez Scheme. See <a href="https://cisco.github.io/ChezScheme/csug9.5/use.html">here</a> for more information on the differences between Chez Scheme and Petite Chez Scheme.<a href="#fnref2" class="footnote-back">↩</a></p></li>
-<li id="fn3"><p>I’ve written a bit more about using Raven in this <a href="/post/chez-stats-now-available-through-raven">blog post</a>.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>You can find the current directory by with <code>current-directory</code><a href="#fnref3" class="footnote-back">↩</a></p></li>
 <li id="fn4"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref4" class="footnote-back">↩</a></p></li>
 <li id="fn5"><p>If you are receiving the message, “No Geiser REPL for this buffer”, then Geiser is <a href="http://geiser.nongnu.org/geiser_4.html#The-source-and-the-REPL">struggling to figure out which Scheme implementation to use</a>. One solution is to delete all of the non-Chez implementations by choosing <code>Options/Customize Emacs/Specific Group...</code>, typing <code>geiser</code> at the prompt, selecting <code>Geiser Implementation</code>, and deleting all the non-Chez implementations under <code>Geiser Active Implementations</code>. Click <code>Apply and Save</code>. Restart Emacs.<a href="#fnref5" class="footnote-back">↩</a></p></li>
 <li id="fn6"><p>If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).<a href="#fnref6" class="footnote-back">↩</a></p></li>
