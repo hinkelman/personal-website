@@ -138,10 +138,10 @@ I've only shown examples from R packages, but the same techniques also work with
 
 ### Chez Scheme
 
-In Chez Scheme, we can view source code for exported procedures with the [inspector](https://cisco.github.io/ChezScheme/csug9.5/debug.html#./debug:s22). Let's load up my [`chez-stats` library](https://hinkelman.github.io/chez-stats/) and inspect `mean`.^[When I tried to use the inspector from the Emacs REPL, it would occassionally hang up. Not sure if that is a quirk of my system or session, but I now run `inspect` after launching Chez from the terminal.]
+In Chez Scheme, we can view source code for exported procedures with the [inspector](https://cisco.github.io/ChezScheme/csug9.5/debug.html#./debug:s22). Let's load up my [`chez-stats` library](https://github.com/hinkelman/chez-stats) and inspect `mean`.^[When I tried to use the inspector from the Emacs REPL, it would occassionally hang up. Not sure if that is a quirk of my system or session, but I now run `inspect` after launching Chez from the terminal.]
 
 ```
-> (import (chez-stats statistics))
+> (import (chez-stats))
 
 > (inspect mean)
 #<procedure mean at statistics.ss:3309>                           : c

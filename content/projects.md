@@ -6,9 +6,9 @@ type: section
 
 ## Chez Scheme Libraries
 
-### [chez-stats](https://hinkelman.github.io/chez-stats/)
+### [chez-stats](https://github.com/hinkelman/chez-stats)
 
-Read/write CSV files, compute descriptive statistics, and generate random variates in Chez Scheme. ([related blog posts](/categories/chez-stats/))
+Read and write delimited text files, compute descriptive statistics, and generate random variates in Chez Scheme. ([related blog posts](/categories/chez-stats/))
 
 ### [chez-docs](https://github.com/hinkelman/chez-docs)
 

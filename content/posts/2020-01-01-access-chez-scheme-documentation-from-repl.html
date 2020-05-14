@@ -92,11 +92,11 @@ out &lt;- bind_rows(source_list)</code></pre>
 </div>
 <div id="data-preparation-with-chez-scheme" class="section level3">
 <h3>Data Preparation with Chez Scheme</h3>
-<p>First, I needed to make a small modification to my <a href="https://github.com/hinkelman/chez-stats/blob/dev/csv.ss"><code>csv</code> library</a> to read TSV files. Then, I read each TSV file, dropped the header row, and combine the two lists into a list for writing to file.</p>
-<pre><code>(import (chez-stats chez-stats))
+<p>I used my <a href="https://github.com/hinkelman/chez-stats/blob/dev/csv.ss"><code>chez-stats</code> library</a> to read the tab-delimited files, dropped the header row, and combine the two lists into a list for writing to file.</p>
+<pre><code>(import (chez-stats))
 
-(define data (list (cons &#39;csug (cdr (read-tsv &quot;R/CSUG.tsv&quot;)))
-                   (cons &#39;tspl (cdr (read-tsv &quot;R/TSPL.tsv&quot;)))))
+(define data (list (cons &#39;csug (cdr (read-delim &quot;R/CSUG.tsv&quot; #\tab)))
+                   (cons &#39;tspl (cdr (read-delim &quot;R/TSPL.tsv&quot; #\tab)))))
 
 (with-output-to-file &quot;chez-docs-data.scm&quot; (lambda () (write data)))</code></pre>
 </div>

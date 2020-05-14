@@ -113,13 +113,13 @@ for (j in c("CSUG", "TSPL")){
 
 ### Data Preparation with Chez Scheme
 
-First, I needed to make a small modification to my [`csv` library](https://github.com/hinkelman/chez-stats/blob/dev/csv.ss) to read TSV files. Then, I read each TSV file, dropped the header row, and combine the two lists into a list for writing to file.
+I used my [`chez-stats` library](https://github.com/hinkelman/chez-stats/blob/dev/csv.ss) to read the tab-delimited files, dropped the header row, and combine the two lists into a list for writing to file.
 
 ```
-(import (chez-stats chez-stats))
+(import (chez-stats))
 
-(define data (list (cons 'csug (cdr (read-tsv "R/CSUG.tsv")))
-                   (cons 'tspl (cdr (read-tsv "R/TSPL.tsv")))))
+(define data (list (cons 'csug (cdr (read-delim "R/CSUG.tsv" #\tab)))
+                   (cons 'tspl (cdr (read-delim "R/TSPL.tsv" #\tab)))))
 
 (with-output-to-file "chez-docs-data.scm" (lambda () (write data)))
 ```

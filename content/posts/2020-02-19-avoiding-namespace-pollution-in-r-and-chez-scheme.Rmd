@@ -27,17 +27,17 @@ I don't profess to have a strong understanding of namespace best practices. None
 
 When you are using only one function from a package, you might opt for `::` if you only call that function once or twice and `include.only` if you call the function many times in a script. For me, `MESS::auc` is an example where I have typically used the `::` operator because I want the reminder that `auc` is found in the `MESS` packge. Alternatively, I could use `library(MESS, include.only = c("auc"))`.
 
-The approach for importing libraries in Chez Scheme is similar to loading packages in R. To load all the functions in my [`chez-stats` library](https://github.com/hinkelman/chez-stats), you use `(import (chez-stats chez-stats))`^[`chez-stats` is an umbrella library and a first step towards constraining the imported procedures is to only import one of the constituent libraries, e.g., `(import (chez-stats statistics))`.] We can import only the `mean` and `median` procedures with 
+The approach for importing libraries in Chez Scheme is similar to loading packages in R. To load all the functions in my [`chez-stats` library](https://github.com/hinkelman/chez-stats), you use `(import (chez-stats))`. We can import only the `mean` and `median` procedures with 
 
 ```
-> (import (only (chez-stats chez-stats) mean median))
+> (import (only (chez-stats) mean median))
 ```
 
 We can also reduce the potential for namespace conflicts by importing a library with a prefix.
 
 ```
-> (import (prefix (chez-stats chez-stats) cs:))
-> (cs:mean '(1 2 2 3 3 3 4 4 4 4))
+> (import (prefix (chez-stats) stats:))
+> (stats:mean '(1 2 2 3 3 3 4 4 4 4))
 3
 ```
 

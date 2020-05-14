@@ -102,8 +102,8 @@ function (.data, ...)
 </div>
 <div id="chez-scheme" class="section level3">
 <h3>Chez Scheme</h3>
-<p>In Chez Scheme, we can view source code for exported procedures with the <a href="https://cisco.github.io/ChezScheme/csug9.5/debug.html#./debug:s22">inspector</a>. Let’s load up my <a href="https://hinkelman.github.io/chez-stats/"><code>chez-stats</code> library</a> and inspect <code>mean</code>.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
-<pre><code>&gt; (import (chez-stats statistics))
+<p>In Chez Scheme, we can view source code for exported procedures with the <a href="https://cisco.github.io/ChezScheme/csug9.5/debug.html#./debug:s22">inspector</a>. Let’s load up my <a href="https://github.com/hinkelman/chez-stats"><code>chez-stats</code> library</a> and inspect <code>mean</code>.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<pre><code>&gt; (import (chez-stats))
 
 &gt; (inspect mean)
 #&lt;procedure mean at statistics.ss:3309&gt;                           : c
