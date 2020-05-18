@@ -61,7 +61,7 @@ $ akku update
 $ akku install
 ```
 
-`akku update` updates the local package index. It is a global command, not specific to a project. If you are having trouble installing a package, this is the first thing to try. `akku install` creates the hidden `.akku` directory.^[To toggle the visibility of files on macOS, use the keyboard shortcut `shift+command+.`. On Linux, use `control+H`.] When you install packages with `akku install pkgname`, they will be placed in `.akku/lib`.
+`akku update` updates the local package index. It is a global command, not specific to a project. If you are having trouble installing a package, this is the first thing to try. `akku install` creates the hidden `.akku` directory.^[To toggle the visibility of files on macOS, use the keyboard shortcut `shift+command+.`. On Linux, use `control+H`.] When you install packages with `akku install pkgname`, the library files are placed in `.akku/lib` and the full source code is installed in `.akku/src`.
 
 Let's install my `chez-stats` library.
 
@@ -69,7 +69,7 @@ Let's install my `chez-stats` library.
 akku install chez-stats
 ```
 
-Now, if you take in a peak in `.akku/lib`, you will find `chez-stats` and the `srfi` library. Arguably, Akku should not install `srfi` in this case. `chez-stats` only has a dependency on `srfi` for testing and the `chez-stats` tests aren't even installed by Akku. 
+Now, if you take in a peak in `.akku/lib`, you will find `chez-stats` and the `srfi` library. `chez-stats` only has a dependency on `srfi` for testing.^[You can run the tests for `chez-stats` from the Terminal by first running `.akku/env` and then `scheme .akku/src/chez-stats/tests/test-chez-stats.sps`.]
 
 Installing `chez-stats` created the following `Akku.manifest` file, which indicates a dependency on the current version of `chez-stats`.
 

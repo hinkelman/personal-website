@@ -41,10 +41,10 @@ $ ./install.sh</code></pre>
 $ cd existing-project
 $ akku update
 $ akku install</code></pre>
-<p><code>akku update</code> updates the local package index. It is a global command, not specific to a project. If you are having trouble installing a package, this is the first thing to try. <code>akku install</code> creates the hidden <code>.akku</code> directory.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> When you install packages with <code>akku install pkgname</code>, they will be placed in <code>.akku/lib</code>.</p>
+<p><code>akku update</code> updates the local package index. It is a global command, not specific to a project. If you are having trouble installing a package, this is the first thing to try. <code>akku install</code> creates the hidden <code>.akku</code> directory.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> When you install packages with <code>akku install pkgname</code>, the library files are placed in <code>.akku/lib</code> and the full source code is installed in <code>.akku/src</code>.</p>
 <p>Let’s install my <code>chez-stats</code> library.</p>
 <pre><code>akku install chez-stats</code></pre>
-<p>Now, if you take in a peak in <code>.akku/lib</code>, you will find <code>chez-stats</code> and the <code>srfi</code> library. Arguably, Akku should not install <code>srfi</code> in this case. <code>chez-stats</code> only has a dependency on <code>srfi</code> for testing and the <code>chez-stats</code> tests aren’t even installed by Akku.</p>
+<p>Now, if you take in a peak in <code>.akku/lib</code>, you will find <code>chez-stats</code> and the <code>srfi</code> library. <code>chez-stats</code> only has a dependency on <code>srfi</code> for testing.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
 <p>Installing <code>chez-stats</code> created the following <code>Akku.manifest</code> file, which indicates a dependency on the current version of <code>chez-stats</code>.</p>
 <pre><code>#!r6rs ; -*- mode: scheme; coding: utf-8 -*-
 (import (akku format manifest))
@@ -58,7 +58,7 @@ $ akku install</code></pre>
 <p>Let’s now illustrate how <code>.akku/env</code> sets the environment to find the installed libraries. If we launch Chez (with <code>chez</code> or <code>scheme</code>) from the <code>existing-project</code> directory, and try to load <code>chez-stats</code>, we will be out of luck.</p>
 <pre><code>&gt; (import (chez-stats))
 Exception: library (chez-stats) not found</code></pre>
-<p>Calling <code>library-directories</code> illustrates the problem.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<p>Calling <code>library-directories</code> illustrates the problem.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
 <pre><code>&gt; (library-directories)
 ((&quot;/home/username/chez/lib&quot;
     .
@@ -106,6 +106,7 @@ fi</code></pre>
 <ol>
 <li id="fn1"><p>Chez Scheme, Chibi Scheme, GNU Guile, Gauche Scheme, Ikarus Scheme, IronScheme, Larceny Scheme, Loko Scheme, Mosh Scheme, Racket (plt-r6rs), Sagittarius Scheme, Vicare Scheme, Ypsilon Scheme<a href="#fnref1" class="footnote-back">↩</a></p></li>
 <li id="fn2"><p>To toggle the visibility of files on macOS, use the keyboard shortcut <code>shift+command+.</code>. On Linux, use <code>control+H</code>.<a href="#fnref2" class="footnote-back">↩</a></p></li>
-<li id="fn3"><p><code>/home/username/chez/lib</code> is where I put libraries that I want to make globally available.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>You can run the tests for <code>chez-stats</code> from the Terminal by first running <code>.akku/env</code> and then <code>scheme .akku/src/chez-stats/tests/test-chez-stats.sps</code>.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p><code>/home/username/chez/lib</code> is where I put libraries that I want to make globally available.<a href="#fnref4" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
