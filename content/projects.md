@@ -14,7 +14,7 @@ Read and write delimited text files, compute descriptive statistics, and generat
 
 Access Chez Scheme documentation from the REPL. ([related blog posts](/categories/chez-docs/))
 
-### [dataframe](https://hinkelman.github.io/dataframe/)
+### [dataframe](https://github.com/hinkelman/dataframe/)
 
 A dataframe record type for Chez Scheme with procedures to select, drop, and rename columns, and filter, sort, split, append, modify, and aggregate dataframes. ([related blog posts](/categories/dataframe/))
 

@@ -70,7 +70,7 @@ $Length
 </blockquote>
 <pre><code>&gt; toJSON(data.frame(ID = c(1, 2), Species = c(&quot;CHN&quot;, &quot;STH&quot;), Length = c(43, 131)))
 [{&quot;ID&quot;:1,&quot;Species&quot;:&quot;CHN&quot;,&quot;Length&quot;:43},{&quot;ID&quot;:2,&quot;Species&quot;:&quot;STH&quot;,&quot;Length&quot;:131}] </code></pre>
-<p>Setting <code>dataframe = &quot;columns&quot;</code>, though, creates a column-based JSON representation.</p>
+<p>Setting <code>dataframe = "columns"</code>, though, creates a column-based JSON representation.</p>
 <pre><code>&gt; toJSON(data.frame(ID = c(1, 2), Species = c(&quot;CHN&quot;, &quot;STH&quot;), Length = c(43, 131)), dataframe = &quot;columns&quot;)
 {&quot;ID&quot;:[1,2],&quot;Species&quot;:[&quot;CHN&quot;,&quot;STH&quot;],&quot;Length&quot;:[43,131]} </code></pre>
 <p><code>fromJSON</code> and <code>toJSON</code> are not perfect inverse functions. For example, a dataframe written in a columnar format is read as a named list.</p>

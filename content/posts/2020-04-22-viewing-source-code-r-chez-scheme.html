@@ -34,7 +34,7 @@ function (x)
 UseMethod(&quot;year&quot;)
 &lt;bytecode: 0x7f9e316ee8d0&gt;
 &lt;environment: namespace:lubridate&gt;</code></pre>
-<p>Encountering <code>UseMethod(&quot;year&quot;)</code> tells us that <code>lubridate::year</code> is a generic function and the method used depends on the object passed to the generic function. Let’s see what methods are available.</p>
+<p>Encountering <code>UseMethod("year")</code> tells us that <code>lubridate::year</code> is a generic function and the method used depends on the object passed to the generic function. Let’s see what methods are available.</p>
 <pre><code>&gt; methods(lubridate::year)
 [1] year.default* year.Period* 
 see &#39;?methods&#39; for accessing help and source code</code></pre>
@@ -174,8 +174,8 @@ Exception: variable alist-select is not bound</code></pre>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>If you are using RStudio, you can also view source code with <code>View(cfs.misc::water_year)</code>, which opens a tab to show the source code and omits the bytecode information.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>The <a href="https://github.com/nathaneastwood/poorman"><code>poorman</code> package</a> attempts to replicate <code>dplyr</code> functionality using only base R code. This is not an endorsement of <code>poorman</code>. I have never used it myself, but I think it provides an interesting contrast to <code>dplyr</code>.<a href="#fnref2" class="footnote-back">↩</a></p></li>
-<li id="fn3"><p>When I tried to use the inspector from the Emacs REPL, it would occassionally hang up. Not sure if that is a quirk of my system or session, but I now run <code>inspect</code> after launching Chez from the terminal.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>If you are using RStudio, you can also view source code with <code>View(cfs.misc::water_year)</code>, which opens a tab to show the source code and omits the bytecode information.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>The <a href="https://github.com/nathaneastwood/poorman"><code>poorman</code> package</a> attempts to replicate <code>dplyr</code> functionality using only base R code. This is not an endorsement of <code>poorman</code>. I have never used it myself, but I think it provides an interesting contrast to <code>dplyr</code>.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>When I tried to use the inspector from the Emacs REPL, it would occassionally hang up. Not sure if that is a quirk of my system or session, but I now run <code>inspect</code> after launching Chez from the terminal.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>

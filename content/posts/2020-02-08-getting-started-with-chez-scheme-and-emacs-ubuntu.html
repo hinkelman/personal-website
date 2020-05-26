@@ -53,7 +53,7 @@ draft: false
 <p><code>library-directories</code> returns the directories where Chez looks for libraries.</p>
 <pre><code>&gt; (library-directories)
 ((&quot;.&quot; . &quot;.&quot;))</code></pre>
-<p>The <code>&quot;.&quot;</code> indicates that Chez is looking in the current directory.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> If you are using a project-based workflow, then you could include your dependencies in the current directory, perhaps in a <code>lib</code> folder. For a ‘global’ approach, I created a library directory at <code>/home/username/chez-lib</code>.</p>
+<p>The <code>"."</code> indicates that Chez is looking in the current directory.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> If you are using a project-based workflow, then you could include your dependencies in the current directory, perhaps in a <code>lib</code> folder. For a ‘global’ approach, I created a library directory at <code>/home/username/chez-lib</code>.</p>
 <p>Before we go over where to stash that directory information, let’s cover library extensions.</p>
 <pre><code>&gt; (library-extensions)
 ((&quot;.chezscheme.sls&quot; . &quot;.chezscheme.so&quot;) (&quot;.ss&quot; . &quot;.so&quot;)
@@ -124,11 +124,11 @@ Type (debug) to enter the debugger.
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>During installation Ubuntu identified the apparent problem as related to numerous partitions from previous operating systems and provided the option to completely erase the old operating systems before installing Ubuntu. I’m sure that would also have been possible with FreeBSD and Debian, but Ubuntu made it easier to diagnose and address.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>You can also type <code>petite</code> to launch Petite Chez Scheme. See <a href="https://cisco.github.io/ChezScheme/csug9.5/use.html">here</a> for more information on the differences between Chez Scheme and Petite Chez Scheme.<a href="#fnref2" class="footnote-back">↩</a></p></li>
-<li id="fn3"><p>You can find the current directory by with <code>current-directory</code><a href="#fnref3" class="footnote-back">↩</a></p></li>
-<li id="fn4"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref4" class="footnote-back">↩</a></p></li>
-<li id="fn5"><p>If you are receiving the message, “No Geiser REPL for this buffer”, then Geiser is <a href="http://geiser.nongnu.org/geiser_4.html#The-source-and-the-REPL">struggling to figure out which Scheme implementation to use</a>. One solution is to delete all of the non-Chez implementations by choosing <code>Options/Customize Emacs/Specific Group...</code>, typing <code>geiser</code> at the prompt, selecting <code>Geiser Implementation</code>, and deleting all the non-Chez implementations under <code>Geiser Active Implementations</code>. Click <code>Apply and Save</code>. Restart Emacs.<a href="#fnref5" class="footnote-back">↩</a></p></li>
-<li id="fn6"><p>If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).<a href="#fnref6" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>During installation Ubuntu identified the apparent problem as related to numerous partitions from previous operating systems and provided the option to completely erase the old operating systems before installing Ubuntu. I’m sure that would also have been possible with FreeBSD and Debian, but Ubuntu made it easier to diagnose and address.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>You can also type <code>petite</code> to launch Petite Chez Scheme. See <a href="https://cisco.github.io/ChezScheme/csug9.5/use.html">here</a> for more information on the differences between Chez Scheme and Petite Chez Scheme.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>You can find the current directory by with <code>current-directory</code><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>If you are receiving the message, “No Geiser REPL for this buffer”, then Geiser is <a href="http://geiser.nongnu.org/geiser_4.html#The-source-and-the-REPL">struggling to figure out which Scheme implementation to use</a>. One solution is to delete all of the non-Chez implementations by choosing <code>Options/Customize Emacs/Specific Group...</code>, typing <code>geiser</code> at the prompt, selecting <code>Geiser Implementation</code>, and deleting all the non-Chez implementations under <code>Geiser Active Implementations</code>. Click <code>Apply and Save</code>. Restart Emacs.<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
