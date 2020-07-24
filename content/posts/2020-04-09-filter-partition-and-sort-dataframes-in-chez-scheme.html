@@ -19,7 +19,7 @@ draft: false
 <p>This post is the fourth in a <a href="/categories/dataframe/">series</a> on the <a href="https://hinkelman.github.io/dataframe/">dataframe library</a> for Chez Scheme. In this post, I will contrast the <code>dataframe</code> library with functions from the <a href="https://dplyr.tidyverse.org"><code>dplyr</code> R package</a> for filtering, partitioning, and sorting dataframes. And discuss implementation decisions in the <code>dataframe</code> library.</p>
 <div id="set-up" class="section level3">
 <h3>Set up</h3>
-<p>First, let’s create a dataframe in both languages. The <code>replicate</code> procedure was introduced in the <a href="/posts/split-bind-append-dataframes-chez-scheme/">previous post</a>, but it is not part of the <code>dataframe</code> library.</p>
+<p>First, let’s create a dataframe in both languages. The <code>rep</code> procedure was introduced in the <a href="/posts/split-bind-append-dataframes-chez-scheme/">previous post</a>, but it is not part of the <code>dataframe</code> library.</p>
 <pre><code>df &lt;- data.frame(trt = rep(c(&quot;a&quot;, &quot;b&quot;), each = 6),
                  grp = rep(rep(c(&quot;x&quot;, &quot;y&quot;), each = 3), times = 2),
                  rsp = rep(1:4, each = 3),

@@ -18,7 +18,7 @@ This post is the fourth in a [series](/categories/dataframe/) on the [dataframe 
 
 ### Set up
 
-First, let's create a dataframe in both languages. The `replicate` procedure was introduced in the [previous post](/posts/split-bind-append-dataframes-chez-scheme/), but it is not part of the `dataframe` library.
+First, let's create a dataframe in both languages. The `rep` procedure was introduced in the [previous post](/posts/split-bind-append-dataframes-chez-scheme/), but it is not part of the `dataframe` library.
 
 ```
 df <- data.frame(trt = rep(c("a", "b"), each = 6),

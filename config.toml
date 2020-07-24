@@ -25,7 +25,7 @@ googleAnalytics = "UA-129874255-1"
 [params]
 	math = true
 	# Blog description at the top of the homepage. Supports markdown.
-	description = "Ecological modeler. Shiny developer. Tidyverse denizen. Scheme enthusiast."
+	description = "Data Scientist. Shiny Developer. Tidyverse Denizen. Scheme Enthusiast."
 
 	# Add links to your accounts. Remove the ones you don't want to include.
 	email = "mailto:travis.hinkelman@gmail.com"
