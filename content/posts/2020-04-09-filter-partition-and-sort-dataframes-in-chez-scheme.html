@@ -174,7 +174,7 @@ draft: false
 <pre><code>(list (list string&lt;? &gt;) &#39;(grp ind))</code></pre>
 <p>The justification for this macro is similar to <code>filter-expr</code>, i.e., passing predicates and names together reduces likelihood of mixing up the order of the predicate list and the column name list. The macro is also slightly shorter than this alternative:</p>
 <pre><code>(list (cons string&lt;? &#39;grp) (cons &gt; &#39;ind))</code></pre>
-<p>Does that save enough keystrokes to justify using a macro? It will be interesting to see where I stand on this issue after I become a more experience Scheme programmer.</p>
+<p>Does that save enough keystrokes to justify using a macro? It will be interesting to see where I stand on this issue after I become a more experienced Scheme programmer.</p>
 <p>Here are the steps involved in <code>dataframe-sort</code>:</p>
 <ol style="list-style-type: decimal">
 <li>Extract the columns selected for sorting from the dataframe.</li>

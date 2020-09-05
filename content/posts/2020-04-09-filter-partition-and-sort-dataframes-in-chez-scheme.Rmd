@@ -239,7 +239,7 @@ The justification for this macro is similar to `filter-expr`, i.e., passing pred
 (list (cons string<? 'grp) (cons > 'ind))
 ```
 
-Does that save enough keystrokes to justify using a macro? It will be interesting to see where I stand on this issue after I become a more experience Scheme programmer.
+Does that save enough keystrokes to justify using a macro? It will be interesting to see where I stand on this issue after I become a more experienced Scheme programmer.
 
 Here are the steps involved in `dataframe-sort`:
 
