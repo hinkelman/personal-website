@@ -9,7 +9,8 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]  # Warning from
 # Add your Disqus shortname here.
 disqusShortname = ""      
 # Add your Google Analytics identifier: UA-XXXXXXXX-X
-googleAnalytics = "UA-129874255-1" 
+# googleAnalytics = "UA-129874255-1" 
+googleAnalytics = ""
 
 [taxonomies]
   category = "categories"
