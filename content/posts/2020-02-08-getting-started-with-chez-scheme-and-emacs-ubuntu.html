@@ -59,13 +59,13 @@ draft: false
 ((&quot;.chezscheme.sls&quot; . &quot;.chezscheme.so&quot;) (&quot;.ss&quot; . &quot;.so&quot;)
   (&quot;.sls&quot; . &quot;.so&quot;) (&quot;.scm&quot; . &quot;.so&quot;) (&quot;.sch&quot; . &quot;.so&quot;))</code></pre>
 <p>These are the file extensions that Chez uses when searching the library directories.</p>
-<p>I edited <code>.profile</code> to add information on library directories and extensions. From a Terminal window, open <code>.profile</code> with the <a href="https://help.ubuntu.com/community/gedit">gedit text editor</a>.</p>
-<pre><code>$ gedit ~/.profile</code></pre>
+<p>I edited <code>.bashrc</code> to add information on library directories and extensions. From a Terminal window, open <code>.bashrc</code> with the <a href="https://help.ubuntu.com/community/gedit">gedit text editor</a>.</p>
+<pre><code>$ gedit ~/.bashrc</code></pre>
 <p>These lines add a new directory to <code>library-directories</code> and a new extension to <code>library-extensions</code>.</p>
 <pre><code>export CHEZSCHEMELIBDIRS=&quot;/home/username/chez-lib:&quot;
 export CHEZSCHEMELIBEXTS=&quot;.sc::.so:&quot;</code></pre>
-<p>The <code>:</code> at the end is used to indicate that the new entries should be appended to the existing entries. Remove the <code>:</code> to replace the default values with the new entries. After saving <code>.profile</code>, you need to logout from your user account and login again <a href="https://askubuntu.com/questions/951000/how-to-make-the-changes-to-source-profile-permanent">to make the changes to <code>.profile</code> permanent</a>. For your current session, though, you can source <code>.profile</code>.</p>
-<pre><code>$ source ~/.profile</code></pre>
+<p>The <code>:</code> at the end is used to indicate that the new entries should be appended to the existing entries. Remove the <code>:</code> to replace the default values with the new entries. After saving <code>.bashrc</code>, you need to logout from your user account and login again <a href="https://stackoverflow.com/questions/2518127/how-do-i-reload-bashrc-without-logging-out-and-back-in">to make the changes to <code>.bashrc</code> permanent</a>. For your current session, though, you can source <code>.bashrc</code>.</p>
+<pre><code>$ source ~/.bashrc</code></pre>
 <p>Now, from a Chez REPL, we can see the effect of our changes.</p>
 <pre><code>&gt; (library-directories)
 ((&quot;/home/username/chez-lib&quot; . &quot;/home/username/chez-lib&quot;)
@@ -88,11 +88,12 @@ Type (debug) to enter the debugger.
 <p>I’m not aware of an <a href="https://en.wikipedia.org/wiki/Integrated_development_environment">IDE</a> for Chez Scheme, but pairing a good text editor with the Chez REPL provides a decent development environment. I chose <a href="https://www.gnu.org/software/emacs/emacs.html">Emacs</a> as a text editor. I’m slowly becoming more comfortable with Emacs, but I’m far from proficient.</p>
 <div id="installation-1" class="section level3">
 <h3>Installation</h3>
-<p>Emacs is available through the Ubuntu Software Manager.</p>
+<p>Emacs is available through the Ubuntu Software Manager. You can also install it through the Terminal with</p>
+<pre><code>sudo apt install emacs-gtk</code></pre>
 </div>
 <div id="basic-usage" class="section level3">
 <h3>Basic Usage</h3>
-<p>The power of Emacs is in the keyboard shortcuts and customization. I’m too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., <code>C-x</code> <code>C-f</code> corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with <code>M</code> as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to <code>.profile</code>, Emacs can be customized through commands saved in the <code>.emacs</code> file.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
+<p>The power of Emacs is in the keyboard shortcuts and customization. I’m too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., <code>C-x</code> <code>C-f</code> corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with <code>M</code> as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to <code>.bashrc</code>, Emacs can be customized through commands saved in the <code>.emacs</code> file.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
 </div>
 <div id="geiser" class="section level3">
 <h3>Geiser</h3>

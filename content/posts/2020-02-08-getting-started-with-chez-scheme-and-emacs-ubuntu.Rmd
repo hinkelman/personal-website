@@ -81,10 +81,10 @@ Before we go over where to stash that directory information, let's cover library
 
 These are the file extensions that Chez uses when searching the library directories.
 
-I edited `.profile` to add information on library directories and extensions. From a Terminal window, open `.profile` with the [gedit text editor](https://help.ubuntu.com/community/gedit). 
+I edited `.bashrc` to add information on library directories and extensions. From a Terminal window, open `.bashrc` with the [gedit text editor](https://help.ubuntu.com/community/gedit). 
 
 ```
-$ gedit ~/.profile
+$ gedit ~/.bashrc
 ```
 
 These lines add a new directory to `library-directories` and a new extension to `library-extensions`.
@@ -94,10 +94,10 @@ export CHEZSCHEMELIBDIRS="/home/username/chez-lib:"
 export CHEZSCHEMELIBEXTS=".sc::.so:"
 ```
 
-The `:` at the end is used to indicate that the new entries should be appended to the existing entries. Remove the `:` to replace the default values with the new entries. After saving `.profile`, you need to logout from your user account and login again [to make the changes to `.profile` permanent](https://askubuntu.com/questions/951000/how-to-make-the-changes-to-source-profile-permanent). For your current session, though, you can source `.profile`.
+The `:` at the end is used to indicate that the new entries should be appended to the existing entries. Remove the `:` to replace the default values with the new entries. After saving `.bashrc`, you need to logout from your user account and login again [to make the changes to `.bashrc` permanent](https://stackoverflow.com/questions/2518127/how-do-i-reload-bashrc-without-logging-out-and-back-in). For your current session, though, you can source `.bashrc`.
 
 ```
-$ source ~/.profile
+$ source ~/.bashrc
 ```
 
 Now, from a Chez REPL, we can see the effect of our changes.
@@ -130,11 +130,15 @@ I'm not aware of an [IDE](https://en.wikipedia.org/wiki/Integrated_development_e
 
 ### Installation
 
-Emacs is available through the Ubuntu Software Manager.
+Emacs is available through the Ubuntu Software Manager. You can also install it through the Terminal with
+
+```
+sudo apt install emacs-gtk
+```
 
 ### Basic Usage
 
-The power of Emacs is in the keyboard shortcuts and customization. I'm too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., `C-x` `C-f` corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with `M` as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to `.profile`, Emacs can be customized through commands saved in the `.emacs` file.^[More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.]
+The power of Emacs is in the keyboard shortcuts and customization. I'm too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., `C-x` `C-f` corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with `M` as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to `.bashrc`, Emacs can be customized through commands saved in the `.emacs` file.^[More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.]
 
 ### Geiser
 
