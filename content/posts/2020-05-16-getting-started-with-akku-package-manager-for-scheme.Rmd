@@ -28,13 +28,25 @@ $ cd akku-1.0.1.src
 $ ./install.sh
 ```
 
-If you are on macOS, you need to add the following line to `.bash_profile` or `.zshenv` or wherever you keep your shell configuration commands. Make sure to replace `username` with the your actual username.
+For some reason, this doesn't work with the latest version (9.5.4) of Chez Scheme (if you've installed Chez Scheme from source). If you are on Linux, you can use the pre-built version of Akku.
+
+```
+$ tar -xf akku-1.0.1.amd64-linux.tar.xz 
+$ cd akku-1.0.1.amd64-linux/
+$ ./install.sh
+```
+
+If neither the Chez version nor the pre-built version work for you, then you will need to install the release tarball (`akku-1.0.1.tar.gz`), which requires [Guile](https://www.gnu.org/software/guile/).
+
+Add one of the following lines to `.bashrc`,  `.bash_profile`, `.zshenv`, or wherever you keep your shell configuration commands. Make sure to replace `username` with the your actual username.
+
+On macOS...
 
 ```
 export PATH="/Users/username/.local/bin:$PATH"
 ```
 
-On Linux, add the following line to `.profile`.
+On Linux...
 
 ```
 export PATH="/home/username/.local/bin:$PATH"
