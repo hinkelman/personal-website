@@ -1,0 +1,190 @@
++++
+title = "Stochastic population model in R, Rcpp, Racket, and Typed Racket"
+date = 2019-04-12
+[taxonomies]
+categories = ["R", "Racket"]
+tags = ["Rcpp", "TypedRacket", "timing"]
++++
+
+On my journey to [learn Racket](/categories/racket/), I look for small pieces of R code to try to implement in Racket. A [blog post](https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html) about speeding up population simulations in R with the [Rcpp package](http://www.rcpp.org) seemed like a good candidate for implementing in Racket. I was particularly interested in the (superficial?) parallels between R/Rcpp and Racket/[Typed Racket](https://docs.racket-lang.org/ts-guide/). 
+
+<!-- more -->
+
+### Running a single simulation
+
+First, let's get some of the setup code [[1]](#1) out of the way [[2]](#2). In this chunk of code, we are loading the `math` library and `stochastic-logistic-typed.rkt`, which contains the typed versions of the functions. Using `require` with a file is similar to loading a script with `source` in R. Racket is a programming language laboratory with the nice feature that it is easy to use code from different languages (#langs) in the same file.
+
+```
+#lang racket
+
+(require math
+         "stochastic-logistic-typed.rkt")
+
+(define YINIT 1.0)        ; initial population size
+(define R 1.4)            ; maximum population growth rate
+(define K 20.0)           ; carrying capacity
+(define THETASD 0.1)      ; standard deviation for adding noise to population
+(define T 100)            ; number of years to run simulation
+(define REPS 1000)        ; number of replications
+(define T2 (* T REPS))    ; used to compare difference between long-running simulation and many calls to simulation
+(define TIME-SAMPLES 100) ; number of samples to run when timing functions
+```
+
+In the spirit of learning, I wanted to try to write the Racket version of the `logmodr` function with recursion. I managed to work out a clunky version (not shown here) and reached out to the [Racket mailing list for help](https://groups.google.com/d/msg/racket-users/ryyW4YHWLMA/nL-P_qobAgAJ). Here is one suggested alternative:
+
+```
+(define (logmod t y r k thetasd)
+
+  (define (calc y)
+    (define theta (flvector-ref (flnormal-sample 0.0 thetasd 1) 0))
+    (* y (- r (* r (/ y k))) (exp theta)))
+    
+  (define (loop y i)
+    (if (= i t)
+        (list y)
+        (cons y (loop (calc y) (add1 i)))))
+  (loop y 1))
+```
+
+My clunky version had calc and loop as separate functions and I struggled to figure out how to pass the extra function arguments (i.e., `r`, `k`, and `thetasd`) to the standalone loop function. Several solutions were suggested on the mailing list. I gravitated to the nested functions approach shown above [[3]](#3), but, as I write this, I'm having trouble articulating why I liked that option the best. Check out the thread on the mailing list and decide for yourself.
+
+I also wrote a version, `logmod-vec`, that is a direct translation of the R code in the `logmodr` function. This version was easy to write because I had already invested time in [learning about `for` loops in Racket.](/post/for-loop-r-racket/).
+
+```
+(define (logmod-vec t y r k thetasd)
+  (define y-vec (make-vector t))
+  (vector-set! y-vec 0 y)
+  (define theta-vec (flnormal-sample 0.0 thetasd t))
+  (for ([i (in-range 1 t)])
+    (define last-y (vector-ref y-vec (sub1 i)))
+    (define theta (flvector-ref theta-vec i))
+    (vector-set! y-vec i (* last-y (- r (* r (/ last-y k))) (exp theta)))))
+```
+
+We can create a typed version of `logmod` simply by adding type annotations. The rest of the code is the same as in the untyped version. The syntax for the type annotations is straightforward. The type of each argument is specified, followed by `->`, and then the type of the output. All of the types and their relationships are thoroughly described in the [documentation](https://docs.racket-lang.org/ts-reference/type-ref.html?q=type%20reference). Moreover, the type-checker was helpful for pointing me to the places where I was misspecifying types.  
+
+```
+#lang typed/racket
+
+(require math)
+
+(provide logmod-typed repeat-logmod-typed)
+
+(: logmod-typed : Integer Flonum Flonum Flonum Flonum -> (Listof Flonum))
+(define (logmod-typed t y r k thetasd)
+
+  (: calc : Flonum -> Flonum)
+  (define (calc y)
+    (define theta (flvector-ref (flnormal-sample 0.0 thetasd 1) 0))
+    (* y (- r (* r (/ y k))) (exp theta)))
+
+  (: loop : Flonum Integer -> (Listof Flonum))
+  (define (loop y i)
+    (if (= i t)
+        (list y)
+        (cons y (loop (calc y) (add1 i)))))
+  (loop y 1))
+```
+
+We need to make a quick digression to talk about the code [[4]](#4) that I wrote to get sample timings for the different functions. `time-apply-cpu` is a simple wrapper function to `time-apply` that runs `time-apply` repeatedly and prints the `min`, `mean`, and `max` cpu time to the interactions pane. `time-apply` produces multiple output values that are not contained in a data structure. `define-values` allows you to capture those outputs and bind them to names (in this case, `results`, `cpu-time`, `real-time`, `gc-time`). `string-append` is similar to `paste` in R, but `string-append` requires that all arguments are strings and, thus, requires some conversion (e.g., `number->string`) [[5]](#5).
+
+```
+(define (time-apply-cpu proc lst reps)
+  (define out
+    (for/list ([i (in-range reps)])
+      (define-values (results cpu-time real-time gc-time) (time-apply proc lst))
+      cpu-time))
+  (displayln (string-append "min: " (number->string (apply min out))
+                            " mean: " (number->string (round (mean out)))
+                            " max: " (number->string (apply max out))
+                            "    function: "
+                            (symbol->string (object-name proc)))))
+```
+
+We will now use `time-apply-cpu` to compare our 3 functions.
+
+```
+> (time-apply-cpu logmod (list T2 YINIT R K THETASD) TIME-SAMPLES)
+min: 84 mean: 148 max: 1385    function: logmod
+> (time-apply-cpu logmod-typed (list T2 YINIT R K THETASD) TIME-SAMPLES)
+min: 66 mean: 101 max: 828    function: logmod-typed
+> (time-apply-cpu logmod-vec (list T2 YINIT R K THETASD) TIME-SAMPLES)
+min: 25 mean: 28 max: 59    function: logmod-vec
+```
+
+I want to be cautious not to overinterpret these results because I know just enough to be dangerous. I am intrigued by the good performance of `logmod-vec` because, generally, I am most comfortable programming in an imperative style. The relatively modest speedup provided by Typed Racket presumably is not representative of the performance bumps that you can get in other situations. For example...
+
+>Performance Warning: Matrix values are arrays, as exported by math/array. The same performance warning applies: operations are currently 25-50 times slower in untyped Racket than in Typed Racket, due to the overhead of checking higher-order contracts. We are working on it. [Source](https://docs.racket-lang.org/math/matrices.html?q=matrix)
+
+I will also cautiously interpret the timings of the R code. Although the Racket and R timing results are all in milliseconds, it seems unlikely that this is an apples-to-apples comparison. Nonetheless, in this simple example, R performance is arguably comparable to Racket. 
+
+```
+Unit: milliseconds
+                                 expr       min        lq      mean    median        uq      max neval
+ logmodc(1e+05, yinit, r, k, thetasd)  5.874801  6.568564  6.702172  6.622926  6.732324 10.74266   100
+ logmodr(1e+05, yinit, r, k, thetasd) 24.786605 25.487129 25.914484 25.654279 26.014754 31.76419   100
+```
+
+One clear result is that the 19x speedup of `logmodc` over `logmodr` reported in the original blog post was not reproduced here. The original blog post is only 2 years old but R releases in those two years have targeted [performance](https://blog.revolutionanalytics.com/2017/02/preview-r-340.html) [improvements](https://blog.revolutionanalytics.com/2018/04/r-350.html). 
+
+### Running multiple simulations
+
+I took a slightly different approach to running multiple simulations than in the original blog post. Instead of running multiple simulations where one parameter is varied, I repeated the simulation many times with the same paramters. In Racket, I used `for/list` to loop through the number of replications.
+
+```
+(define (repeat-logmod reps t y r k thetasd)
+  (for/list ([i (in-range reps)]) (logmod t y r k thetasd)))
+  
+(define (repeat-logmod-vec reps t y r k thetasd)
+  (for/list ([i (in-range reps)]) (logmod-vec t y r k thetasd)))
+```
+
+The timings for the Racket code showed similar results to the single simulation results. Good performance of `repeat-logmod-vec` and a modest speedup of `repeat-logmod-typed` over `repeat-logmod`. 
+
+```
+> (time-apply-cpu repeat-logmod (list REPS T YINIT R K THETASD) TIME-SAMPLES)
+min: 54 mean: 77 max: 1437    function: repeat-logmod
+> (time-apply-cpu repeat-logmod-typed (list REPS T YINIT R K THETASD) TIME-SAMPLES)
+min: 43 mean: 58 max: 795    function: repeat-logmod-typed
+> (time-apply-cpu repeat-logmod-vec (list REPS T YINIT R K THETASD) TIME-SAMPLES)
+min: 25 mean: 29 max: 65    function: repeat-logmod-vec
+```
+
+In R, I only slightly modified the `purrr::map` examples from the original blog post. Again, results for multiple simulations are similar to single simulation results. R performance is comparable to Racket and `logmodc` speedup over `logmodr` is not as large as reported in the original blog post.
+
+```
+> reps <- 1:1000
+> mb3 <- microbenchmark(
++   purrr::map(reps, ~logmodc(t, yinit, r, k, thetasd)),
++   purrr::map(reps, ~logmodr(t, yinit, r, k, thetasd))
++ )
+> mb3
+Unit: milliseconds
+                                                expr       min        lq     mean    median       uq      max neval
+ purrr::map(reps, ~logmodc(t, yinit, r, k, thetasd))  8.863207  9.245297 11.48015 10.048379 11.14099 44.91200   100
+ purrr::map(reps, ~logmodr(t, yinit, r, k, thetasd)) 28.869978 29.357927 32.00268 30.180079 33.39805 48.81793   100
+```
+
+**Update 2019-04-21:** All of the previous timings were run in DrRacket. Running from the command line yields much better performance (2-3x).
+
+```
+$ racket stochastic-logistic.rkt
+min: 34 mean: 41 max: 218    function: logmod
+min: 27 mean: 33 max: 195    function: logmod-typed
+min: 14 mean: 15 max: 16    function: logmod-vec
+min: 32 mean: 40 max: 213    function: repeat-logmod
+min: 26 mean: 27 max: 28    function: repeat-logmod-typed
+min: 14 mean: 15 max: 16    function: repeat-logmod-vec
+```
+
+***
+
+<a name="1"></a> [1] All of the Racket code is a available in this [gist](https://gist.github.com/hinkelman/a97a9c1491d829b1f4ba148ed1712ee4).
+
+<a name="2"></a> [2] See the [original blog post](https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html) for the R code.
+
+<a name="3"></a> [3] Throughout this post, we are using `flnormal-sample` to draw random numbers. I wrote about generating random numbers in this [post](/post/generating-random-numbers-r-racket/).
+
+<a name="4"></a> [4] See [this post](/post/microbenchmarking-in-r-and-racket/) for an improved version.
+
+<a name="5"></a> [5] The [`racket/format`](https://docs.racket-lang.org/reference/strings.html?q=string-append#%28part._format%29) library provides functions for formatting strings with more compact code. 

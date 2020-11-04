@@ -1,0 +1,3 @@
+[submodule "themes/anpu-zola-theme"]
+	path = themes/anpu-zola-theme
+	url = https://github.com/zbrox/anpu-zola-theme

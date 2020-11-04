@@ -1,92 +1,32 @@
-baseURL = "https://www.travishinkelman.com/"
-languageCode = "en-us"
+# The URL the site will be built for
+base_url = "https://www.travishinkelman.com"
+
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+
+# Whether to do syntax highlighting
+# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
+highlight_code = true
+
+# The theme to use for code highlighting.
+highlight_theme = "demain"
+
+# Whether to build a search index to be used later on by a JavaScript library
+build_search_index = false
+
 title = "Travis Hinkelman"
-theme = "hugo-theme-noteworthy"
-enableRobotsTXT = true
-paginate = 3 # Set the number of posts to show before overflowing to the next page.
-summaryLength = 30 # Configure how long the post summary should be on the homepage.
-ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]  # Warning from blogdown(?) recommended to add this line
-# Add your Disqus shortname here.
-disqusShortname = ""      
-# Add your Google Analytics identifier: UA-XXXXXXXX-X
-# googleAnalytics = "UA-129874255-1" 
-googleAnalytics = ""
+description = "Data Scientist. Shiny Developer. Tidyverse Denizen. Scheme Enthusiast."
+generate_feed = true
 
-[taxonomies]
-  category = "categories"
-  tag = "tags"
+taxonomies = [
+    {name = "categories", rss = true},
+    {name = "tags", rss = true},
+]
 
-[author]
-	name = "Travis Hinkelman"
-
-# Set to false to disallow raw HTML in markdown files
-[markup.goldmark.renderer]
-    unsafe = true
-
-[params]
-	math = true
-	# Blog description at the top of the homepage. Supports markdown.
-	description = "Data Scientist. Shiny Developer. Tidyverse Denizen. Scheme Enthusiast."
-
-	# Add links to your accounts. Remove the ones you don't want to include.
-	email = "mailto:travis.hinkelman@gmail.com"
-	github = "https://github.com/hinkelman"
-  twitter = "https://twitter.com/travishinkelman"
-	linkedin = "https://www.linkedin.com/in/travis-hinkelman-36604955/"
-	orcid = "https://orcid.org/0000-0002-8157-8407"
-	googlescholar = "https://scholar.google.com/citations?user=_Bb54NMAAAAJ&hl=en"
-	impactstory = "https://profiles.impactstory.org/u/0000-0002-8157-8407"
-
-# Menu links along the sidebar navigation.
-[[menu.main]]
-	identifier = "about"
-	name = "About"
-	url = "/about/"
-	weight = 1 # Weight is an integer used to sort the menu items. The sorting goes from smallest to largest numbers. If weight is not defined for each menu entry, Hugo will sort the entries alphabetically.
-
-[[menu.main]]
-	identifier = "projects"
-	name = "Projects"
-	url = "/projects/"
-	weight = 2
-	
-[[menu.main]]
-	identifier = "categories"
-	name = "Categories"
-	url = "/categories/"
-	weight = 3
-
-[[menu.main]]
-	identifier = "tags"
-	name = "Tags"
-	url = "/tags/"
-	weight = 4
-
-[[menu.main]]
-	name = "Archives"
-	identifier = "archives"
-	url = "/archives/"
-	weight = 5
-
-# Privacy configurations: https://gohugo.io/about/hugo-and-gdpr/
-[privacy]
-  [privacy.disqus]
-    disable = false
-  [privacy.googleAnalytics]
-    anonymizeIP = true
-    disable = false
-    respectDoNotTrack = false
-    useSessionStorage = false
-  [privacy.instagram]
-    disable = false
-    simple = false
-  [privacy.twitter]
-    disable = false
-    enableDNT = false
-    simple = false
-  [privacy.vimeo]
-    disable = false
-    simple = false
-  [privacy.youtube]
-    disable = false
-    privacyEnhanced = true
+[extra]
+anpu_date_format="%e %B %Y"
+anpu_menu_links = [
+    { url = "$BASE_URL/about/", name = "About" },
+    { url = "$BASE_URL/categories/", name = "Categories" },
+    { url = "$BASE_URL/tags/", name = "Tags" },
+]

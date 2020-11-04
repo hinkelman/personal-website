@@ -1,0 +1,196 @@
++++
+title = "Reading CSV files in R and Racket"
+date = 2019-06-09
+[taxonomies]
+categories = ["R", "Racket"]
+tags = ["data-structures", "dataframe", "list"]
++++
+
+In a [previous post](/post/data-serialization-in-r-and-racket/), I wrote about reading and writing data to file while retaining the structure and attributes of the data (i.e., data serialization). However, I more commonly pass data around as text files (usually, CSV files). For this post, I created an [example CSV file](/data/example.csv) with a [tool for generating test data](http://convertcsv.com/generate-test-data.htm), which allows for including different data types (e.g., dates, integers, names, phone numbers) in the output file.
+
+<!-- more -->
+
+### R
+
+In base R, `read.csv` [[1]](#1) includes sensible defaults that make reading a CSV file relatively straightforward. 
+
+```
+> str(read.csv("example.csv"))
+'data.frame':	25 obs. of  7 variables:
+ $ date   : Factor w/ 25 levels "01/23/2054","01/30/2023",..: 23 3 21 6 11 9 19 13 24 2 ...
+ $ integer: int  -958838 -165090 -207296 316236 722897 -903116 -350444 -498413 63304 -644668 ...
+ $ float  : num  5.90e+11 5.28e+11 9.94e+10 5.90e+11 -3.09e+11 ...
+ $ bool   : Factor w/ 2 levels "false","true": 2 2 1 1 2 2 1 1 1 1 ...
+ $ char   : Factor w/ 20 levels ")","$","0","1",..: 17 4 18 19 5 3 20 9 2 11 ...
+ $ word   : Factor w/ 25 levels "ca","da","doptah",..: 24 4 3 8 10 6 21 7 18 20 ...
+ $ yn     : Factor w/ 2 levels "N","Y": 2 2 2 1 1 2 1 1 2 2 ...
+```
+
+The `str` function shows the structure of an R object. For a `data.frame` object, each column in the `data.frame` is previewed in a row with the column name, followed by the column type, followed by the values for the first few rows in that column. Most of the columns in `example.csv` were converted to factors by `read.csv`. The factor levels are encoded as integers (e.g., `"true"` and `"false"` as `1` and `2`). I won't re-hash the [explanation for this default behavior](https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/), but I now typically set `stringsAsFactors = FALSE` to read non-numeric data as strings. 
+
+```
+> str(read.csv("example.csv", stringsAsFactors = FALSE))
+'data.frame':	25 obs. of  7 variables:
+ $ date   : chr  "12/25/2060" "02/18/2023" "11/27/2064" "06/28/2044" ...
+ $ integer: int  -958838 -165090 -207296 316236 722897 -903116 -350444 -498413 63304 -644668 ...
+ $ float  : num  5.90e+11 5.28e+11 9.94e+10 5.90e+11 -3.09e+11 ...
+ $ bool   : chr  "true" "true" "false" "false" ...
+ $ char   : chr  "u" "1" "w" "x" ...
+ $ word   : chr  "zosu" "em" "doptah" "gutijenel" ...
+ $ yn     : chr  "Y" "Y" "Y" "N" ...
+```
+
+However, I'm even more likely to use the `read_csv` function from the [`readr` package](https://readr.tidyverse.org).
+
+```
+> library(readr)
+> str(read_csv("example.csv"))
+Parsed with column specification:
+cols(
+  date = col_character(),
+  integer = col_double(),
+  float = col_double(),
+  bool = col_logical(),
+  char = col_character(),
+  word = col_character(),
+  yn = col_character()
+)
+Classes ‘spec_tbl_df’, ‘tbl_df’, ‘tbl’ and 'data.frame':	25 obs. of  7 variables:
+ $ date   : chr  "12/25/2060" "02/18/2023" "11/27/2064" "06/28/2044" ...
+ $ integer: num  -958838 -165090 -207296 316236 722897 ...
+ $ float  : num  5.90e+11 5.28e+11 9.94e+10 5.90e+11 -3.09e+11 ...
+ $ bool   : logi  TRUE TRUE FALSE FALSE TRUE TRUE ...
+ $ char   : chr  "u" "1" "w" "x" ...
+ $ word   : chr  "zosu" "em" "doptah" "gutijenel" ...
+ $ yn     : chr  "Y" "Y" "Y" "N" ...
+ - attr(*, "spec")=
+  .. cols(
+  ..   date = col_character(),
+  ..   integer = col_double(),
+  ..   float = col_double(),
+  ..   bool = col_logical(),
+  ..   char = col_character(),
+  ..   word = col_character(),
+  ..   yn = col_character()
+  .. )
+```
+
+`readr` flexibly parses many data types. In our example file, `readr` converts the `bool` column of `"true"` and `"false"` to R's logical type represented as `TRUE` and `FALSE`. `readr` is also capable of automatically parsing dates, but, apparently, not when the dates are in the `mm/dd/yyyy` format [[2]](#2). Interestingly, `readr` parses the `integer` column in this example file as a `double` rather than `integer`, perhaps because the integer values are so large.
+
+If you are dealing with large datasets with slow read times, [`fread`](https://www.rdocumentation.org/packages/data.table/versions/1.12.2/topics/fread) from the [`data.table` package](https://rdatatable.gitlab.io/data.table/) and the [`vroom` package](http://vroom.r-lib.org) provide fast reading of delimited files. Jim Hester, maintainer of both the `readr` and `vroom` packages, made a [helpful video](https://www.youtube.com/watch?v=ZP_y5eaAc60) comparing the performance of the `readr`, `vroom`, and `data.table` packages on a variety of tasks related to reading delimited files.
+
+### Racket 
+
+The `csv-reading` package provides a high-level convenience function, `csv->list`, for reading a CSV file. 
+
+```
+> (require csv-reading)
+> (call-with-input-file "example.csv" csv->list)
+'(("date" " integer" " float" " bool" " char" " word" " yn")
+  ("12/25/2060" "-958838" "590131109036.032" "true" "u" "zosu" "Y")
+  ("02/18/2023" "-165090" "528052918838.8864" "true" "1" "em" "Y")
+  ("11/27/2064" "-207296" "99397538938.88" "false" "w" "doptah" "Y")
+  ("06/28/2044" "316236" "590216172037.7344" "false" "x" "gutijenel" "N")
+  ("08/12/2045" "722897" "-309360363516.7232" "true" "7" "hueh" "N")
+  ("07/23/1904" "-903116" "-509332808531.968" "true" "0" "fufcora" "Y")
+  ("11/16/2021" "-350444" "-660010367870.5664" "false" "Y" "we" "N")
+  ("08/30/1906" "-498413" "464406135282.0736" "false" "E" "gilveodo" "N")
+  ("12/28/2059" "63304" "-89202181223.2192" "false" "$" "teocon" "Y")
+  ("01/30/2023" "-644668" "777959066776.3712" "false" "J" "vettocfa" "Y")
+  ("11/15/1952" "-157838" "-367124812713.1648" "false" "9" "ponposa" "N")
+  ("07/14/1943" "526756" "-838433449495.7568" "true" "p" "ni" "Y")
+  ("09/21/2032" "-397651" "492526730687.2832" "false" "9" "fa" "N")
+  ("10/31/1997" "127459" "586856424642.9696" "true" "N" "rifot" "N")
+  ("03/30/1971" "-430726" "816426901097.6768" "false" "C" "wihpubun" "N")
+  ("12/10/2002" "986178" "390724723094.3232" "false" "0" "ca" "N")
+  ("01/23/2054" "-761264" "167446627483.648" "false" "B" "ku" "Y")
+  ("07/16/1999" "373063" "-487648905710.7968" "false" ")" "da" "Y")
+  ("08/25/2041" "326420" "382617699273.9328" "false" "L" "kegtizub" "Y")
+  ("07/29/1984" "335329" "-511355736870.0928" "false" "M" "kiili" "N")
+  ("10/24/2027" "-149539" "244888640893.7472" "true" "g" "ufhuk" "N")
+  ("12/30/2009" "258694" "-261971544060.7232" "false" "g" "zemegrif" "N")
+  ("11/22/1920" "-553309" "-687846506836.7872" "false" "m" "hetige" "Y")
+  ("09/04/2007" "-686574" "779963704593.6128" "false" "L" "zule" "N")
+  ("03/07/2060" "372912" "605244557046.5792" "true" "N" "sez" "Y"))
+```
+
+`csv->list` reads all values as strings into a list [[3]](#3) (i.e., no automated parsing of values). I think that reading CSV files provides an informative contrast between the R and Racket communities [[4]](#4). By and large, R users are not programmers but end users who want to expeditiously perform tasks related to cleaning, analyzing, and visualizing their data. There is a large, and growing, industry around building R packages and tools that facilitate those end users. My early impression of the Racket community is that packages are generally written at a lower level of abstraction than R packages because the target audience is other programmers [[5]](#5). I think this [discussion on the racket-users mailing list](https://groups.google.com/forum/#!msg/racket-users/1STqCq2dzSs/aMHeIhsIBAAJ) illustrates this difference reasonably well.
+
+Our example data was handled well by `csv->list`, but if your data is more unruly, then you can turn to the lower-level functions in the `csv-reading` package, which involves making a `csv-reader` and then iteratively calling that reader.  
+
+```
+(define make-example-csv-reader
+  (make-csv-reader-maker
+   '((separator-chars #\,))))
+
+(define next-row
+  (make-example-csv-reader (open-input-file "example.csv")))
+```
+
+The reader function, `next-row`, returns each row until it has reached the end of the file and then returns a null list (`'()`).
+
+```
+> (next-row)
+'("date" " integer" " float" " bool" " char" " word" " yn")
+> (next-row)
+'("12/25/2060" "-958838" "590131109036.032" "true" "u" "zosu" "Y")
+```
+
+We can use this behavior to create a function for previewing a CSV file that uses our previously defined `make-example-csv-reader` function and then iterates through the file with a recursive function.
+
+```
+(define (preview-csv filename [rows 6])
+  (define next-row
+    (make-example-csv-reader (open-input-file filename)))
+  (define (iterate iter [result '()])
+    (define nr (next-row))
+    (if (or (< iter 1) (empty? nr))
+        (reverse result)
+        (iterate (- iter 1) (cons nr result))))
+  (iterate rows))
+```
+
+`preview-csv` allows the user to specify the maximum number of rows to preview (with a default of 6).
+
+```
+> (preview-csv "example.csv")
+'(("date" " integer" " float" " bool" " char" " word" " yn")
+  ("12/25/2060" "-958838" "590131109036.032" "true" "u" "zosu" "Y")
+  ("02/18/2023" "-165090" "528052918838.8864" "true" "1" "em" "Y")
+  ("11/27/2064" "-207296" "99397538938.88" "false" "w" "doptah" "Y")
+  ("06/28/2044" "316236" "590216172037.7344" "false" "x" "gutijenel" "N")
+  ("08/12/2045" "722897" "-309360363516.7232" "true" "7" "hueh" "N"))
+```
+
+With a small modification, we can change `preview-csv` to a function that reads the whole file.
+
+```
+(define (read-csv filename)
+  (define next-row
+    (make-example-csv-reader (open-input-file filename)))
+  (define (iterate [result '()])
+    (define nr (next-row))
+    (if (empty? nr)
+        (reverse result)
+        (iterate (cons nr result))))
+  (iterate))
+```
+
+And, for this example, `read-csv` returns the same result as `csv->list`.
+
+```
+> (equal? (call-with-input-file "example.csv" csv->list) (read-csv "example.csv"))
+#t
+```
+
+***
+
+<a name="1"></a> [1] `read.csv` is a wrapper function to [`read.table`](https://stat.ethz.ch/R-manual/R-devel/RHOME/library/utils/html/read.table.html), which adds type conversions (and other conveniences) to the [`scan`](https://stat.ethz.ch/R-manual/R-devel/RHOME/library/base/html/scan.html) function.
+
+<a name="2"></a> [2] `readr` correctly parses dates stored as strings in the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601).
+
+<a name="3"></a> [3] A Racket list is a linked list, which is different than the [list data structure in R](https://www.rdocumentation.org/packages/base/versions/3.6.0/topics/list) ([see also](https://stackoverflow.com/questions/29417134/what-is-the-difference-between-a-list-and-a-pairlist-in-r)).
+
+<a name="4"></a> [4] Of course, it is also relevant that the central data structure in R (i.e., data frame) is tabular. That is not true of Racket but there have been a couple of recent discussions on the racket-users mailing list ([here](https://groups.google.com/d/msg/racket-users/3Ve4UlOmnpo/udLRfywiBgAJ) and [here](https://groups.google.com/d/msg/racket-users/7MCIp7RmTh8/IIJLsC9ADAAJ)) about tabular data structures in Racket. And there is a [data frame package](https://docs.racket-lang.org/data-frame/index.html?q=data%20frame) that implements a data frame data structure in Racket.
+
+<a name="5"></a> [5] This comparison is possibly made more stark by my choice to [learn Racket rather than Clojure](/post/programming-horizons/), which have [different philosophies](https://qr.ae/TWh7Ur) on how to build a community.

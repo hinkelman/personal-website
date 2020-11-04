@@ -1,0 +1,186 @@
++++
+title = "Getting started with Chez Scheme and Emacs on Ubuntu"
+date = 2020-02-08
+[taxonomies]
+categories = ["Chez Scheme", "Emacs"]
+tags = ["REPL", "packages", "libraries", "extensions", "Raven", "geiser", "Linux"]
++++
+
+I've been an enthusiastic Mac user for about 12 years, but hardware problems with a recent MacBook Pro and friction surrounding the Catalina upgrade pushed me to evaluate other Unix-like systems. I pulled out an old ASUS laptop that originally had Windows 7(?) installed, but was most recently running [CloudReady](https://www.neverware.com/freedownload). I first tried installing [FreeBSD](https://www.freebsd.org) because it seemed like an intriguing alternative, but the installation failed on the old hardware. I then tried [Debian](https://www.debian.org), but also failed. Finally, I reached for [Ubuntu](https://ubuntu.com) and, true to its reputation as being beginner friendly, was able to successfully complete the installation [[1]](#1).
+
+<!-- more -->
+
+I have been [learning Chez Scheme](/categories/chezscheme/) over the past 6 months and had previously written about [getting started with Chez Scheme and Emacs on macOS and Windows](/post/getting-started-with-chez-scheme-and-emacs/). For this post, I've copied the text of the previous post and updated only the components that needed to be changed to work with Ubuntu. 
+
+***
+
+## Chez Scheme
+
+### Installation
+
+I installed Chez with [APT](https://en.wikipedia.org/wiki/APT_(software)).
+
+```
+$ sudo apt install chezscheme
+```
+
+### REPL
+
+To launch the Chez [REPL](https://en.wikipedia.org/wiki/Read–eval–print_loop), open Terminal and type `scheme` [[2]](#2).
+
+Test the REPL with simple expression.
+
+```
+> (+ 100 10 1)
+111
+```
+
+The REPL has several nice features including:
+
+* Navigate through previous expressions with the up and down arrow keys.
+* Autocomplete functions and paths with <kbd>TAB</kbd>.
+* Write and edit multi-line expressions.
+
+```
+> (define (example x y z)
+    (if (> x 0)
+        (+ y z)
+        (- y z)))
+> (example 1 2 3)
+5
+```
+When navigating through previous expressions, only the first line of a multi-line expression is shown. To see (and edit) all lines, type <kbd>CTRL</kbd>+<kbd>L</kbd>. In the middle of an expression, <kbd>RET</kbd> creates a new line; to enter an expression from the middle of an expression, use <kbd>CTRL</kbd>+<kbd>J</kbd>.
+
+### Library Directory
+
+Chez does not come with a package manager, but there are 3rd-party options, e.g., [Akku](https://akkuscm.org). In this post, though, I will describe manual package management. 
+
+`library-directories` returns the directories where Chez looks for libraries. 
+
+```
+> (library-directories)
+(("." . "."))
+```
+
+The `"."` indicates that Chez is looking in the current directory [[3]](#3). If you are using a project-based workflow, then you could include your dependencies in the current directory, perhaps in a `lib` folder. For a 'global' approach, I created a library directory at `/home/username/chez-lib`.
+
+Before we go over where to stash that directory information, let's cover library extensions.
+
+```
+> (library-extensions)
+((".chezscheme.sls" . ".chezscheme.so") (".ss" . ".so")
+  (".sls" . ".so") (".scm" . ".so") (".sch" . ".so"))
+```
+
+These are the file extensions that Chez uses when searching the library directories.
+
+I edited `.bashrc` to add information on library directories and extensions. From a Terminal window, open `.bashrc` with the [gedit text editor](https://help.ubuntu.com/community/gedit). 
+
+```
+$ gedit ~/.bashrc
+```
+
+These lines add a new directory to `library-directories` and a new extension to `library-extensions`.
+
+```
+export CHEZSCHEMELIBDIRS="/home/username/chez-lib:"
+export CHEZSCHEMELIBEXTS=".sc::.so:"
+```
+
+The `:` at the end is used to indicate that the new entries should be appended to the existing entries. Remove the `:` to replace the default values with the new entries. After saving `.bashrc`, you need to logout from your user account and login again [to make the changes to `.bashrc` permanent](https://stackoverflow.com/questions/2518127/how-do-i-reload-bashrc-without-logging-out-and-back-in). For your current session, though, you can source `.bashrc`.
+
+```
+$ source ~/.bashrc
+```
+
+Now, from a Chez REPL, we can see the effect of our changes.
+
+```
+> (library-directories)
+(("/home/username/chez-lib" . "/home/username/chez-lib")
+  ("." . "."))
+> (library-extensions)
+((".sc" . ".so") (".chezscheme.sls" . ".chezscheme.so") (".ss" . ".so")
+  (".sls" . ".so") (".scm" . ".so") (".sch" . ".so"))
+```
+
+If we have a library at `home/username/chez-lib/srfi/s1/lists.sls`, then we import the library with `(import (srfi s1 lists))`, i.e., you pass the components of the path to import. If you can't import the library, look at the `library` call at the top of `lists.sls`, for example, because that will give you a clue of where the library expects to be placed in `library-directories`. 
+
+```
+> (xcons 1 2)
+Exception: variable xcons is not bound
+Type (debug) to enter the debugger.
+> (import (srfi s1 lists))
+> (xcons 1 2)
+(2 . 1)
+```
+
+***
+
+## Emacs
+
+I'm not aware of an [IDE](https://en.wikipedia.org/wiki/Integrated_development_environment) for Chez Scheme, but pairing a good text editor with the Chez REPL provides a decent development environment. I chose [Emacs](https://www.gnu.org/software/emacs/emacs.html) as a text editor. I'm slowly becoming more comfortable with Emacs, but I'm far from proficient.
+
+### Installation
+
+Emacs is available through the Ubuntu Software Manager. You can also install it through the Terminal with
+
+```
+sudo apt install emacs-gtk
+```
+
+### Basic Usage
+
+The power of Emacs is in the keyboard shortcuts and customization. I'm too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., `C-x` `C-f` corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with `M` as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to `.bashrc`, Emacs can be customized through commands saved in the `.emacs` file [[4]](#4).
+
+### Geiser
+
+[Geiser](https://www.nongnu.org/geiser/) is a package that provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through [MELPA](https://melpa.org/#/). 
+
+Open Emacs, enter `C-x` `C-f` to find a file, and type `.emacs` at the prompt. I added the following to `.emacs`. 
+
+```
+(require 'package)
+;;; either the stable version:
+
+(add-to-list 'package-archives
+  ;; choose either the stable or the latest git version:
+  '("melpa-stable" . "https://stable.melpa.org/packages/"))
+  ;; '("melpa-unstable" . "https://melpa.org/packages/"))
+
+(package-initialize)
+```
+
+Save `.emacs` and restart Emacs. Then type `M-x` followed by `package-refresh-contents`. If that is successful, you will see the message `Package refresh done` in the [minibuffer](https://www.gnu.org/software/emacs/manual/html_node/emacs/Minibuffer.html). To install Geiser, type `M-x` and then `package-install`. In response to the `Install package: ` prompt, type `geiser` and hit return.
+
+To customize Geiser, I used the menu options rather than directly editing the `.emacs` file. Choose `Options/Customize Emacs/Specific Group...` and type `geiser` at the prompt. Click on `Geiser Implementation` and change the default implementation to `chez`. Click `Apply and Save`. Restart Emacs.
+  
+The Chez REPL is launched through Emacs with `M-x` followed by `run-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>. Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
+
+### Miscellaneous
+
+In Emacs, there is an option to highlight matching parantheses, which I find very helpful. Select `Options/Highlight Matching Parantheses` and then `Options/Save Options`. I've also started using [company-mode](http://company-mode.github.io) for text completion. I was also pleased to discover that reindenting lines in Emacs is as simple as selecting the section to indent and pressing <kbd>TAB</kbd>.
+
+Add the following lines to your `.emacs` file for `scheme-mode` to recognize the `.sc` and `.sls` file extensions that are used with scheme code.
+
+```
+(add-to-list 'auto-mode-alist
+             '("\\.sls\\'" . scheme-mode)
+             '("\\.sc\\'" . scheme-mode))
+```
+
+In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type `C-x` `C-e` [[5]](#5). If the executed code displays any output, it will be shown in the minibuffer and not the REPL [[6]](#6). To evaluate several s-expressions, highlight the region and type `C-c` `C-r`. To select an s-expression, place your cursor at the beginning of the s-expression and type `M-C-space` (where space is the space bar). I've done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I was excited to discover this last one.
+
+***
+
+<a name="1"></a> [1] During installation Ubuntu identified the apparent problem as related to numerous partitions from previous operating systems and provided the option to completely erase the old operating systems before installing Ubuntu. I'm sure that would also have been possible with FreeBSD and Debian, but Ubuntu made it easier to diagnose and address. 
+
+<a name="2"></a> [2] You can also type `petite` to launch Petite Chez Scheme. See [here](https://cisco.github.io/ChezScheme/csug9.5/use.html) for more information on the differences between Chez Scheme and Petite Chez Scheme.
+
+<a name="3"></a> [3] You can find the current directory by with `current-directory`.
+
+<a name="4"></a> [4] More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.
+
+<a name="5"></a> [5] If you are receiving the message, "No Geiser REPL for this buffer", then Geiser is [struggling to figure out which Scheme implementation to use](http://geiser.nongnu.org/geiser_4.html#The-source-and-the-REPL). One solution is to delete all of the non-Chez implementations by choosing `Options/Customize Emacs/Specific Group...`, typing `geiser` at the prompt, selecting `Geiser Implementation`, and deleting all the non-Chez implementations under `Geiser Active Implementations`. Click `Apply and Save`. Restart Emacs. 
+
+<a name="6"></a> [6] If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).

@@ -1,0 +1,38 @@
++++
+title = "Programming horizons revisited"
+date = 2020-04-03
+[taxonomies]
+categories = ["navel-gazing"]
+tags = ["Scheme", "Racket", "ChezScheme", "Pharo", "Smalltalk", "Elixir", "Rust", "Clojure", "Julia", "Python", "C++", "JavaScript", "Red"]
++++
+
+In my [second post on this blog](/posts/programming-horizons/), I wrote about my interest in learning new programming languages and my thoughts on how to choose the next language to learn. It's been over a year since that post and I thought it would be worthwhile to reflect on what I've learned.
+
+<!-- more -->
+
+In that old post, I identified the four features of a programming language that I thought were most relevant to my goals and interests: (1) friendly and accessible, (2) GUI capabilities, (3) scientific computing libraries, and (4) capable of expanding my programming horizons (which is a low bar given my limited programming experience). 
+
+I think that #1 still holds, but I have taken the plunge with Emacs (see [here](/posts/getting-started-with-chez-scheme-and-emacs/) and [here](/posts/getting-started-with-chez-scheme-and-emacs-ubuntu/)), which doesn't exactly have the reputation of being friendly and accessible. I'm reasonably productive when I use Emacs, even without extensive modification, and find the experience quite pleasant. In general, I'm more persistent when it comes to installing and setting up new programming environments than I was a year ago. I have noticed, though, that I prefer a programming language to feel lightweight (so to speak) and it is hard for me to imagine becoming productive without a REPL. Surely, that is a largly a product of my experience (i.e., primarily an R programmer). But I also wonder how much of that preference is inherent to my personality. One of my produtivity challenges is starting projects. When writing, I struggle with the blank page. When faced with a big project, I struggle to decide where to start. My suspicion is that REPL-driven development facilitates tinkering that gets me over that initial hump.
+
+The 2nd feature on my list, GUI capabilities, followed from, at the time, having recently built some large shiny apps ([DSM2 Viz Tool](https://github.com/fishsciences/DSM2-Viz-Tool) and [Shiny Scorekeeper](https://github.com/hinkelman/Shiny-Scorekeeper)) that were designed for desktop, not web, use and realizing that I didn't like using web technologies to build desktop apps. Or, rather, reading that using web technologies to build desktop apps was suboptimal, which rang true to my limited experience, and wanting to learn how to build proper desktop apps. Although I still want to learn more about building desktop apps, I don't have any desktop GUI apps that I'm eager to build. However, I am drawn to the idea of implementing Shiny Scorekeeper in other languages to see which language provides the most pleasant experience for building a desktop GUI application.
+
+The 3rd item on my list is no longer a priority for my hobby programming goals. When I wrote the original post, I wasn't laser focused on learning things that would improve my productivity at work and advance my career (which is obvious from my candidate programming languages to learn), but I was hopeful that the hobby programming would have the side effect of making me a more valuable employee and more attractive job applicant. I’ve subsequently become much more comfortable with the idea of programming as a hobby and tinkering for fun without any expectation that it will open new doors for my career. Moreover, R has a strong foothold in ecology and there is incentive to build ecological models in R because those models are accessible to a wider range of ecologists. 
+
+In the last year, I've learned that the 4th item on my list was the most important one. My experience with Chez Scheme has been particularly enlightening. The small ecosystem surrounding Chez Scheme proved to be a feature because it forced me to better understand core concepts (e.g., [reading/writing files](/posts/reading-writing-csv-files-chez-scheme/), [algorithms for descriptive statistics](/posts/writing-chez-scheme-library/)). When I was learning Racket, which has a relatively large ecosystem, my primary approach was to take tasks that I do in R (e.g., [stochastic population model](/posts/stochastic-population-model-r-racket/)) and learn how to do them in Racket. When I [switched to Chez Scheme](/posts/exploring-scheme-implementations/), my primary approach was to take functionality available in R and build it in Chez Scheme (e.g., [dataframe](https://github.com/hinkelman/dataframe/)). I found the latter approach much more fulfilling and engaging.
+
+***
+
+In my old post, I identified three languages (Python, JavaScript, C++) that I probably should learn but were not interesting to me and six languages (Julia, Red, Elm, Pharo, Clojure, Racket) that I was considering learning next. I chose Racket from that list and learned that I love Scheme. Even though Racket [fell out of my favor](/posts/exploring-scheme-implementations/), and I'm all in on Chez Scheme, I could still see myself using Racket to build a desktop GUI application. 
+
+[Julia](https://julialang.org) has joined Python, JavaScript, and C++ as languages that would probably be useful to me at work, but are not very interesting to me as a hobbyist. I find myself drawn to foundational languages like Scheme/Lisp, Smalltalk, and, to a much lesser degree, C. I've spent a little more time with Smalltalk (Pharo) over the last year. I'm pretty convinced that writing my [Shiny Scorekeeper](https://github.com/hinkelman/Shiny-Scorekeeper) application in Smalltalk would be easier to maintain and extend, but the mental model is so different from my previous experience that I haven't yet gotten to the point where Smalltalk clicks with me. 
+
+[Red](https://www.red-lang.org) has completely lost my attention. Development as stalled for over a year at version 0.6.4 as the core developers have taken an extensive detour into the realm of blockchain technologies. Even if the pace of development picked up, it is hard to imagine wanting to use Red over Racket.
+
+I still casually follow [Elm](https://elm-lang.org), but I have no strong yearning to spend more time with it. In fact, I've started keeping an eye on [Elixir](https://elixir-lang.org) and [Phoenix LiveView](https://dockyard.com/blog/2018/12/12/phoenix-liveview-interactive-real-time-apps-no-need-to-write-javascript) as an alternative option for building web apps. Elixir is a dynamic, functional language with macros, which are appealing features to a Scheme enthusiast. This [video](https://youtu.be/U_Pe8Ru06fM) makes a compelling case for Phoenix LiveView.
+
+I really want to like [Clojure](https://clojure.org), but I think the weight (see above) of the JVM is too much of a deterrent for me. It is hard to imagine choosing Clojure over Chez Scheme or Racket for a hobby project.
+
+One language that I think I should try is [Rust](https://www.rust-lang.org). I'm not particularly drawn to Rust as a hobbyist, but I think it is the most relevant C++ alternative for an R programmer that occasionally needs more speed in their R programs. And the foundation for calling [Rust in R](https://github.com/r-rust) is already laid.
+
+It's been a fun year of hobby programming. It will be interesting to see if, in a year from now, I'm neck deep in Chez Scheme code or if I have branched out to other languages.
+
