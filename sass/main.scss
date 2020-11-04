@@ -118,12 +118,12 @@ table {
 }
 
 thead {
-    background: lightgrey;
+    background: #F9F9F9;
 }
 
 th, td {
     padding: 0.5em 1em;
-    border: 1px double lightgrey;
+    border: 1px double #F9F9F9;
 }
 
 /* Code */
@@ -140,6 +140,7 @@ kbd {
     font-family: monospace;
     font-size: 0.90em;
     line-height: 154%;
+    background-color: #F9F9F9;
 }
 
 /* Styles */
