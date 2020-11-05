@@ -19,9 +19,3 @@ Clemson University
 **BS in Fisheries and Wildlife, 2001**  
 University of Missouri
 
-***
-<br/>
-
-| [GitHub](https://github.com/hinkelman/) | [LinkedIn](https://www.linkedin.com/in/travis-hinkelman-36604955/) | [Twitter](https://twitter.com/travishinkelman) | [Google Scholar](https://scholar.google.com/citations?user=_Bb54NMAAAAJ&hl=en) | [ORCID](https://orcid.org/0000-0002-8157-8407) | [Impactstory](https://profiles.impactstory.org/u/0000-0002-8157-8407) |
-|---|---|---|---|---|---|
-

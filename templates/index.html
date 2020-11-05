@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ get_url(path="main.css", trailing_slash=false) }}">
 
     {% if config.generate_feed %}
-        <link rel="alternate" type={% if config.feed_filename == "atom.xml" %}"application/atom+xml"{% else %}"application/rss+xml"{% endif %} title="RSS" href="{{ get_url(path=config.feed_filename) | safe }}">
+        <link rel="alternate" type={% if config.feed_filename == "atom.xml" %}"application/atom+xml"{% else %}"application/rss+xml"{% endif %} title="Travis Hinkelman" href="{{ get_url(path=config.feed_filename) | safe }}">
     {% endif %}
 
     {% block extra_head %}
@@ -51,8 +51,13 @@
         </main>
         <footer>
             <p>
-                © {{ config.title }} {{ now() | date(format="%Y") }}<br>
+                © {{ config.title }} {{ now() | date(format="%Y") }}.  
                 Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+                <br>
+                <a href="https://github.com/hinkelman/"><img src="/img/GitHub-Mark-32px.png"> </a>
+                <a href="https://www.linkedin.com/in/travis-hinkelman-36604955/"><img src="/img/LI-In-Bug.png" style = "height:32px; padding-left:10px"></a>
+                <a href="https://twitter.com/travishinkelman"><img src="/img/Twitter_Logo_WhiteOnBlue.png" style = "height:32px; padding-left:10px"></a>
+                <a href="https://orcid.org/0000-0002-8157-8407"><img src="/img/ORCIDiD_icon32x32.png" style = "padding-left:10px"></a>
             </p>
             <p>
                 {% block footer %}
