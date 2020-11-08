@@ -3,7 +3,7 @@ title = "Expanding my programming horizons"
 date = 2019-02-15
 [taxonomies]
 categories = ["navel-gazing"]
-tags = ["C++", "Clojure", "Elm", "Julia", "NetLog", "Pharo", "Python", "R", "Racket", "Red"]
+tags = ["C++", "Clojure", "Elm", "Julia", "NetLogo", "Pharo", "Python", "R", "Racket", "Red"]
 +++
 
 For many years, I've had intentions of learning another programming language. I would guess that I've done 70-80% of my programming work in [R](https://www.r-project.org) and 20-30% in [NetLogo](https://ccl.northwestern.edu/netlogo/). Those two languages have served me well and I haven't yet been in a position where I was required to learn a new language for work. Lately, I've been thinking about my professional development goals and how learning a new programming language might fit into those goals.
