@@ -126,8 +126,8 @@ then Chez knows where to look for the libraries used in this project.
    "/home/username/existing-project/.akku/libobj"))
    
 > (import (chez-stats))
-> (mean (repeat 1e6 (lambda () (random-normal))))
-0.0031616355735957662
+> (mean (random-sample 1e6 'normal))
+0.003722857359421433
 ```
 
 I [accidentally discovered](https://gitlab.com/akkuscm/akku/-/issues/46) that if you are using `zsh` as your shell (new macOS default), and exporting a `CHEZSCHEMELIBDIRS` in `.zshenv`, then running `.akku/env` will not find the libraries installed in your package because `.zshenv` is apparently loaded after `.akku/env` (instead of when Terminal is opened). One fix is to add the following conditional logic to `.zshenv`. UPDATE (2020-11-16): I don't know if there was a recent change to Ubuntu, but I now also have this same problem using `bash` and have added these same lines to `.bashrc`.
