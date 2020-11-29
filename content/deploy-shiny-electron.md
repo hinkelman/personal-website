@@ -12,6 +12,8 @@ In developing the [DSM2 HYDRO Viz Tool](https://github.com/fishsciences/dsm2-viz
 
 UPDATE (2020-09-06): The approach described in this post is fragile and I no longer use it. Here are a couple of alternatives: [electricShine](https://chasemc.github.io/electricShine/) and [photon](https://github.com/ColumbusCollaboratory/photon).
 
+UPDATE (2020-11-28): I spent some time this weekend looking again at options for using Electron to deploy Shiny apps. My current conclusion is that it is more trouble than it is worth. Instead, I recommend [DesktopDeployR](https://github.com/wleepang/DesktopDeployR) as a simpler solution (Windows only). The end result is less slick than an Electron app, but involves much less hassle.
+
 ## R Shiny Electron Build Process
 
 The [R Shiny Electron (RSE) template](https://github.com/dirkschumacher/r-shiny-electron) includes only very basic instructions for how to get started with this process (and they clearly specify that it is not ready for production). There were considerable gaps in my understanding that left me flailing while trying to get things to work (especially on Windows). Below I am describing what I did to get up and running but I make no argument that this process represents best practices.
