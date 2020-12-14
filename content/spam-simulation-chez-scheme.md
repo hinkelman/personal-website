@@ -6,7 +6,7 @@ categories = ["Chez Scheme", "dataframe", "chez-stats"]
 tags = ["simulation", "random-variates"]
 +++
 
-I learned a lot about Scheme by writing a few Chez Scheme libraries and I expect that there is more to learn by trying to use those libraries (e.g., [EDA in Chez Scheme](/eda-chez-scheme/)). A [blog post](http://varianceexplained.org/r/spam-simulation/) about a stochastic simulation of spam comments in R caught me eye as an interesting example to test my [`chez-stats`](https://github.com/hinkelman/chez-stats) and [`dataframe`](https://github.com/hinkelman/dataframe/) libraries.
+I learned a lot about Scheme by writing a few Chez Scheme libraries and I expect that there is more to learn by trying to use those libraries (e.g., [EDA in Chez Scheme](/eda-chez-scheme/)). A [blog post](http://varianceexplained.org/r/spam-simulation/) about a stochastic simulation of spam comments in R caught my eye as an interesting example to test my [`chez-stats`](https://github.com/hinkelman/chez-stats) and [`dataframe`](https://github.com/hinkelman/dataframe/) libraries.
 
 <!-- more -->
 
