@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Tidy Data</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Travis Hinkelman" />
+    <meta name="date" content="2020-12-18" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Tidy Data
+### Travis Hinkelman
+### 2020-12-18
+
+---
+
+
+
+
+
+
+## Tidy Data
+
+1. Each variable must have its own column.
+2. Each observation must have its own row.
+3. Each value must have its own cell.
+
+&lt;img src="https://d33wubrfki0l68.cloudfront.net/6f1ddb544fc5c69a2478e444ab8112fb0eea23f8/91adc/images/tidy-1.png"&gt;
+
+.footnote[[Source](https://r4ds.had.co.nz/tidy-data.html)]
+
+---
+
+## Pivot Wider
+
+
+```r
+txhousing %&gt;% 
+  filter(year %in% 2004:2012 &amp; city == "San Antonio" &amp; 
+           month %in% 4:10) %&gt;% 
+  pivot_wider(id_cols = year, names_from = "month", 
+              values_from = "median")
+```
+
+```
+## # A tibble: 9 x 8
+##    year    `4`    `5`    `6`    `7`    `8`    `9`   `10`
+##   &lt;int&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1  2004 112500 121800 126900 124200 124000 120700 117900
+## 2  2005 125900 130700 135700 134600 135500 136700 129700
+## 3  2006 135800 140800 147500 146100 143300 139100 137900
+## 4  2007 145000 147200 157200 152300 151500 146600 144400
+## 5  2008 152300 151700 157800 153400 150200 144500 144300
+## 6  2009 147900 151600 156100 158600 147800 146500 138700
+## 7  2010 142600 146600 152000 161800 160100 152000 149300
+## 8  2011 147900 152400 155300 156500 153300 152400 151400
+## 9  2012 156900 160400 169700 163200 160400 157200 157800
+```
+
+---
+
+## Pivot Wider
+
+
+```r
+det &lt;- tibble(FishID = c(rep("X1", 3), rep("X2", 4), rep("X3", 4)),
+              Day = c(1, 3, 4, 1, 2, 3, 4, 1, 5, 6, 7),
+              Receiver = c("A", "C", "D", "A", "D", "E", "F", 
+                           "A", "B", "C", "E"))
+det
+```
+
+```
+## # A tibble: 11 x 3
+##    FishID   Day Receiver
+##    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;   
+##  1 X1         1 A       
+##  2 X1         3 C       
+##  3 X1         4 D       
+##  4 X2         1 A       
+##  5 X2         2 D       
+##  6 X2         3 E       
+##  7 X2         4 F       
+##  8 X3         1 A       
+##  9 X3         5 B       
+## 10 X3         6 C       
+## 11 X3         7 E
+```
+
+---
+
+## Pivot Wider
+
+
+```r
+det %&gt;% 
+  mutate(Presence = 1) %&gt;% 
+  pivot_wider(id_cols = FishID, names_from = "Receiver", 
+              values_from = "Presence", values_fill = 0)
+```
+
+```
+## # A tibble: 3 x 7
+##   FishID     A     C     D     E     F     B
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 X1         1     1     1     0     0     0
+## 2 X2         1     0     1     1     1     0
+## 3 X3         1     1     0     1     0     1
+```
+
+---
+
+## Pivot Wider
+
+
+```r
+det %&gt;% 
+  mutate(Presence = 1) %&gt;% 
+  arrange(Receiver) %&gt;% 
+  pivot_wider(id_cols = FishID, names_from = "Receiver", 
+              values_from = "Presence", values_fill = 0)
+```
+
+```
+## # A tibble: 3 x 7
+##   FishID     A     B     C     D     E     F
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 X1         1     0     1     1     0     0
+## 2 X2         1     0     0     1     1     1
+## 3 X3         1     1     1     0     1     0
+```
+
+---
+
+## Pivot Longer
+
+
+```r
+det %&gt;% 
+  mutate(Presence = 1) %&gt;% 
+  arrange(Receiver) %&gt;% 
+  pivot_wider(id_cols = FishID, names_from = "Receiver", 
+              values_from = "Presence", values_fill = 0) %&gt;% 
+  pivot_longer(cols = -FishID, names_to = "Receiver", 
+               values_to = "Presence") %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 3
+##   FishID Receiver Presence
+##   &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt;
+## 1 X1     A               1
+## 2 X1     B               0
+## 3 X1     C               1
+## 4 X1     D               1
+## 5 X1     E               0
+## 6 X1     F               0
+```
+
+---
+
+## Pivot Longer
+
+
+```r
+det %&gt;% 
+  mutate(Presence = 1) %&gt;% 
+  arrange(Receiver) %&gt;% 
+  pivot_wider(id_cols = c(FishID, Day), names_from = "Receiver", 
+              values_from = "Presence", values_fill = 0) %&gt;% 
+  pivot_longer(cols = -c(FishID, Day), names_to = "Receiver", 
+               values_to = "Presence") %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 4
+##   FishID   Day Receiver Presence
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt;
+## 1 X1         1 A               1
+## 2 X1         1 B               0
+## 3 X1         1 C               0
+## 4 X1         1 D               0
+## 5 X1         1 E               0
+## 6 X1         1 F               0
+```
+
+---
+
+## Left Join
+
+.pull-left[
+
+```r
+det
+```
+
+```
+## # A tibble: 11 x 3
+##    FishID   Day Receiver
+##    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;   
+##  1 X1         1 A       
+##  2 X1         3 C       
+##  3 X1         4 D       
+##  4 X2         1 A       
+##  5 X2         2 D       
+##  6 X2         3 E       
+##  7 X2         4 F       
+##  8 X3         1 A       
+##  9 X3         5 B       
+## 10 X3         6 C       
+## 11 X3         7 E
+```
+]
+
+.pull-right[
+
+```r
+rec &lt;- 
+  tibble(Receiver = LETTERS[1:6],
+         RKM = c(33, 28, 20, 15, 9, 1))
+rec
+```
+
+```
+## # A tibble: 6 x 2
+##   Receiver   RKM
+##   &lt;chr&gt;    &lt;dbl&gt;
+## 1 A           33
+## 2 B           28
+## 3 C           20
+## 4 D           15
+## 5 E            9
+## 6 F            1
+```
+]
+
+---
+
+## Left Join
+
+
+```r
+left_join(det, rec)
+```
+
+```
+## Joining, by = "Receiver"
+```
+
+```
+## # A tibble: 11 x 4
+##    FishID   Day Receiver   RKM
+##    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt;
+##  1 X1         1 A           33
+##  2 X1         3 C           20
+##  3 X1         4 D           15
+##  4 X2         1 A           33
+##  5 X2         2 D           15
+##  6 X2         3 E            9
+##  7 X2         4 F            1
+##  8 X3         1 A           33
+##  9 X3         5 B           28
+## 10 X3         6 C           20
+## 11 X3         7 E            9
+```
+
+---
+
+## Left Join
+
+
+```r
+left_join(det, rec) %&gt;% 
+  ggplot(aes(x = Day, y = RKM, col = FishID)) +
+  geom_point(size = 3) +
+  geom_line(size = 1)
+```
+
+```
+## Joining, by = "Receiver"
+```
+
+&lt;img src="3_Tidy-data_files/figure-html/waterfall-1.png" height="320px" /&gt;
+
+---
+
+## Separate
+
+
+```r
+tibble(Species_Lifestage = c("Chinook_Spawning", "Chinook_Fry",
+                             "Steelhead_Spawning", "Steelhead_Fry"),
+       Count = c(12, 980, 17, 1234)) %&gt;% 
+  separate(col = "Species_Lifestage", 
+           into = c("Species", "Lifestage"))
+```
+
+```
+## # A tibble: 4 x 3
+##   Species   Lifestage Count
+##   &lt;chr&gt;     &lt;chr&gt;     &lt;dbl&gt;
+## 1 Chinook   Spawning     12
+## 2 Chinook   Fry         980
+## 3 Steelhead Spawning     17
+## 4 Steelhead Fry        1234
+```
+
+---
+
+## Unite
+
+
+```r
+tibble(Species_Lifestage = c("Chinook_Spawning", "Chinook_Fry",
+                             "Steelhead_Spawning", "Steelhead_Fry"),
+       Count = c(12, 980, 17, 1234)) %&gt;% 
+  separate(col = "Species_Lifestage", 
+           into = c("Species", "Lifestage")) %&gt;% 
+  unite(Species_Lifestage, Species, Lifestage)
+```
+
+```
+## # A tibble: 4 x 2
+##   Species_Lifestage  Count
+##   &lt;chr&gt;              &lt;dbl&gt;
+## 1 Chinook_Spawning      12
+## 2 Chinook_Fry          980
+## 3 Steelhead_Spawning    17
+## 4 Steelhead_Fry       1234
+```
+
+
+---
+
+## Unite
+
+
+```r
+tibble(Species_Lifestage = c("Chinook_Spawning", "Chinook_Fry",
+                             "Steelhead_Spawning", "Steelhead_Fry"),
+       Count = c(12, 980, 17, 1234)) %&gt;% 
+  separate(col = "Species_Lifestage", 
+           into = c("Species", "Lifestage")) %&gt;% 
+  unite(Species_Lifestage, Species, Lifestage, sep = ".")
+```
+
+```
+## # A tibble: 4 x 2
+##   Species_Lifestage  Count
+##   &lt;chr&gt;              &lt;dbl&gt;
+## 1 Chinook.Spawning      12
+## 2 Chinook.Fry          980
+## 3 Steelhead.Spawning    17
+## 4 Steelhead.Fry       1234
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
