@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>ggplot Basics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Taylor Spaulding" />
+    <meta name="date" content="2021-01-08" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# ggplot Basics
+### Taylor Spaulding
+### 2021-01-08
+
+---
+
+
+
+
+
+
+## Graphics Language
+
+1. ggplot has a particular syntax with 7 unique components
+  - Data
+  - Geometries
+  - Transformations
+  - Position
+  - Scale
+  - Coordinate System
+  - Grouping
+  
+2. First 5 components are grouped into layers
+3. Layers are combined to produce plots
+
+---
+
+## Load Up Your Packages
+
+
+```r
+library(ggplot2)
+library(tidyverse)
+```
+
+---
+
+
+## Load In Some Data
+
+Load in the data from the basic R dataset
+"iris" which compares flower parts of 
+different iris species
+
+
+```r
+iris &lt;- iris
+```
+
+---
+
+## Examine the Data
+
+
+```r
+str(iris)
+```
+
+```
+## 'data.frame':	150 obs. of  5 variables:
+##  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
+##  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
+##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
+##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
+##  $ Species     : Factor w/ 3 levels "setosa","versicolor",..: 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+```r
+head(iris)
+```
+
+```
+##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa
+```
+
+---
+
+## Creating A Simple Plot
+
+
+```r
+sepL_vs_petL &lt;- ggplot(data = iris,
+                       mapping = aes(x = Sepal.Length,
+                                     y = Petal.Length))
+```
+
+data: Where is the data comimg from
+
+mapping: How is the data plotted?
+
+aes(): aesthetics governing the way the data looks
+
+---
+
+## Creating A Simple Plot
+
+Check the Plot
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-5-1.png" width="300px" height="300px" /&gt;
+
+Why isn't there an image?
+
+hint: What component didn't we include?
+---
+
+## Creating A Simple Plot
+
+Do the graph axes match the data? 
+  If no, maybe the data is wrong
+
+```r
+range(iris$Sepal.Length)
+```
+
+```
+## [1] 4.3 7.9
+```
+
+```r
+range(iris$Petal.Length)
+```
+
+```
+## [1] 1.0 6.9
+```
+This looks right...so it's not Scale or Coordinate System
+
+---
+
+## Creating A Simple Plot
+
+What about a geometry?
+  Lets try points first
+  
+```[r]
+sepL_vs_petL + geom_point()
+```
+---
+
+## Creating A Simple Plot
+
+What about a geometry?
+  Lets try points first
+  
+
+```r
+sepL_vs_petL + geom_point()
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-7-1.png" width="400px" height="400px" /&gt;
+
+That works!
+---
+
+## Aesthetics For Categorical Variables
+
+We can adjust aesthetics for the entire dataset
+by specificying the aesthetics outside of mapping
+
+.pull-left[
+
+```r
+sepL_vs_petL+
+  geom_point(color = "black",
+             fill = "red",
+             shape = 21,
+             size = 1)
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-8-1.png" width="300px" height="300px" /&gt;
+]
+
+.pull-right[
+Outline is Black
+
+Fill is Red
+
+Shape is a circle with an outline
+
+Size is 1 pixel
+]
+
+---
+## Aesthetics For Categorical Variables
+
+We can also adjust aesthetics for the points based on attributes
+by specificying the aesthetics inside of the aes() call and
+identifying the attributes
+
+.pull-left[
+
+```r
+sepL_vs_petL+
+  geom_point(mapping = 
+               aes(color = Species,
+                   fill = Species,
+                   size = Species),
+             shape = 21)
+```
+]
+
+.pull-right[
+Different outline color for Species
+
+Different fill color for Species
+
+Different size for Species
+
+Shape remains a circle with outline for all points
+]
+---
+
+## Aesthetics For Categorical Variables
+
+Why did we get a warning?
+
+Fill and Outline color are the same, why?
+
+How can we identify each aesthetic individually?
+
+---
+
+## Aesthetics For Categorical Variables
+
+By specifying the "Name" of the aesthetic uniquely we can see each legend separately
+
+.pull-left[
+```[r]
+sepL_vs_petL+
+  geom_point(mapping = aes(color = Species,
+                           fill = Species,
+                           size = Species),
+             shape = 21)+
+  scale_color_discrete(name = "Species Outline")+
+  scale_fill_discrete(name = "Species Fill")+
+  scale_size_discrete(name = "Species Size")
+```
+]
+
+.pull-right[
+
+```
+## Warning: Using size for a discrete variable is not advised.
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-10-1.png" width="400" height="300" /&gt;
+]
+---
+
+## Aesthetics For Categorical Variables
+
+We can adjust also aesthetics for continuous
+variables
+
+.pull-left[
+
+```r
+sepL_vs_petL+
+  geom_point(mapping = aes(color = Petal.Length,
+                           fill = Petal.Length),
+             shape = 21, size = 3)
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/out-1.png" height="300" /&gt;
+]
+
+.pull-right[
+Outline changes with Petal Length
+
+Fill changes with Petal Length
+
+Shape is a circle with an outline
+
+Size is 3 pixel
+]
+
+---
+
+## Geometries - Lines
+
+
+```r
+sepL_vs_petL + geom_line()
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-11-1.png" width="400" height="400" /&gt;
+
+---
+
+## Geometries - Lines
+
+How does geom_line determine plot order?
+
+Would it change if we change the order of the data?
+
+```[r]
+iris &lt;- iris %&gt;%
+  arrange(Sepal.Length, Petal.Length)
+  
+sepL_vs_petL &lt;- ggplot(data = iris,
+                       mapping = aes(x = Sepal.Length,
+                                     y = Petal.Length))
+sepL_vs_petL + geom_line()
+```
+
+---
+
+## Geometries - Lines
+
+Would it change if we change the order of the data?
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-12-1.png" width="500" height="400" /&gt;
+
+---
+
+##Geometries - Bar Charts
+
+Why doesn't 
+```[r]
+sepL_vs_petL + geom_bar()
+```
+work?
+
+---
+
+## Geometries - Bar Charts
+
+The Answer: stat_count
+
+What are statistics in plots?
+
+Time for a new example!
+
+---
+
+## Geometries - Bar Charts
+
+Get some new data
+
+```[r]
+mtcars &lt;- mtcars
+```
+Make some factor variables
+
+
+```r
+mtcars_factor &lt;- mtcars %&gt;%
+  mutate(cyl = factor(cyl, levels = c(2,4,6,8)),
+         vs = factor(vs, levels = c(0,1), labels = c("V-Shaped","Flat")),
+         am = factor(am, levels = c(0,1), labels = c("Automatic","Manual")))
+```
+---
+
+## Geometries - Bar Charts
+
+Basic Histogram
+
+
+```r
+ggplot(data = mtcars_factor)+
+  geom_bar(aes(x = cyl))
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-14-1.png" width="400" height="300" /&gt;
+
+Notice: We only put the data in the ggplot() call and put the aesthetics in the geom_bar() call
+
+---
+
+## Geometries - Bar Charts
+
+Histogram with added grouping and colors for group
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_bar(aes(x = cyl, fill = vs))
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-15-1.png" width="500" height="400" /&gt;
+
+---
+
+## Geometries - Bar Charts
+
+Histogram with position "fill" so bars appear as a proportion of 100%
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_bar(aes(x = cyl, fill = vs), position = "fill")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-16-1.png" width="500" height="400" /&gt;
+
+---
+
+## Geometries - Bar Charts
+
+Histograms with position "dodged" to make it easier to compare groups
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_bar(aes(x = cyl, fill = vs), position = "dodge")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-17-1.png" width="500" height="400" /&gt;
+
+---
+
+## Geometries - Box and Whisker
+
+Box and Whisker plots also use statistics in the background
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_boxplot(aes(x = cyl, y = mpg))
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-18-1.png" width="500" height="400" /&gt;
+
+---
+
+## Geometries - Box and Whisker
+
+Box and Whiskers can also have additional groups
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_boxplot(aes(x = cyl, y = mpg, fill = vs))
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-19-1.png" width="500" height="400" /&gt;
+
+---
+
+## Labels
+
+Labels are important to help viewers, they define axes, titles, and legends
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_boxplot(aes(x = cyl, y = mpg, fill = vs))
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-20-1.png" width="500" height="400" /&gt;
+---
+
+## Labels - Title and Subtitle
+
+Title and Subtitles are useful for presentations or standalone graphics
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_boxplot(aes(x = cyl, y = mpg, fill = vs))+
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-21-1.png" width="450" height="350" /&gt;
+---
+
+## Labels - Axes
+
+Descriptive Axes are ALWAYS important
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_boxplot(aes(x = cyl, y = mpg, fill = vs))+
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Number of Cylinders",
+       y = "Miles per Gallon (mpg)")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-22-1.png" width="400" height="300" /&gt;
+---
+
+## Labels - Legend
+Adjusting the legend title is accomplished through the adjusting the legend scale
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_boxplot(aes(x = cyl, y = mpg, fill = vs))+
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Number of Cylinders",
+       y = "Miles per Gallon (mpg)")+
+  scale_fill_discrete(name = "Engine Shape")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-23-1.png" width="400" height="300" /&gt;
+---
+
+## Scales
+Scales are important to help us see trends AND to help us define our legend components
+
+Two properties of graphs can be scaled: Aesthetics and Axes (covered in part 2)
+
+---
+
+## Scaling Aesthetics
+
+Scaling aesthetics can be done to adjust the colors, shapes, and sizes of geometries manually
+
+Usually done using `scale_[aesthetic]_manual` to supply manual values, breaks, and labels
+
+---
+
+## Scaling Aesthetics
+
+Basic Plot
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_point(aes(x = mpg, y = qsec, color = vs))+
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Quarter Mile Time (seconds)",
+       y = "Miles per Gallon (mpg)")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-24-1.png" width="400" height="300" /&gt;
+---
+
+## Scaling Aesthetics
+
+Change the colors to Blue and Red using scale_color_manual
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_point(aes(x = mpg, y = qsec, color = vs))+
+  scale_color_manual(name = "Engine Shape", values = c("blue","red"))+
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Quarter Mile Time (seconds)",
+       y = "Miles per Gallon (mpg)")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-25-1.png" width="400" height="300" /&gt;
+---
+
+##Scaling Aesthetics
+
+Change the shapes to squares and circles
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_point(aes(x = mpg, y = qsec, shape = vs), size = 3)+
+  scale_shape_manual(name = "Engine Shape", values = c(15,16))+ # Change the shape
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Quarter Mile Time (seconds)",
+       y = "Miles per Gallon (mpg)")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-26-1.png" width="400" height="300" /&gt;
+---
+
+##Scaling Aesthetics
+
+Change the size of the points
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_point(aes(x = mpg, y = qsec, size = vs))+
+  scale_size_manual(name = "Engine Shape", values = c(2,4))+
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Quarter Mile Time (seconds)",
+       y = "Miles per Gallon (mpg)")
+```
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-27-1.png" width="400" height="300" /&gt;
+
+---
+
+##Scaling Aesthetics
+
+Completely manual aesthetics
+
+
+```r
+ggplot(data = mtcars_factor)+ 
+  geom_point(aes(x = mpg, y = qsec, size = vs))+
+  scale_size_manual(name = "Engine Shape", # Define the legend name
+                    breaks = c("V-Shaped","Flat"), # Define the break values (categories)
+                    labels = c("OPTION 1","OPTION 2"), # Change the Legend Labels
+                    values = c(2,4))+ # Define the Sizes assigned to each Category
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Quarter Mile Time (seconds)",
+       y = "Miles per Gallon (mpg)")
+```
+
+---
+
+##Scaling Aesthetics
+
+Completely manual aesthetics
+
+&lt;img src="4_GGPLOT_1_files/figure-html/unnamed-chunk-29-1.png" width="600" height="500" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
