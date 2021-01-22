@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>ggplot Continued</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Taylor Spaulding" />
+    <meta name="date" content="2021-01-22" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# ggplot Continued
+### Taylor Spaulding
+### 2021-01-22
+
+---
+
+
+
+
+
+
+## ggplot Continued
+
+Topics for Today
+  - Grouping
+  - Statistics
+  - Theming
+
+---
+
+## Load Up Your Packages
+
+
+```r
+library(tidyverse)
+```
+
+---
+
+## Load In Some Data
+
+Load in the data from a dataset stored in the Project. 
+
+
+```r
+poke &lt;- read.csv(file.path("~","R","R-Intro-Training","Data", "Pokemon.csv"))
+```
+
+---
+## Basic Mutations
+
+Make all the factorized fields into characters
+
+Filter the dataset for only Grass, Water, and Fire Types
+
+
+```r
+poke &lt;- poke %&gt;%
+  mutate_if(., is.factor, as.character)
+
+poke_mod &lt;- poke %&gt;%
+  filter(., stringr::str_detect("(Grass|Water|Fire)", Type.1)) #filter for just those with these types
+```
+
+---
+
+## Examine the Data
+
+
+```r
+str(poke_mod)
+```
+
+```
+## 'data.frame':	234 obs. of  13 variables:
+##  $ X.        : int  1 2 3 3 4 5 6 6 6 7 ...
+##  $ Name      : chr  "Bulbasaur" "Ivysaur" "Venusaur" "VenusaurMega Venusaur" ...
+##  $ Type.1    : chr  "Grass" "Grass" "Grass" "Grass" ...
+##  $ Type.2    : chr  "Poison" "Poison" "Poison" "Poison" ...
+##  $ Total     : int  318 405 525 625 309 405 534 634 634 314 ...
+##  $ HP        : int  45 60 80 80 39 58 78 78 78 44 ...
+##  $ Attack    : int  49 62 82 100 52 64 84 130 104 48 ...
+##  $ Defense   : int  49 63 83 123 43 58 78 111 78 65 ...
+##  $ Sp..Atk   : int  65 80 100 122 60 80 109 130 159 50 ...
+##  $ Sp..Def   : int  65 80 100 120 50 65 85 85 115 64 ...
+##  $ Speed     : int  45 60 80 80 65 80 100 100 100 43 ...
+##  $ Generation: int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ Legendary : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+```
+
+---
+
+## Creating A Simple Plot
+
+
+```r
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, color = Type.1)) +
+  geom_point()
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-5-1.png" width="500px" height="400px" /&gt;
+
+---
+
+## Faceting
+
+Sometimes plots are difficult to read when too many groups are present, faceting can be used to reduce clutter.
+
+`facet_grid([rows] ~ [columns])` is added to our original plot.
+
+A period is used to "ignore" the rows here
+```[r]
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, color = Type.1)) +
+  geom_point() +
+  facet_grid(. ~ Type.1)
+```
+
+---
+
+## Faceting
+
+
+```r
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, color = Type.1)) +
+  geom_point() +
+  facet_grid(. ~ Type.1)
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/echo==TRUE-1.png" width="500px" height="400px" /&gt;
+
+---
+
+## Faceting
+By changing which side of the "~" we place the variable on we change the orientation.
+
+```r
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, color = Type.1)) +
+  geom_point() +
+  facet_grid(Type.1 ~ .)
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-6-1.png" width="400px" height="300px" /&gt;
+
+---
+
+## Making things Tricky
+
+Lets change the data to make Water Type 6x more abundant
+  
+
+```r
+poke_mod %&gt;%
+  base::split(., .$Type.1) %&gt;% # Split the dataset by type
+  purrr::map(~ dplyr::filter(., Type.1 == "Water")) %&gt;% # Filter the dataset for only water pokemon
+  base::Filter(function(x) dim(x)[1] &gt; 1, .) %&gt;%
+  base::rep(., 5) %&gt;% # Repeat the entire data set 5 times for 6 records
+  base::do.call(rbind, .) %&gt;% #bind all the rows together into a single table
+  base::rbind(., poke_mod) -&gt; six_times_water # Bind the new table to the old
+```
+---
+
+## Histograms
+.pull-left[  
+
+```r
+ggplot(data = six_times_water, mapping = aes(x = Attack, fill = Type.1)) +
+  geom_histogram() +
+  facet_grid(Type.1 ~ .)
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-8-1.png" width="400px" height="300px" /&gt;
+]
+
+.pull-right[ 
+It's hard to read Fire and Grass, because the y-axis scale is determined by Water
+]
+
+---
+
+## Facet Axis Scales
+
+We can adjust scales for the x or y axes
+
+`scales = "free_y"`
+
+.pull-left[
+```[r]
+ggplot(data = six_times_water, 
+       mapping = aes(x = Attack, 
+       fill = Type.1)) +
+  geom_histogram() +
+  facet_grid(Type.1 ~ . , 
+             scales = "free_y")
+```
+]
+
+.pull-right[
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-9-1.png" width="400px" height="300px" /&gt;
+]
+
+---
+## Facetting
+
+can include facets for both rows and columns
+
+.pull-left[
+Type ~ Legendary
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-10-1.png" width="400px" height="300px" /&gt;
+]
+
+.pull-right[
+Legendary ~ Type
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-11-1.png" width="400px" height="300px" /&gt;
+]
+---
+
+## New Statistics/Summaries
+
+Smoothers turn data (points) into smoothed curves
+```
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, col = Type.1)) +
+  geom_point() +
+  geom_smooth(se = FALSE, span = 0.7)
+```
+se = FALSE turns off the standard error ribbon
+
+span = 0.7 determines the "wiggliness" of the curve try other combos, higher = less squiggle
+
+---
+
+## Statistics/Summaries
+
+Smoothers turn data (points) into smoothed curves
+
+```r
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, col = Type.1)) +
+  geom_point() +
+  geom_smooth(se = FALSE, span = 0.7)
+```
+
+```
+## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-12-1.png" width="400px" height="300px" /&gt;
+---
+
+## Statistics and Summaries
+
+`geom_histogram` is another stat we've already used
+
+
+
+```r
+ggplot(data = poke_mod, mapping = aes(x = Attack)) +
+  geom_histogram()
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-13-1.png" width="400" height="300" /&gt;
+
+---
+
+## Statistics and Summaries
+
+We can also make a histogram using `geom_bar` and `stat = "bin"`
+geom_histogram is called a "wrapper"
+
+
+```r
+ggplot(data = poke_mod, mapping = aes(x = Attack)) +
+  geom_bar(stat = "bin")
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/out-1.png" height="300" /&gt;
+
+---
+
+## Statistics
+
+Sometimes we want to plot "standard" distributions the `stat_function` geometry is used for this.
+
+Create new x-values for distribution
+
+```r
+x &lt;- data.frame(x = seq(-4, 4, length = 1000))
+```
+
+---
+## Statistics
+
+Sometimes we want to plot "standard" distributions the `stat_function` geometry is used for this.
+
+Plot the normal distribution with ggplot
+
+```r
+ggplot(data = x, mapping = aes(x = x)) +
+  stat_function(fun = dnorm)
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-15-1.png" width="400" height="300" /&gt;
+
+---
+## Statistics
+
+Sometimes we want to plot "standard" distributions the `stat_function` geometry is used for this.
+
+Plot the t-distribution with ggplot
+
+```r
+ggplot(data = x, mapping = aes(x = x)) +
+  stat_function(fun = dt, args = list(df = 20))
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-16-1.png" width="400" height="300" /&gt;
+
+---
+## Statistics
+
+Using these statistical functions to extract y-values for x-values in the t-distribution, with 20 degrees of freedom
+
+```r
+data &lt;- data.frame(x = x, y = dt(x$x, df = 20))
+```
+
+---
+
+## Statistics
+
+Get two-tailed critical value for t-distribution with 20 df and alpha = 0.05
+
+```r
+critical_value &lt;- qt(0.025, 20)
+```
+
+---
+## Statistics
+
+Make a beautiful graph of the t-distribution
+```
+ggplot(data = x, mapping = aes(x = x)) +
+  stat_function(fun = dt, args = list(df = 20))+
+  geom_area(data = subset(data, x &lt;= critical_value), 
+            mapping = aes(x = x, y = y), fill = "red") +
+  geom_area(data = subset(data, x &gt;= abs(critical_value)), 
+            mapping = aes(x = x, y = y), fill = "red") +
+  geom_vline(xintercept = c(critical_value, abs(critical_value))) +
+  annotate("text", x = -3.5, y = 0.375, 
+           label = "alpha = 0.05") +
+  annotate("text", x = -3.25, y = 0.05, 
+           label = paste("critical value = ", round(critical_value, digits = 3)), col = "red") +
+  annotate("text", x = 3.25, y = 0.05, 
+           label = paste("critical value = ", round(abs(critical_value), digits = 3)), col = "red")
+
+```
+notice use of `stat_function`, `geom_area`, `geom_vline`, and `annotate`
+---
+## Statistics
+Make a beautiful graph of the t-distribution
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-19-1.png" width="500" height="400" /&gt;
+
+notice use of `stat_function`, `geom_area`, `geom_vline`, and `annotate`
+---
+
+## Statistics
+
+Summarizing y-values at an x-value
+.pull_left[
+```[r]
+ggplot(data = poke_mod, mapping = aes(x = Type.1, y = Speed)) +
+  geom_jitter(width = 0.1) +
+  stat_summary(geom = "point", fun.y = "median", size = 5, aes(colour = Type.1))
+```
+]
+.pull_right[
+`geom_jitter` creates point geometries which are separated randomly
+
+the `stat_summary` call finds the median y-values and plots a point
+
+]
+---
+## Statistics
+
+Summarizing y-values at an x-value
+.pull_left[
+
+```
+## Warning: `fun.y` is deprecated. Use `fun` instead.
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-20-1.png" width="400" height="300" /&gt;
+]
+.pull_right[
+`geom_jitter` creates point geometries which are separated randomly
+
+the `stat_summary` call finds the median y-values
+
+]
+---
+
+## Coordinates and Scales
+
+We've already seen how we can assign x and y coordinates, but we can also use the coordinate system to display our plots better
+
+Lets reorder the count data by type for all pokemon types
+
+```r
+highest_to_lowest &lt;- poke %&gt;%
+  dplyr::group_by(., Type.1) %&gt;%
+  dplyr::summarise(n = n()) %&gt;%
+  dplyr::arrange(., n) %&gt;%
+  dplyr::pull(., Type.1) %&gt;%
+  base::unique(.)
+```
+
+```
+## `summarise()` ungrouping output (override with `.groups` argument)
+```
+
+```r
+poke$Type.1 &lt;- factor(poke$Type.1, levels = highest_to_lowest)
+```
+---
+
+## Coordinates and Scales
+
+Standard Plot:
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-22-1.png" width="500" height="400" /&gt;
+
+x-axis is cluttered!
+---
+## Coordinates and Scales
+
+Can we switch x for y?
+
+```r
+ggplot(data = poke, mapping = aes(y = Type.1)) +
+  geom_bar()
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-23-1.png" width="400" height="300" /&gt;
+
+Sure! But let's try another methods!
+---
+
+## Coordinates and Scales
+
+Coordinate Flip
+
+```r
+ggplot(data = poke, mapping = aes(x = Type.1)) +
+  geom_bar()+
+  coord_flip()
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-24-1.png" width="400" height="300" /&gt;
+---
+
+## Axis Scaling
+Adjusting the axes to represent different scales/information is done through a simple call:
+
+`scale_x_[function]()` or `scale_y_[function]()`
+
+Built in scale functions are: `continuous`, `discrete`, `log10`, `sqrt`, and `reverse`
+
+As we saw last session, `discrete` scale only works for categorical variables (text, factor, integer)
+
+All other scales only work for continuous numeric variables
+
+---
+
+## Axis Scaling
+
+Get some new data
+
+```[r]
+mtcars &lt;- mtcars
+```
+---
+
+## Axis Scaling
+
+Basic Plot; The additional `scale_x_continuous` call is where we will adjust the x-axis
+
+
+```r
+ggplot(data = mtcars)+ 
+  geom_point(aes(x = mpg, y = qsec))+
+  scale_x_continuous()+ #This is where we can scale the x-axis
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Quarter Mile Time (seconds)",
+       y = "Miles per Gallon (mpg)")
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-25-1.png" width="300" height="200" /&gt;
+---
+## Axis Scaling
+
+Change the tick marks (`breaks`)
+
+
+```r
+ggplot(data = mtcars)+ 
+  geom_point(aes(x = mpg, y = qsec))+
+  scale_x_continuous(breaks = c(10,20,30))+ #change the "breaks" (labels)
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Quarter Mile Time (seconds)",
+       y = "Miles per Gallon (mpg)")
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-26-1.png" width="300" height="200" /&gt;
+---
+## Axis Scaling
+
+Reverse order the tick marks (`breaks`)
+
+
+```r
+ggplot(data = mtcars)+ 
+  geom_point(aes(x = mpg, y = qsec))+
+  scale_x_reverse()+ 
+  labs(title = "Miles per Gallon vs. Cylinder Count",
+       subtitle = "V-Shaped vs. Flat",
+       x = "Quarter Mile Time (seconds)",
+       y = "Miles per Gallon (mpg)")
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-27-1.png" width="300" height="200" /&gt;
+---
+## Zoom
+Useful for insets
+
+```r
+ggplot(data = mtcars, aes(x = mpg))+
+  geom_histogram()
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-28-1.png" width="400" height="300" /&gt;
+
+Lets focus on cars getting &gt;25mpg
+---
+## Zoom
+using `scale_x_continuous` and the `limits` call we can zoom to a particular section
+
+```r
+ggplot(data = mtcars, aes(x = mpg))+
+  geom_histogram()+
+  scale_x_continuous(limits = c(25, 35), breaks = seq(25,35,2))
+```
+
+```
+## Warning: Removed 26 rows containing non-finite values (stat_bin).
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-29-1.png" width="400" height="300" /&gt;
+---
+
+## Scaling Non-Normal Data
+
+Not all data is well-suited for "normal" distribution plots! Let's load some new data!
+
+
+```r
+library(gapminder)
+```
+
+---
+##Scaling Non-Normal Data
+
+Basic Smooth based on a log-normal distribution
+
+```r
+ggplot(data = gapminder, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ log(x))
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-31-1.png" width="400" height="300" /&gt;
+
+This isn't very attractive! Because our axes are not scaled appropriately!
+---
+
+## Scaling Non-Normal Data
+
+Simply adding `scale_log10_x` creates a linear graph showing the trend better
+
+```r
+ggplot(data = gapminder, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_x_log10()
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-32-1.png" width="400" height="300" /&gt;
+---
+## Themes
+
+Themes allow us to change the appearance of ggplots
+
+ggplot contains a number of native themes some better than others
+
+---
+## Themes
+Theme Minimal:
+
+```r
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, color = Type.1)) +
+  geom_point() +
+  labs(title = "Defending/Attacking Scatter Plot By Pokemon Type") +
+  theme_minimal()
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-33-1.png" width="400" height="300" /&gt;
+
+---
+## Themes
+The `theme` call can help us take even more control over the theme like the placement of the title
+
+```r
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, color = Type.1)) +
+  geom_point() +
+  labs(title = "Defending/Attacking Scatter Plot By Pokemon Type") +
+  theme_minimal()+
+  theme(
+    plot.title = element_text(hjust = 0.5) # hjust 0 = left, 0.5 = center, 1 = right
+  )
+```
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-34-1.png" width="400" height="300" /&gt;
+---
+
+## Themes
+
+How much can we change? Everything!!
+```[r]
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, color = Type.1)) +
+  geom_point() +
+  labs(title = "Defending/Attacking Scatter Plot By Pokemon Type",
+       x = "Base Attacking Skills",
+       y = "Base Defending Skills") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 20), # adjust the centering and size of title
+        legend.position = "bottom", # positions the legend on the bottom
+        legend.title = element_text(size = 15), # change the legend title font size
+        legend.text = element_text(size = 12), # change the legend label font size
+        axis.title.x = element_text(size = 15), # change the axis title font size
+        axis.text.x = element_text(size = 15), # change the axis label font size
+        axis.title.y = element_text(size = 15), # change the axis title font size
+        axis.text.y = element_text(size = 15)) + # change the axis label font size
+  scale_color_discrete(name = "Pokemon Type", # make some fancy names in the legend using aesthetic scale
+                       labels = c("Fire Pokemon",
+                                  "Grass Pokemon",
+                                  "Water Pokemon"))
+```
+---
+## Themes
+
+How much can we change? Everything!!
+![](5_GGPLOT_2_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+---
+## Themes
+
+This is pretty intense, can you make it easier? 
+
+Use the ESA Template!! Simply copy and paste from lines 260 to 287 to the top of your script
+
+
+```r
+library(ggthemr)
+
+esa_colours &lt;- c('#F9A134', '#699CC6', '#A0CF67', '#9370B1', '#F26531', '#72CCD2', '#098A5B', '#781D7E','#B12533', '#004261', '#015E44', '#421953', '#DCDDDE', '#ADAFB2', '#6D6E71')
+
+esa_colours &lt;- c('#000000', esa_colours) #Add black as the "initial" color (outlining boxes, and plain plots)
+
+esa_theme &lt;- define_palette(
+  swatch = esa_colours, # colors for plotting points
+  gradient = c(lower = esa_colours[7L], upper = esa_colours[11L]), # upper and lower colors for continuous colors
+  background = '#FFFFFF' # White background
+)
+```
+
+---
+## Themes
+
+Apply this as a "theme" using `ggthemr`
+
+
+```r
+ggthemr(esa_theme, type = "outer", layout = "minimal", spacing = 3)
+```
+---
+## Themes
+
+Build this as a complete theme which can be called in ggplot
+
+
+```r
+theme_esa &lt;- function(base_size = 11, base_family = "", base_line_size = base_size/22, base_rect_size = base_size/22){
+  theme_bw(base_size = base_size, base_family = base_family,
+           base_line_size = base_line_size, base_rect_size = base_rect_size) %+replace%
+    theme(panel.border =element_blank(), panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), axis.line = element_line(color = '#000000', size = rel(1)),
+          legend.key = element_blank(),
+          plot.title = element_text(size = 18, face = 'bold'),
+          plot.subtitle = element_text(size = 12, face = 'italic', color = 'grey40'),
+          plot.caption = element_text(hjust = 0, size = 9, color = 'grey30'),
+          strip.background = element_rect(fill = '#FFFFFF', color = "#000000", size = rel(2)), complete = TRUE)
+}
+```
+---
+
+## Theme
+
+Test our new theme!
+
+```
+ggplot(data = poke_mod, mapping = aes(x = Attack, y = Defense, color = Type.1)) +
+  geom_point() +
+  labs(title = "Defending/Attacking Scatter Plot By Pokemon Type",
+       x = "Base Attacking Skills",
+       y = "Base Defending Skills") +
+  theme_esa() + # THEME IS HERE
+   scale_color_manual(name = "Pokemon Type", # make some fancy names in the legend using aesthetic scale
+                      labels = c("Fire Pokemon",
+                                 "Grass Pokemon",
+                                 "Water Pokemon"),
+                      values = c(esa_colours[2], esa_colours[4], esa_colours[3])) # scale the colors manually to ensure they match (can we do this another way?)
+```
+---
+Test our new theme!
+
+&lt;img src="5_GGPLOT_2_files/figure-html/unnamed-chunk-39-1.png" width="600" height="500" /&gt;
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
