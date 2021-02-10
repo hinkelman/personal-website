@@ -4,7 +4,7 @@
     <title>ggplot Continued</title>
     <meta charset="utf-8" />
     <meta name="author" content="Taylor Spaulding" />
-    <meta name="date" content="2021-01-22" />
+    <meta name="date" content="2021-02-05" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -14,7 +14,7 @@ class: center, middle, inverse, title-slide
 
 # ggplot Continued
 ### Taylor Spaulding
-### 2021-01-22
+### 2021-02-05
 
 ---
 
@@ -40,7 +40,7 @@ remotes::install_github('Mikata-Project/ggthemr')
 ```
 
 ```
-## Skipping install of 'ggthemr' from a github remote, the SHA1 (3a86e281) has not changed since last install.
+## Skipping install of 'ggthemr' from a github remote, the SHA1 (4a31e0df) has not changed since last install.
 ##   Use `force = TRUE` to force installation
 ```
 
@@ -227,12 +227,12 @@ Load in the data from a dataset stored in the Project.
 
 
 ```r
-poke &lt;- read_csv("C:/Users/tspaulding/Documents/R/R-Intro-Training/Data/Pokemon.csv")
+poke &lt;- read_csv("Pokemon.csv")
 ```
 
 ```
 ## 
-## -- Column specification --------------------------------------------------------
+## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
 ##   `#` = col_double(),
 ##   Name = col_character(),
@@ -261,7 +261,7 @@ str(poke_mod)
 ```
 
 ```
-## tibble [234 x 13] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+## spec_tbl_df [234 × 13] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
 ##  $ #         : num [1:234] 1 2 3 3 4 5 6 6 6 7 ...
 ##  $ Name      : chr [1:234] "Bulbasaur" "Ivysaur" "Venusaur" "VenusaurMega Venusaur" ...
 ##  $ Type 1    : Factor w/ 3 levels "Fire","Water",..: 3 3 3 3 1 1 1 1 1 2 ...
