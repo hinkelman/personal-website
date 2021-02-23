@@ -12,7 +12,7 @@ I learned a lot about Scheme by writing a few Chez Scheme libraries and I expect
 
 I was drawn to the spam simulation post because it describes using the `crossing` function from the [`tidyr` package](https://tidyr.tidyverse.org/) as a convenient way to examine the parameter space of a simulation under the familar framework of a dataframe, which is an approach that I've used in my own work. One of the challenges for me in learning new programming languages is that my R experience has led me to primarily think in terms of dataframes. 
 
-The takeway from implementing the spam simulation in Chez Scheme is that my `dataframe` library is not well suited to this task. That is not entirely surprising. `dataframe` was written for ease of implementation, not performance. More importantly, for a simple simulation like this, plain Scheme code provides a more straightforward solution than the `dataframe` approach [[1]](#1). 
+The takeaway from implementing the spam simulation in Chez Scheme is that my `dataframe` library is not well suited to this task. That is not entirely surprising. `dataframe` was written for ease of implementation, not performance. More importantly, for a simple simulation like this, plain Scheme code provides a more straightforward solution than the `dataframe` approach [[1]](#1). 
 
 In this post, I will focus on explaining the Scheme code rather than describing the simulation. In short, the idea is that you can build up your intuition about a problem with simulations, which might eventually lead you to a more concise mathematical solution to the problem. The objective is to determine the number of spam comments after three days given that spammers follow a Poisson process. 
 
