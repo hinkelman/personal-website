@@ -122,4 +122,4 @@ fn logmod(yinit: f64, r: f64, k: f64, thetasd: f64, t: usize) -> Vec<f64> {
 }
 ```
 
-I know that I've hardly touched on any of the features of Rust, but this was a nice experience. I also really enjoyed the [guessing game tutorial](https://doc.rust-lang.org/book/ch02-00-guessing-game-tutorial.html) in `The Rust Programming Language`. I'm particularly interested in the potential for Rust in scientific computing and plan to try to rewrite a couple of small Fortran programs in Rust. 
+I know that I've hardly touched on any of the features of Rust, but this was a nice experience. I also really enjoyed the [guessing game tutorial](https://doc.rust-lang.org/book/ch02-00-guessing-game-tutorial.html) in the Rust book. I'm particularly interested in the potential for Rust in scientific computing and plan to try to rewrite a couple of small Fortran programs in Rust. 
