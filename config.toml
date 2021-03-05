@@ -15,7 +15,7 @@ highlight_theme = "demain"
 build_search_index = false
 
 title = "Travis Hinkelman"
-description = "Data Scientist. Shiny Developer. Tidyverse Denizen. Scheme Enthusiast."
+description = "Data Scientist. Ecologist. R Programmer. Scheme Enthusiast."
 generate_feed = true
 
 taxonomies = [
