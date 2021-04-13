@@ -16,17 +16,19 @@ In this post, I will walk through the basics of setting up Akku, setting up proj
 
 ### Setting up Akku
 
-First, download the [Akku source version for Chez Scheme](https://github.com/weinholt/akku/releases). Then change your directory to the download location and run the following commands:
+You can install the source version that is built with Chez Scheme using the following commands:
 
 ```
+$ curl -L -O https://github.com/weinholt/akku/releases/download/v1.0.1/akku-1.0.1.src.tar.xz
 $ tar -xf akku-1.0.1.src.tar.xz
 $ cd akku-1.0.1.src
 $ ./install.sh
 ```
 
-For some reason, this doesn't work with the latest version (9.5.4) of Chez Scheme (if you've installed Chez Scheme from source). If you are on Linux, you can use the pre-built version of Akku.
+Alternatively, on Linux, you can use the pre-built version of Akku.
 
 ```
+$ curl -L -O https://github.com/weinholt/akku/releases/download/v1.0.1/akku-1.0.1.amd64-linux.tar.xz
 $ tar -xf akku-1.0.1.amd64-linux.tar.xz 
 $ cd akku-1.0.1.amd64-linux/
 $ ./install.sh
@@ -34,7 +36,7 @@ $ ./install.sh
 
 If neither the Chez version nor the pre-built version work for you, then you will need to install the release tarball (`akku-1.0.1.tar.gz`), which requires [Guile](https://www.gnu.org/software/guile/).
 
-Add one of the following lines to `.bashrc`,  `.bash_profile`, `.zshenv`, or wherever you keep your shell configuration commands. Make sure to replace `username` with the your actual username.
+If `~/.local/bin` is not already on your path (check with `echo $PATH`), then add one of the following lines to `.bashrc`,  `.bash_profile`, `.zshenv`, or wherever you keep your shell configuration commands. Make sure to replace `username` with the your actual username.
 
 On macOS...
 

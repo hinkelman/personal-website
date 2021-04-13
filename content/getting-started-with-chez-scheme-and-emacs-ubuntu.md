@@ -24,6 +24,17 @@ I installed Chez with [APT](https://en.wikipedia.org/wiki/APT_(software)).
 $ sudo apt install chezscheme
 ```
 
+Alternatively, you can build it from source with the following commands:
+
+```
+$ curl -L -O https://github.com/cisco/ChezScheme/releases/download/v9.5.4/csv9.5.4.tar.gz
+$ tar -xf csv9.5.4.tar.gz 
+$ cd csv9.5.4/
+$ ./configure
+$ make
+$ sudo make install
+```
+
 ### REPL
 
 To launch the Chez [REPL](https://en.wikipedia.org/wiki/Read–eval–print_loop), open Terminal and type `scheme` [[2]](#2).
@@ -119,7 +130,7 @@ Type (debug) to enter the debugger.
 
 ## Emacs
 
-I'm not aware of an [IDE](https://en.wikipedia.org/wiki/Integrated_development_environment) for Chez Scheme, but pairing a good text editor with the Chez REPL provides a decent development environment. I chose [Emacs](https://www.gnu.org/software/emacs/emacs.html) as a text editor. I'm slowly becoming more comfortable with Emacs, but I'm far from proficient.
+[Emacs](https://www.gnu.org/software/emacs/emacs.html) is the standard editor for writing Scheme code. I'm slowly becoming more comfortable with Emacs, but I'm far from proficient.
 
 ### Installation
 
@@ -137,23 +148,15 @@ The power of Emacs is in the keyboard shortcuts and customization. I'm too early
 
 [Geiser](https://www.nongnu.org/geiser/) is a package that provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through [MELPA](https://melpa.org/#/). 
 
-Open Emacs, enter `C-x` `C-f` to find a file, and type `.emacs` at the prompt. I added the following to `.emacs`. 
+Open Emacs, enter `C-x` `C-f` to find a file, and type `.emacs` at the prompt and add the following to the top of the `.emacs` file. 
 
 ```
 (require 'package)
-;;; either the stable version:
-
 (add-to-list 'package-archives
-  ;; choose either the stable or the latest git version:
-  '("melpa-stable" . "https://stable.melpa.org/packages/"))
-  ;; '("melpa-unstable" . "https://melpa.org/packages/"))
-
-(package-initialize)
+             '("melpa" . "http://melpa.org/packages/") t)
 ```
 
-Save `.emacs` and restart Emacs. Then type `M-x` followed by `package-refresh-contents`. If that is successful, you will see the message `Package refresh done` in the [minibuffer](https://www.gnu.org/software/emacs/manual/html_node/emacs/Minibuffer.html). To install Geiser, type `M-x` and then `package-install`. In response to the `Install package: ` prompt, type `geiser` and hit return.
-
-To customize Geiser, I used the menu options rather than directly editing the `.emacs` file. Choose `Options/Customize Emacs/Specific Group...` and type `geiser` at the prompt. Click on `Geiser Implementation` and change the default implementation to `chez`. Click `Apply and Save`. Restart Emacs.
+Save `.emacs` and restart Emacs. Then type `M-x` followed by `package-refresh-contents`. If that is successful, you will see the message `Package refresh done` in the [minibuffer](https://www.gnu.org/software/emacs/manual/html_node/emacs/Minibuffer.html). To install Geiser, type `M-x` and then `package-install`. In response to the `Install package: ` prompt, type `geiser` and hit return. You will also need to install `geiser-chez` following the same package installation steps. Lastly, you need to add `(require 'geiser-chez)` to the `.emacs` file. 
   
 The Chez REPL is launched through Emacs with `M-x` followed by `run-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>. Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
 
@@ -169,7 +172,7 @@ Add the following lines to your `.emacs` file for `scheme-mode` to recognize the
              '("\\.sc\\'" . scheme-mode))
 ```
 
-In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type `C-x` `C-e` [[5]](#5). If the executed code displays any output, it will be shown in the minibuffer and not the REPL [[6]](#6). To evaluate several s-expressions, highlight the region and type `C-c` `C-r`. To select an s-expression, place your cursor at the beginning of the s-expression and type `M-C-space` (where space is the space bar). I've done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I was excited to discover this last one.
+In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type `C-x` `C-e`. If the executed code displays any output, it will be shown in the minibuffer and not the REPL [[5]](#5). To evaluate several s-expressions, highlight the region and type `C-c` `C-r`. To select an s-expression, place your cursor at the beginning of the s-expression and type `M-C-space` (where space is the space bar). I've done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I was excited to discover this last one.
 
 ***
 
@@ -181,6 +184,4 @@ In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most us
 
 <a name="4"></a> [4] More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.
 
-<a name="5"></a> [5] If you are receiving the message, "No Geiser REPL for this buffer", then Geiser is [struggling to figure out which Scheme implementation to use](http://geiser.nongnu.org/geiser_4.html#The-source-and-the-REPL). One solution is to delete all of the non-Chez implementations by choosing `Options/Customize Emacs/Specific Group...`, typing `geiser` at the prompt, selecting `Geiser Implementation`, and deleting all the non-Chez implementations under `Geiser Active Implementations`. Click `Apply and Save`. Restart Emacs. 
-
-<a name="6"></a> [6] If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).
+<a name="5"></a> [5] If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).
