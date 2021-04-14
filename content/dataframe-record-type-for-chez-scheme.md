@@ -61,10 +61,11 @@ A key component of the record definition is `check-alist`, which confirms that t
 Exception in (make-dataframe alist): names are not symbols
 
 > (dataframe-display df)
-         a         b
-         1         4
-         2         5
-         3         6
+ dim: 3 rows x 2 cols
+     a     b 
+    1.    4. 
+    2.    5. 
+    3.    6. 
 ```
 
 ### Head and tail
@@ -104,16 +105,18 @@ Dataframes are a column-oriented data structure. However, the more natural patte
 ((a b c) (100 4 700) (300 6 900))
 
 > (dataframe-display (rowtable->dataframe '((a b c) (1 4 7) (2 5 8) (3 6 9)) #t))
-         a         b         c
-         1         4         7
-         2         5         8
-         3         6         9
+ dim: 3 rows x 3 cols
+     a     b     c 
+    1.    4.    7. 
+    2.    5.    8. 
+    3.    6.    9. 
 
 > (dataframe-display (rowtable->dataframe '((1 4 7) (2 5 8) (3 6 9)) #f))
-        V0        V1        V2
-         1         4         7
-         2         5         8
-         3         6         9
+ dim: 3 rows x 3 cols
+    V0    V1    V2 
+    1.    4.    7. 
+    2.    5.    8. 
+    3.    6.    9. 
 
 > (rowtable->dataframe '(("a" "b" "c") (1 4 7) (2 5 8) (3 6 9)) #t)
 Exception in (make-dataframe alist): names are not symbols
@@ -169,15 +172,17 @@ If you are working exclusively with dataframes, you can read and write them dire
                                (juv 10 20 30 40 50))))
 
 > (dataframe-display (dataframe-ref df '(0 2 4)))
-       grp       trt     adult       juv
-         a         a         1        10
-         b         a         3        30
-         b         b         5        50
+ dim: 3 rows x 4 cols
+   grp   trt  adult   juv 
+   "a"   "a"     1.   10. 
+   "b"   "a"     3.   30. 
+   "b"   "b"     5.   50. 
 
 > (dataframe-display (dataframe-ref df '(0 2 4) 'adult 'juv))
-     adult       juv
-         1        10
-         3        30
-         5        50
+ dim: 3 rows x 2 cols
+  adult   juv 
+     1.   10. 
+     3.   30. 
+     5.   50. 
 ```
 
