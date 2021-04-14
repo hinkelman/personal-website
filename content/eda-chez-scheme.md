@@ -43,21 +43,18 @@ The `#t` in `rowtable->dataframe` indicates that the the rowtable has a header r
          string->number 'year 'month 'sales 'volume 'median 'listings 'inventory 'date)))
 
 > (dataframe-display df1)
-      city      year     month     sales    volume    median  listings  inventory
-   Abilene      2000         1        72   5380000     71400       701        6.3
-   Abilene      2000         2        98   6505000     58700       746        6.6
-   Abilene      2000         3       130   9285000     58100       784        6.8
-   Abilene      2000         4        98   9730000     68600       785        6.9
-   Abilene      2000         5       141  10590000     67300       794        6.8
-   Abilene      2000         6       156  13910000     66900       780        6.6
-   Abilene      2000         7       152  12635000     73500       742        6.2
-   Abilene      2000         8       131  10710000     75000       765        6.4
-   Abilene      2000         9       104   7615000     64500       771        6.5
-   Abilene      2000        10       101   7040000     59300       764        6.6
-Columns not displayed: date
-
-> (dataframe-dim df1)
-(8602 . 9)
+ dim: 8602 rows x 9 cols
+       city   year  month  sales    volume  median  listings  inventory       date 
+  "Abilene"  2000.     1.    72.  5.380e+6  71400.      701.     6.3000  2000.0000 
+  "Abilene"  2000.     2.    98.  6.505e+6  58700.      746.     6.6000  2000.0833 
+  "Abilene"  2000.     3.   130.  9.285e+6  58100.      784.     6.8000  2000.1667 
+  "Abilene"  2000.     4.    98.  9.730e+6  68600.      785.     6.9000  2000.2500 
+  "Abilene"  2000.     5.   141.  1.059e+7  67300.      794.     6.8000  2000.3333 
+  "Abilene"  2000.     6.   156.  1.391e+7  66900.      780.     6.6000  2000.4167 
+  "Abilene"  2000.     7.   152.  1.264e+7  73500.      742.     6.2000  2000.5000 
+  "Abilene"  2000.     8.   131.  1.071e+7  75000.      765.     6.4000  2000.5833 
+  "Abilene"  2000.     9.   104.  7.615e+6  64500.      771.     6.5000  2000.6667 
+  "Abilene"  2000.    10.   101.  7.040e+6  59300.      764.     6.6000  2000.7500 
 ```
 
 In Chez Scheme, there is no built-in representation for missing values (like `NA` in R). We have to handle them manually. In our example, we have already converted 8 of the 9 columns from strings to numbers and can use `#f` as an indicator of missing values. But this carries the limitation that typos (e.g., `701t`) are treated as missing [[3]](#3).
@@ -91,17 +88,18 @@ We need a dataframe with no missing values because we can't pass missing values 
 (0 0 0 0 0 0 0)
 
 > (dataframe-display df-complete)
-      city      year     month     sales    volume    median      date
-   Abilene      2000         1        72   5380000     71400      2000
-   Abilene      2000         2        98   6505000     58700  2000.083
-   Abilene      2000         3       130   9285000     58100  2000.166
-   Abilene      2000         4        98   9730000     68600   2000.25
-   Abilene      2000         5       141  10590000     67300  2000.333
-   Abilene      2000         6       156  13910000     66900  2000.416
-   Abilene      2000         7       152  12635000     73500    2000.5
-   Abilene      2000         8       131  10710000     75000  2000.583
-   Abilene      2000         9       104   7615000     64500  2000.666
-   Abilene      2000        10       101   7040000     59300   2000.75
+ dim: 7985 rows x 7 cols
+       city   year  month  sales    volume  median       date 
+  "Abilene"  2000.     1.    72.  5.380e+6  71400.  2000.0000 
+  "Abilene"  2000.     2.    98.  6.505e+6  58700.  2000.0833 
+  "Abilene"  2000.     3.   130.  9.285e+6  58100.  2000.1667 
+  "Abilene"  2000.     4.    98.  9.730e+6  68600.  2000.2500 
+  "Abilene"  2000.     5.   141.  1.059e+7  67300.  2000.3333 
+  "Abilene"  2000.     6.   156.  1.391e+7  66900.  2000.4167 
+  "Abilene"  2000.     7.   152.  1.264e+7  73500.  2000.5000 
+  "Abilene"  2000.     8.   131.  1.071e+7  75000.  2000.5833 
+  "Abilene"  2000.     9.   104.  7.615e+6  64500.  2000.6667 
+  "Abilene"  2000.    10.   101.  7.040e+6  59300.  2000.7500 
 ```
 
 Now that we have cleaned up the dataset we will aggregate the data for plotting to look for annual and seasonal patterns. `dataframe-aggregate` takes an `aggregate-expr` as one of its arguments. If we separately define an `aggregate-expr`, then we can easily use it with different grouping variables.
@@ -117,17 +115,18 @@ Now that we have cleaned up the dataset we will aggregate the data for plotting 
     (dataframe-aggregate df-complete '(year) agg-expr))
     
 > (dataframe-display df-agg-year)
-      year  avg-sales  avg-volume  avg-median
-      2000  491.12444  73788386.9     96442.0
-      2001  510.40354  79052988.2  100801.552
-      2002  547.11709  88198732.5  104365.105
-      2003  540.12765  88653190.3  108030.638
-      2004  577.23373  97384530.2  111096.747
-      2005  635.90744  113752022.  118384.305
-      2006  664.88145  124737114.  124263.479
-      2007  620.64583  121958294.  130156.628
-      2008  520.29755  101945887.  131297.928
-      2009  470.64206  89349077.4  131483.763
+ dim: 16 rows x 4 cols
+   year  avg-sales  avg-volume  avg-median 
+  2000.   491.1244    7.379e+7    96442.00 
+  2001.   510.4035    7.905e+7   100801.55 
+  2002.   547.1171    8.820e+7   104365.11 
+  2003.   540.1277    8.865e+7   108030.64 
+  2004.   577.2337    9.738e+7   111096.75 
+  2005.   635.9074    1.138e+8   118384.31 
+  2006.   664.8815    1.247e+8   124263.48 
+  2007.   620.6458    1.220e+8   130156.63 
+  2008.   520.2976    1.019e+8   131297.93 
+  2009.   470.6421    8.935e+7   131483.76 
 ```
 
 We can plot data using `gnuplot-pipe`; a Chez Scheme interface for [`Gnuplot`](http://gnuplot.info/). I have only a rudimentary understanding of how to use `Gnuplot` so these plots will be very simple. 
