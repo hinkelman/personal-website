@@ -3,6 +3,9 @@
         {% if page.date %}
         <div class="article-date">{{ page.date | date(format=config.extra.anpu_date_format) }}</div>
         {% endif %}
+        {% if page.updated %}
+        <div class="article-date">Last updated: {{ page.updated | date(format=config.extra.anpu_date_format) }}</div>
+        {% endif %}
         <div class="article-taxonomies">
             {% if page.taxonomies.categories %}
                 <ul class="article-categories">
