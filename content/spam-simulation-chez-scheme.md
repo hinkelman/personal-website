@@ -1,9 +1,10 @@
 +++
 title = "Spam simulation in Chez Scheme"
 date = 2020-12-12
+updated = 2021-04-26
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats"]
-tags = ["simulation", "random-variates"]
+tags = ["simulation", "random-variates", "dataframe"]
 +++
 
 I learned a lot about Scheme by writing a few Chez Scheme libraries and I expect that there is more to learn by trying to use those libraries (e.g., [EDA in Chez Scheme](/eda-chez-scheme/)). A [blog post](http://varianceexplained.org/r/spam-simulation/) about a stochastic simulation of spam comments in R caught my eye as an interesting example to test my [`chez-stats`](https://github.com/hinkelman/chez-stats) and [`dataframe`](https://github.com/hinkelman/dataframe/) libraries.
@@ -34,21 +35,19 @@ First, let's import the necessary libraries (after following installation instru
             (cons 'observation (map add1 (iota 300))))
       (dataframe-crossing)))
 
-> (dataframe-dim sim-waiting)
-(195000 . 3)
-
 > (dataframe-display sim-waiting)
-     trial      time  observation
-         1         0            1
-         1         0            2
-         1         0            3
-         1         0            4
-         1         0            5
-         1         0            6
-         1         0            7
-         1         0            8
-         1         0            9
-         1         0           10
+ dim: 195000 rows x 3 cols
+  trial  time  observation 
+     1.    0.           1. 
+     1.    0.           2. 
+     1.    0.           3. 
+     1.    0.           4. 
+     1.    0.           5. 
+     1.    0.           6. 
+     1.    0.           7. 
+     1.    0.           8. 
+     1.    0.           9. 
+     1.    0.          10. 
 ```
 
 We continue to build up the `sim-waiting` dataframe by adding a column with waiting times by drawing from an exponential distribution with the observation as the rate parameter (used by `rexp` in R). However, `random-exponential` from `chez-stats` takes the mean of the distribution as the parameter, which is equal to `1/rate`.  
@@ -64,17 +63,18 @@ We continue to build up the `sim-waiting` dataframe by adding a column with wait
                               (random-exponential (/ 1 observation)))))))
 
 > (dataframe-display sim-waiting)
-     trial      time  observation   waiting
-         1         0            1  0.524573
-         1         0            2  0.143351
-         1         0            3  0.372225
-         1         0            4  0.012361
-         1         0            5  0.093031
-         1         0            6  0.055577
-         1         0            7  0.663598
-         1         0            8  0.147212
-         1         0            9  0.123309
-         1         0           10  0.145412
+ dim: 195000 rows x 4 cols
+  trial  time  observation  waiting 
+     1.    0.           1.   1.8179 
+     1.    0.           2.   0.7011 
+     1.    0.           3.   0.3383 
+     1.    0.           4.   0.2445 
+     1.    0.           5.   0.0135 
+     1.    0.           6.   0.2159 
+     1.    0.           7.   0.1129 
+     1.    0.           8.   0.0396 
+     1.    0.           9.   0.0110 
+     1.    0.          10.   0.0177 
 ```
 
 The next step uses the `split-apply-combine` strategy to return the cumulative sum of the `waiting` column for each `trial`/`time` combination. `->` pipes into the first argument of the next procedure whereas `->>` pipes into the last. In the apply step, we add a new column for each dataframe that came out of `dataframe-split` with `(cumulative () (cumulative-sum ($ df 'waiting)))`. If a `modify-expr` contains a list of the same length as the number of rows in the dataframe, then `dataframe-modify` adds that list to the dataframe as a column with the specified name, which is `cumulative` in this example.
@@ -97,17 +97,18 @@ The next step uses the `split-apply-combine` strategy to return the cumulative s
        (->> (apply dataframe-bind))))
 
 > (dataframe-display sim-waiting)
-     trial      time  observation   waiting  cumulative
-         1         0            1  0.524573  0.52457379
-         1         0            2  0.143351  0.66792542
-         1         0            3  0.372225  1.04015060
-         1         0            4  0.012361  1.05251217
-         1         0            5  0.093031  1.14554345
-         1         0            6  0.055577  1.20112111
-         1         0            7  0.663598  1.86471927
-         1         0            8  0.147212  2.01193168
-         1         0            9  0.123309  2.13524144
-         1         0           10  0.145412  2.28065430
+ dim: 195000 rows x 5 cols
+  trial  time  observation  waiting  cumulative 
+     1.    0.           1.   0.0052      0.0052 
+     1.    0.           2.   0.4459      0.4511 
+     1.    0.           3.   0.3299      0.7810 
+     1.    0.           4.   0.3592      1.1402 
+     1.    0.           5.   0.0644      1.2046 
+     1.    0.           6.   0.1608      1.3654 
+     1.    0.           7.   0.0726      1.4381 
+     1.    0.           8.   0.0596      1.4977 
+     1.    0.           9.   0.0058      1.5035 
+     1.    0.          10.   0.2524      1.7559 
 ```
 
 We aggregate `sim-waiting` to find the number of spam comments within each `trial` and `time`. The `cumulative` column gives the total time that has elapsed. We are counting the number of rows where `cumulative` is less than `time` to determine the number of comments received in a specified `time`. 
@@ -124,17 +125,18 @@ We aggregate `sim-waiting` to find the number of spam comments within each `tria
                                             cumulative time))))))))
 
 > (dataframe-display sim-waiting-times)
-     trial      time  num-comments
-         1         0             0
-         1      0.25             2
-         1       0.5             0
-         1      0.75             0
-         1       1.0             0
-         1      1.25             1
-         1       1.5             2
-         1      1.75             2
-         1       2.0            15
-         1      2.25             1
+ dim: 650 rows x 3 cols
+  trial    time  num-comments 
+     1.  0.0000            0. 
+     1.  0.2500            0. 
+     1.  0.5000            0. 
+     1.  0.7500            0. 
+     1.  1.0000            2. 
+     1.  1.2500            4. 
+     1.  1.5000            6. 
+     1.  1.7500           12. 
+     1.  2.0000           10. 
+     1.  2.2500            0. 
 ```
 
 The last step is to calculate the average number of spam comments for each time across all trials.
@@ -148,21 +150,21 @@ The last step is to calculate the average number of spam comments for each time 
      (average (num-comments) (exact->inexact (mean num-comments))))))
 
 > (dataframe-display average-over-time 13)
-      time   average
-         0       0.0
-      0.25      0.22
-       0.5      0.58
-      0.75      0.84
-       1.0      2.08
-      1.25      1.96
-       1.5      3.44
-      1.75      4.72
-       2.0      5.62
-      2.25      9.98
-       2.5     11.32
-      2.75     12.84
-       3.0     15.76
-
+ dim: 13 rows x 2 cols
+    time  average 
+  0.0000   0.0000 
+  0.2500   0.3600 
+  0.5000   0.8000 
+  0.7500   0.9800 
+  1.0000   1.4000 
+  1.2500   2.1800 
+  1.5000   4.1400 
+  1.7500   5.2400 
+  2.0000   5.7800 
+  2.2500  11.2200 
+  2.5000  11.8600 
+  2.7500  16.2000 
+  3.0000  17.3000 
 ```
 
 ### Idiomatic Scheme approach
