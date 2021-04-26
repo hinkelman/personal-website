@@ -1,6 +1,7 @@
 +++
 title = "Deploying a Shiny app as a desktop application with Electron"
 date = 2018-11-21
+updated = 2020-11-28
 [taxonomies]
 categories = ["R", "Shiny"]
 tags = ["DSM2", "Electron"]
