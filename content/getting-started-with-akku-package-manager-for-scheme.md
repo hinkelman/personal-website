@@ -1,6 +1,7 @@
 +++
 title = "Getting started with Akku package manager for Scheme"
 date = 2020-05-16
+updated = 2021-04-26
 [taxonomies]
 categories = ["Chez Scheme", "Akku"]
 tags = ["libraries", "packages"]
@@ -94,6 +95,7 @@ Installing `chez-stats` created the following `Akku.manifest` file, which indica
   (depends ("chez-stats" "^0.1.0"))
 )
 ```
+To upgrade the version of a dependency, I run `akku update`, edit `Akku.manifest` with the new version number, delete `Akku.lock`, delete hidden `.akku` folder, and run `akku install`, which creates a new `Akku.lock` file and `.akku` folder. Presumably, the intended workflow is instead to remove the package that you are upgrading with `akku uninstall pkgname`, `akku update`, and `akku install pkgname`. 
 
 Let's now illustrate how `.akku/env` sets the environment to find the installed libraries. If we launch Chez (with `chez` or `scheme`) from the `existing-project` directory, and try to load `chez-stats`, we will be out of luck.
 
@@ -112,7 +114,7 @@ Calling `library-directories` illustrates the problem [[4]](#4).
   ("." . "."))
 ```
 
-If we load the Akku environment before launcing Chez,
+If we load the Akku environment [[5]](#5) before launcing Chez,
 
 ```
 $ .akku/env
@@ -195,6 +197,8 @@ I can't speak for the average time for a library to appear in the Akku package l
 <a name="3"></a> [3] You can run the tests for `chez-stats` from the Terminal by first running `.akku/env` and then `scheme .akku/src/chez-stats/tests/test-chez-stats.sps`.
 
 <a name="4"></a> [4] `/home/username/chez/lib` is where I put libraries that I want to make globally available.
+
+<a name="5"></a> [5] If `.akku/env` is not loading the environment, try `eval $(.akku/env -s)`. 
 
 
 
