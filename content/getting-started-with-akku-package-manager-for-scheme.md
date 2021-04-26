@@ -178,7 +178,7 @@ Next you need to push the tagged release.
 $ git push --tags
 ```
 
-Because I use two-factor authentication for GitHub, I needed to set up a [personal access token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) to use as the password when pushing the tags.
+Because I use two-factor authentication for GitHub, I needed to set up a [personal access token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) to use as the password when pushing the tags. Alternatively, you could set up git to [authenticate with an ssh key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh).
 
 The last step is to publish with Akku.
 
