@@ -1,6 +1,7 @@
 +++
 title = "Modify and aggregate dataframes in Chez Scheme"
 date = 2020-09-05
+updated = 2021-04-26
 [taxonomies]
 categories = ["Chez Scheme", "dataframe"]
 tags = ["dataframe", "data-structures", "association-list", "modify", "modify-at", "dplyr", "mutate", "mutate_at", "aggregate", "macros"]
@@ -56,12 +57,13 @@ In R, `dplyr::mutate` changes all the values in a column according to the expres
                                       (scalar () 16)
                                       (lst () '(2 4 6 8 10)))))
 > (dataframe-display df2)
-       grp       trt     adult       juv     total    scalar       lst
-         A         x         1        10        11        16         2
-         A         y         2        20        22        16         4
-         B         x         3        30        33        16         6
-         B         y         4        40        44        16         8
-         B         y         5        50        55        16        10
+ dim: 5 rows x 7 cols
+   grp   trt  adult   juv  total  scalar   lst 
+     A     x     1.   10.    11.     16.    2. 
+     A     y     2.   20.    22.     16.    4. 
+     B     x     3.   30.    33.     16.    6. 
+     B     y     4.   40.    44.     16.    8. 
+     B     y     5.   50.    55.     16.   10. 
 ```
 
 `dplyr` also provides `mutate_at` and `mutate_all` [[2]](#2).
@@ -81,12 +83,13 @@ In R, `dplyr::mutate` changes all the values in a column according to the expres
 ```
 > (dataframe-display
    (dataframe-modify-at df2 sqrt 'total 'scalar 'lst))
-       grp       trt     adult       juv     total    scalar       lst
-         A         x         1        10  3.316624         4  1.414213
-         A         y         2        20  4.690415         4         2
-         B         x         3        30  5.744562         4  2.449489
-         B         y         4        40  6.633249         4  2.828427
-         B         y         5        50  7.416198         4  3.162277
+ dim: 5 rows x 7 cols
+   grp   trt  adult   juv   total  scalar     lst 
+     A     x     1.   10.  3.3166      4.  1.4142 
+     A     y     2.   20.  4.6904      4.  2.0000 
+     B     x     3.   30.  5.7446      4.  2.4495 
+     B     y     4.   40.  6.6332      4.  2.8284 
+     B     y     5.   50.  7.4162      4.  3.1623 
 ```
 
 #### Implementation
@@ -146,11 +149,12 @@ In base R, dataframes are aggregated by first splitting into groups, applying th
                         '(grp trt)
                          (aggregate-expr (adult-sum (adult) (apply + adult))
                          (juv-sum (juv) (apply + juv)))))
-       grp       trt  adult-sum   juv-sum
-         a         x          1        10
-         a         y          2        20
-         b         x          3        30
-         b         y          9        90
+ dim: 4 rows x 4 cols
+   grp   trt  adult-sum  juv-sum 
+     a     x         1.      10. 
+     a     y         2.      20. 
+     b     x         3.      30. 
+     b     y         9.      90. 
 ```
 
 ***
