@@ -1,6 +1,7 @@
 +++
 title = "Select, drop, and rename dataframe columns in Chez Scheme"
 date = 2020-03-29
+updated = 2021-04-26
 [taxonomies]
 categories = ["dataframe", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "dplyr"]
@@ -36,10 +37,11 @@ With `dataframe-select`, we can also select and re-order columns in a single sta
 
 ```
 > (dataframe-display (dataframe-select df 'c 'a))
-         c         a
-         7         1
-         8         2
-         9         3
+ dim: 3 rows x 2 cols
+     c     a 
+    7.    1. 
+    8.    2. 
+    9.    3. 
 ```
 
 ### Drop
@@ -58,10 +60,11 @@ In `dataframe`, dropping columns requires a separate procedure, `dataframe-drop`
 
 ```
 > (dataframe-display (dataframe-drop df 'b))
-         a         c
-         1         7
-         2         8
-         3         9
+ dim: 3 rows x 2 cols
+     a     c 
+    1.    7. 
+    2.    8. 
+    3.    9. 
 ```
 
 ### Rename
@@ -86,20 +89,22 @@ With `dplyr::select`, columns can be renamed during selection, but `dplyr::renam
 
 ```
 > (dataframe-display (dataframe-rename df '((b Bee) (c Sea))))
-         a       Bee       Sea
-         1         4         7
-         2         5         8
-         3         6         9
+ dim: 3 rows x 3 cols
+     a   Bee   Sea 
+    1.    4.    7. 
+    2.    5.    8. 
+    3.    6.    9. 
 ```
 
 When renaming all of the columns, `dataframe-rename-all` allows for specifying all new names as a list rather than `(old-name new-name)` pairs. 
 
 ```
 > (dataframe-display (dataframe-rename-all df '(A B C)))
-         A         B         C
-         1         4         7
-         2         5         8
-         3         6         9
+ dim: 3 rows x 3 cols
+     A     B     C 
+    1.    4.    7. 
+    2.    5.    8. 
+    3.    6.    9. 
 ```
 
 ### Final thoughts
