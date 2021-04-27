@@ -1,6 +1,7 @@
 +++
 title = "A dataframe record type for Chez Scheme"
 date = 2020-03-27
+updated = 2021-04-26
 [taxonomies]
 categories = ["dataframe", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list"]
@@ -174,9 +175,9 @@ If you are working exclusively with dataframes, you can read and write them dire
 > (dataframe-display (dataframe-ref df '(0 2 4)))
  dim: 3 rows x 4 cols
    grp   trt  adult   juv 
-   "a"   "a"     1.   10. 
-   "b"   "a"     3.   30. 
-   "b"   "b"     5.   50. 
+     a     a     1.   10. 
+     b     a     3.   30. 
+     b     b     5.   50. 
 
 > (dataframe-display (dataframe-ref df '(0 2 4) 'adult 'juv))
  dim: 3 rows x 2 cols
