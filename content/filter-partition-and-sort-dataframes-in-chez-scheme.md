@@ -1,6 +1,7 @@
 +++
 title = "Filter, partition, and sort dataframes in Chez Scheme"
 date = 2020-04-09
+updated = 2021-04-26
 [taxonomies]
 categories = ["dataframe", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "dplyr", "arrange", "macros"]
@@ -47,10 +48,11 @@ Similarly, `dataframe-filter` takes a `filter-expr` (see more below) and returns
    (dataframe-filter df (filter-expr (trt grp)
                                      (and (string=? trt "a")
                                           (string=? grp "y")))))
-       trt       grp       rsp       ind
-         a         y         2         3
-         a         y         2         4
-         a         y         2         5
+ dim: 3 rows x 4 cols
+   trt   grp   rsp   ind 
+     a     y    2.    3. 
+     a     y    2.    4. 
+     a     y    2.    5. 
 ```
 
 #### Implementation
@@ -139,22 +141,24 @@ As mentioned in the [previous post](/posts/split-bind-append-dataframes-chez-sch
     (dataframe-partition df (filter-expr (grp) (string=? grp "x"))))
   
 > (dataframe-display keep)
-       trt       grp       rsp       ind
-         a         x         1         0
-         a         x         1         1
-         a         x         1         2
-         b         x         3         6
-         b         x         3         7
-         b         x         3         8
+ dim: 6 rows x 4 cols
+   trt   grp   rsp   ind 
+     a     x    1.    0. 
+     a     x    1.    1. 
+     a     x    1.    2. 
+     b     x    3.    6. 
+     b     x    3.    7. 
+     b     x    3.    8. 
   
 > (dataframe-display drop)
-       trt       grp       rsp       ind
-         a         y         2         3
-         a         y         2         4
-         a         y         2         5
-         b         y         4         9
-         b         y         4        10
-         b         y         4        11
+ dim: 6 rows x 4 cols
+   trt   grp   rsp   ind 
+     a     y    2.    3. 
+     a     y    2.    4. 
+     a     y    2.    5. 
+     b     y    4.    9. 
+     b     y    4.   10. 
+     b     y    4.   11. 
 ```
 
 The dirty little secret of `dataframe-partition` is that it is simply two calls to `dataframe-filter` under the covers and, thus, requires two passes over the whole dataframe (more inefficiency!).
@@ -187,19 +191,22 @@ Similarly, `dataframe-sort` takes a `sort-expr` (see more below) and sorts the d
    (dataframe-sort df (sort-expr (string<? grp)
                                  (> ind)))
    12)
-       trt       grp       rsp       ind
-         b         x         3         8
-         b         x         3         7
-         b         x         3         6
-         a         x         1         2
-         a         x         1         1
-         a         x         1         0
-         b         y         4        11
-         b         y         4        10
-         b         y         4         9
-         a         y         2         5
-         a         y         2         4
-         a         y         2         3
+   
+ dim: 12 rows x 4 cols
+   trt   grp   rsp   ind 
+     b     x    3.    8. 
+     b     x    3.    7. 
+     b     x    3.    6. 
+     a     x    1.    2. 
+     a     x    1.    1. 
+     a     x    1.    0. 
+     b     y    4.   11. 
+     b     y    4.   10. 
+     b     y    4.    9. 
+     a     y    2.    5. 
+     a     y    2.    4. 
+     a     y    2.    3. 
+
 ```
 
 #### Implementation
