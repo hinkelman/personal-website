@@ -1,70 +1,123 @@
-{% import "macros/page.html" as page_macros %}
+{% import "post_macros.html" as post_macros %}
+
 <!DOCTYPE html>
-<html lang="{% if lang %}{{ lang }}{% else %}en{% endif %}">
-<head>
-    <meta charset="utf-8">
-    <meta name="HandheldFriendly" content="True">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer-when-downgrade">
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-    <title>{% block title %}{{ config.title }}{% endblock title %}</title>
-    <meta name="description" content="{{ config.description }}">
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-    <link rel="stylesheet" href="{{ get_url(path="main.css", trailing_slash=false) }}">
+      <title>{% block title %}{{ config.title }}{% endblock title %}</title>
 
-    {% if config.generate_feed %}
-        <link rel="alternate" type={% if config.feed_filename == "atom.xml" %}"application/atom+xml"{% else %}"application/rss+xml"{% endif %} title="Travis Hinkelman" href="{{ get_url(path=config.feed_filename) | safe }}">
-    {% endif %}
+      {% if config.generate_feed %}
+        <link rel="alternate" type={% if config.feed_filename == "atom.xml" %}"application/atom+xml"{% else %}"application/rss+xml"{% endif %} title="RSS" href="{{ get_url(path=config.feed_filename) | safe }}">
+      {% endif %}
 
-    {% block extra_head %}
-    {% endblock extra_head %}
-</head>
-<body>
-    <a class="skip-main" href="#main">Skip to content</a>
-    <div class="container">
-        <header> 
-            <h1 class="site-header">
-                <a href="{{ config.base_url }}">{{ config.title }}</a>
-            </h1>
-            <nav>
-                {% block sidebar_nav %}
-                {% for menu_link in config.extra.anpu_menu_links %}
-                {% set link_url = menu_link.url | replace(from="$BASE_URL", to=config.base_url) %}
-                <a {% if current_url and current_url == link_url %}class="active"{% endif %} href="{{ link_url }}">{{menu_link.name}}</a>
+      {% block js %}
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          {% if config.extra.katex_enable %}
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              {% if config.extra.katex_auto_render %}
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              {% endif %}
+          {% endif %}
+      {% endblock js %}
+
+      {% block css %}
+          <link rel="stylesheet" href="{{ get_url(path="site.css", trailing_slash=false) }}">
+          {% if config.extra.katex_enable %}
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          {% endif %}
+      {% endblock css %}
+
+      {% block extra_head %}
+      {% endblock extra_head %}
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">{{ config.extra.even_title }}</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                {% for item in config.extra.even_menu %}
+                    <li class="mobile-menu-item">
+                        <a href="{{ item.url | replace(from="$BASE_URL", to=config.base_url) }}">
+                            {{ item.name }}
+                        </a>
+                    </li>
                 {% endfor %}
-                {% endblock sidebar_nav %}
+              </ul>
             </nav>
-        </header>
-        <main id="main" tabindex="-1">
-            {% block content %}
-                {% if paginator.pages %}
-                {% for page in paginator.pages %}
-                    {{ page_macros::page_listing(page=page) }}
-                {% endfor %}
-                {{ page_macros::page_pagination(paginator=paginator) }}
-                {% else %}
-                {% for page in section.pages %}
-                    {{ page_macros::page_listing(page=page) }}
-                {% endfor %}
-                {% endif %}
-            {% endblock content %}
-        </main>
-        <footer>
-            <p>
-                © {{ config.title }} {{ now() | date(format="%Y") }}.
-                <br>  
-                Powered by <a target="_blank" href="https://getzola.org/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
-                <!-- <br>
-                <a href="https://github.com/hinkelman/"><img src="/img/GitHub-Mark-32px.png"> </a>
-                <a href="https://www.linkedin.com/in/travis-hinkelman-36604955/"><img src="/img/LI-In-Bug.png" style = "height:32px; padding-left:10px"></a>
-                <a href="https://twitter.com/travishinkelman"><img src="/img/Twitter_Logo_WhiteOnBlue.png" style = "height:32px; padding-left:10px"></a>
-                <a href="https://orcid.org/0000-0002-8157-8407"><img src="/img/ORCIDiD_icon32x32.png" style = "padding-left:10px"></a> -->
-            </p>
-            <p>
+
+            <header id="header">
+                <div class="logo"><a href="{{ config.base_url }}">{{ config.extra.even_title }}</a></div>
+                <nav class="menu">
+                    <ul>
+                        {% for item in config.extra.even_menu %}
+                            <li>
+                                <a href="{{ item.url | replace(from="$BASE_URL", to=config.base_url) }}">
+                                    {{ item.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    {% block content %}
+                        <div class="posts">
+                            {% for page in paginator.pages %}
+                                <article class="post">
+                                    {{ post_macros::title(page=page) }}
+                                    <div class="post__summary">
+                                        {{ page.summary | safe }}
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="{{ page.permalink }}">Read more...</a>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                        <nav class="pagination">
+                            {% if paginator.previous %}
+                                <a class="previous" href="{{ paginator.previous }}">‹ Previous</a>
+                            {% endif %}
+                            {% if paginator.next %}
+                                <a class="next" href="{{ paginator.next }}">Next ›</a>
+                            {% endif %}
+                        </nav>
+                    {% endblock content %}
+                </div>
+            </main>
                 {% block footer %}
+
                 {% endblock footer %}
-            </p>
-        </footer>
-    </div>
-</body>
+        </div>
+
+      {% block js_body %}
+          <script type="text/javascript" src="{{ get_url(path="even.js", trailing_slash=false) }}" ></script>
+      {% endblock js_body %}
+      
+    </body>
+
+
 </html>

@@ -1,28 +1,24 @@
-name = "Anpu"
-description = "A port of the Hugo Anubis theme"
+name = "even"
+description = "A robust, elegant dark theme"
 license = "MIT"
-homepage = "https://github.com/zbrox/anpu-zola-theme"
-# The minimum version of Zola required
+homepage = "https://github.com/getzola/even"
 min_version = "0.11.0"
-# An optional live demo URL
-demo = "https://anpu-zola-theme.netlify.app"
+demo = "https://zola-even.netlify.com"
 
-# Any variable there can be overriden in the end user `config.toml`
-# You don't need to prefix variables by the theme name but as this will
-# be merged with user data, some kind of prefix or nesting is preferable
-# Use snake_casing to be consistent with the rest of Zola
 [extra]
-anpu_date_format = "%e %B %Y"
-anpu_menu_links = []
+even_menu = [
+    {url = "$BASE_URL", name = "Home"},
+    {url = "$BASE_URL/categories", name = "Categories"},
+    {url = "$BASE_URL/tags", name = "Tags"},
+    {url = "$BASE_URL/about", name = "About"},
+]
+even_title = "Even"
 
-# The theme author info: you!
 [author]
-name = "Travis Hinkelman"
-homepage = "https://www.travishinkelman.com"
+name = "Vincent Prouillet"
+homepage = "https://www.vincentprouillet.com"
 
-# If this is porting a theme from another static site engine, provide
-# the info of the original author here
 [original]
-author =  "mitrichius"
-homepage = "https://github.com/mitrichius/hugo-theme-anubis"
-repo = "https://github.com/mitrichius/hugo-theme-anubis"
+author =  "olOwOlo"
+homepage = "https://blog.olowolo.com/example-site/"
+repo = "https://github.com/olOwOlo/hugo-theme-even"

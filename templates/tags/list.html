@@ -1,18 +1,16 @@
-{% import "macros/page.html" as page_macros %}
 {% extends "index.html" %}
 
-{% block title %}Tags{% endblock title%}
-
 {% block content %}
-<h1>Tags</h1>
-
-<ul class="terms">
-    {% for term in terms %}
-    <li>
-        <a href="{{ term.permalink }}">
-        #{{ term.name }}
-        </a>
-    </li>
-    {% endfor %}
-</ul>
+    <div class="taxonomies">
+        <div class="taxonomies__title">
+            {{ terms | length }} tags in total
+        </div>
+        <div class="taxonomies__items">
+            {% for tag in terms %}
+                <a href="{{ tag.permalink }}">
+                    {{ tag.name }}<sup>{{ tag.pages | length }}</sup>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock content %}

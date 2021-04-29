@@ -1,16 +1,15 @@
-{% import "macros/page.html" as page_macros %}
 {% extends "index.html" %}
 
-{% block title %}{{ term.name }}{% endblock title%}
-
 {% block content %}
-<h1>Tag: #{{ term.name }}</h1>
-<div class="article-info">
-    <a href="{{ get_url(path="/tags") }}">To all tags</a>
-</div>
-
-{% for page in term.pages %}
-{{ page_macros::page_listing(page=page) }}
-{% endfor %}
-
+    <div class="taxonomy">
+        <h2>{{ term.name }}</h2>
+        {% for page in term.pages %}
+            <div class="taxonomy__item">
+                <span class="taxonomy__item__time">{{ page.date | date(format="%F") }}</span>
+                <span class="taxonomy__item__title">
+                    <a href="{{ page.permalink }}">{{ page.title }}</a>
+                </span>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock content %}
