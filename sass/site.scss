@@ -14,7 +14,7 @@ $secondary-colour: #f8f5ec;
 $body-width: 800px;
 $mobile-navbar-height: 50px !default;
 $code-colour: #34495e;
-$code-font-family: Consolas, Monaco, Menlo, Consolas, monospace !default;
+$code-font-family: Consolas, Monaco, Menlo, monospace !default;
 $decoration-font-family: Athelas, STHeiti, Microsoft Yahei, serif;
 
 @mixin min-screen($min-width: $body-width) {
