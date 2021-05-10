@@ -18,7 +18,7 @@ First, I wrote a [standalone Fortran program](https://github.com/hinkelman/stoch
 character(len=20), dimension(5) :: args
 ```
 
-I initially missed the `len` argument for character and was confused by the results I was getting until I realized that the program was only reading the first character provided for each argument. 
+I initially missed the `len` argument for `character` and was confused by the results I was getting until I realized that the program was only reading the first character provided for each argument. 
 
 We can straightforwardly fill the `args` array with a loop.
 
@@ -34,7 +34,7 @@ But the syntax for converting the arguments from strings to the correct types is
 read(args(1), *) t
 ```
 
-`t` is the first value in `args` (indexed with `args(1)`). The `*` indicates the format of the value, which the compiler infers is an `integer` because that is the type of `t`. 
+`t` is the first value in `args` (indexed with `args(1)`). The `*` indicates the default format of the value, which the compiler infers is an `integer` because that is the type of `t`. 
 
 ### Fortran Subroutines
 
@@ -74,7 +74,7 @@ To test that the `rnormal` subroutine is giving reasonable results, we call the 
 ```
 > n = 1000000L
 > rnorm_result <- .Fortran("rnorm", n, 7.8, 8.3, vector("numeric", n))
-> # .Fortran returns a list; 4th element of list in this case contains the vector
+# .Fortran returns a list; 4th element of list in this case contains the vector
 > mean(rnorm_result[[4]])
 [1] 7.798748
 > sd(rnorm_result[[4]])
