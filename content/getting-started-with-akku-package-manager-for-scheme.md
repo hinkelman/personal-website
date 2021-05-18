@@ -1,7 +1,7 @@
 +++
 title = "Getting started with Akku package manager for Scheme"
 date = 2020-05-16
-updated = 2021-04-26
+updated = 2021-05-17
 [taxonomies]
 categories = ["Chez Scheme", "Akku"]
 tags = ["libraries", "packages"]
@@ -20,22 +20,22 @@ In this post, I will walk through the basics of setting up Akku, setting up proj
 You can install the source version that is built with Chez Scheme using the following commands:
 
 ```
-$ curl -L -O https://github.com/weinholt/akku/releases/download/v1.0.1/akku-1.0.1.src.tar.xz
-$ tar -xf akku-1.0.1.src.tar.xz
-$ cd akku-1.0.1.src
+$ curl -L -O https://gitlab.com/akkuscm/akku/uploads/9d23bb6ec47dd2d7ee41802115cd7d80/akku-1.1.0.src.tar.xz
+$ tar -xf akku-1.1.0.src.tar.xz
+$ cd akku-1.1.0.src
 $ ./install.sh
 ```
 
 Alternatively, on Linux, you can use the pre-built version of Akku.
 
 ```
-$ curl -L -O https://github.com/weinholt/akku/releases/download/v1.0.1/akku-1.0.1.amd64-linux.tar.xz
-$ tar -xf akku-1.0.1.amd64-linux.tar.xz 
-$ cd akku-1.0.1.amd64-linux/
+$ curl -L -O https://gitlab.com/akkuscm/akku/uploads/094ce726ce3c6cf8c14560f1e31aaea0/akku-1.1.0.amd64-linux.tar.xz
+$ tar -xf akku-1.1.0.amd64-linux.tar.xz 
+$ cd akku-1.1.0.amd64-linux/
 $ ./install.sh
 ```
 
-If neither the Chez version nor the pre-built version work for you, then you will need to install the release tarball (`akku-1.0.1.tar.gz`), which requires [Guile](https://www.gnu.org/software/guile/).
+If neither the Chez version nor the pre-built version work for you, then you will need to install the release tarball (`akku-1.1.0.tar.gz`), which requires [Guile](https://www.gnu.org/software/guile/).
 
 If `~/.local/bin` is not already on your path (check with `echo $PATH`), then add one of the following lines to `.bashrc`,  `.bash_profile`, `.zshenv`, or wherever you keep your shell configuration commands. Make sure to replace `username` with the your actual username.
 
