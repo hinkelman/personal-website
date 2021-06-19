@@ -173,14 +173,13 @@ As I mentioned above, the `dataframe` approach is inefficient and more verbose t
 
 ```
 > (define (get-num-events max-obs max-time)
-   (let loop ([total 0]
-              [count 0]
-              [obs 1])
-     ;; arguably silly to have two counting variables; but makes code clearer
-     (if (or (> obs max-obs) (> total max-time))
-         (sub1 count) ;; sub1 to find count that is less than max-time threshold
-         (let ([exp-draw (random-exponential (/ 1 obs))])
-           (loop (+ total exp-draw) (add1 count) (add1 obs))))))
+    (let loop ([obs 1]
+               [time 0]
+               [events 0])
+      (if (or (> obs max-obs) (> time max-time))
+          (sub1 events) ;; sub1 to find num events less than max-time threshold
+          (let ([exp-draw (random-exponential (/ 1 obs))])
+            (loop (add1 obs) (+ time exp-draw) (add1 events))))))
 
 > (get-num-events 300 3)
 16
