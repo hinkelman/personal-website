@@ -1,7 +1,7 @@
 +++
 title = "Spam simulation in Chez Scheme"
 date = 2020-12-12
-updated = 2021-04-26
+updated = 2021-06-19
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats"]
 tags = ["simulation", "random-variates", "dataframe"]
