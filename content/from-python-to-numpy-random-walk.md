@@ -3,7 +3,7 @@ title = "From Python to NumPy: random walk example in R and Chez Scheme"
 date = 2021-08-21
 [taxonomies]
 categories = ["Python", "R", "Chez Scheme"]
-tags = ["from-python-to-numpy", "Rcpp", "timing"]
+tags = ["from-python-to-numpy", "vectorization", "timing"]
 +++
 
 As a learning exercise, I decided to translate examples from the book, [From Python to NumPy](https://www.labri.fr/perso/nrougier/from-python-to-numpy/), into R and Chez Scheme. This post describes the [random walk example from Chapter 2](https://www.labri.fr/perso/nrougier/from-python-to-numpy/#simple-example). All of the code is in [this repository](https://github.com/hinkelman/from-python-to-numpy) so I will only highlight a few pieces of code below. For context, I am a long-time R programmer who only periodically pokes at Python and dabbles in Scheme for fun. Because performance is the primary motivation of vectorizing code with NumPy in Python, I will be loosely comparing timings between Python, R, and Chez Scheme. Take these timings with a large grain of salt. I don't know how comparable the different timings are.
