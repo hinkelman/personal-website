@@ -93,18 +93,22 @@ Unfortunately, it is not possible (as far as I understand) to reproduce this alg
             (loop (add1 index) (cdr lst) results)))))
 ```
 
-After asking on the [Scheme Discord server](https://discord.gg/8zjfdtj4), it was pointed out that the code above re-calculates the length on each iteration. Making the minor change below leads to a 16x improvement. Still over 3x slower than R and Python, but likely still room for optimizations.
+After asking on the [Scheme Discord server](https://discord.gg/8zjfdtj4), oaktownsam provided the code below, which is 35x faster than my original version. 
 
 ```
-(define (find-crossing-lst seq sub)
-  (let ([seq-len (length seq)]
-        [sub-len (length sub)])
-    (let loop ([index 0]
-               [lst seq]
-               [results '()])
-      (if (< (- seq-len index) sub-len)
-          (reverse results)
-          (if (equal? (first-n lst sub-len) sub)
-              (loop (add1 index) (cdr lst) (cons index results))
-              (loop (add1 index) (cdr lst) results))))))
+(define (same-head? seq sub)
+  (cond
+    [(and (null? seq) (null? sub)) #t]
+    [(null? sub)                   #t]
+    [(null? seq)                   #f]
+    [(equal? (car seq) (car sub))  (same-head? (cdr seq) (cdr sub))]
+    [else #f]))
+
+(define (find-crossing-lst-2 seq sub)
+  (define (step index seq results)
+    (cond
+      [(null? seq) (reverse results)]
+      [(same-head? seq sub) (step (add1 index) (cdr seq) (cons index results))]
+      [else (step (add1 index) (cdr seq) results)]))
+  (step 0 seq '()))
 ```
