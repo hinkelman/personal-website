@@ -1,6 +1,6 @@
 +++
 title = "From Python to NumPy: random walk example in R and Chez Scheme"
-date = 2021-08-21
+date = 2022-08-21
 [taxonomies]
 categories = ["Python", "R", "Chez Scheme"]
 tags = ["from-python-to-numpy", "vectorization", "timing"]
