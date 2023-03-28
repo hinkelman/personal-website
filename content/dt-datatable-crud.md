@@ -34,7 +34,7 @@ When the `teamsTable` is edited, the edited value replaces the previous value in
 observeEvent(input$teamsTable_cell_edit, {
   info = input$teamsTable_cell_edit
   i = info$row
-  j = info$col + 1L  # column index offset by 1 b/c TeamID column hidden
+  j = info$col + 1L  # column index offset by 1
   v = info$value
   rv[["teams"]][i, j] = coerceValue(v, rv[["teams"]][i, j])
   replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE) 
@@ -99,7 +99,7 @@ observeEvent(input$add_teams_row,{
 
 ### Rosters
 
-Creating the `rosterTable` is similar to the `teamsTable`. In this case, I am hiding the `TeamID` column (indexed at 0) and disabling the PlayerID (indexed at 1). Also, Rosters.csv contains rosters for all teams and is stored in `rv[["rosters"]]` whereas `rv[["roster"]]` [[2]](#2) holds only the roster for the team selected in the `teamsTable`.
+Creating the `rosterTable` is similar to the `teamsTable`. In this case, I am hiding the `TeamID` column (indexed at 0) and disabling the PlayerID column (indexed at 1). Also, Rosters.csv contains rosters for all teams and is stored in `rv[["rosters"]]` whereas `rv[["roster"]]` [[2]](#2) holds only the roster for the team selected in the `teamsTable`.
 
 ```
 output$rosterTable <- renderDT(
