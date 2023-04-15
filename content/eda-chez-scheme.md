@@ -1,7 +1,7 @@
 +++
 title = "Exploratory data analysis in Chez Scheme"
 date = 2020-09-12
-updated = 2021-04-26
+updated = 2023-04-15
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats", "gnuplot-pipe"]
 tags = ["EDA", "macros", "dataframe"]
@@ -58,7 +58,7 @@ The `#t` in `rowtable->dataframe` indicates that the the rowtable has a header r
   Abilene  2000.    10.   101.  7.040E+6  59300.      764.     6.6000  2000.7500 
 ```
 
-In Chez Scheme, there is no built-in representation for missing values (like `NA` in R). We have to handle them manually. In our example, we have already converted 8 of the 9 columns from strings to numbers and can use `#f` as an indicator of missing values. But this carries the limitation that typos (e.g., `701t`) are treated as missing [[3]](#3).
+In Chez Scheme, there is no built-in representation for missing values (like `NA` in R). We have to handle them manually. In our example, we have already converted 8 of the 9 columns from strings to numbers and can use `#f` as an indicator of missing values.
 
 ```
 > (map string->number '("one" "2" ""))
@@ -247,5 +247,3 @@ In conclusion, it's been fun to see that something I built is moderately useful 
 <a name="1"></a> [1] In retrospect, `read-delim` is a better fit for the `dataframe` library.
 
 <a name="2"></a> [2] SRFI 197 has now deviated considerably from that early syntax.
-
-<a name="3"></a> [3] I'm not suggesting that this is an insurmountable problem, but it requires extra processing that is not done in this example.
