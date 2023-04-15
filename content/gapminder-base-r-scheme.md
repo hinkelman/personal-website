@@ -1,6 +1,7 @@
 +++
 title = "Analyzing gapminder dataset with base R and Scheme"
 date = 2021-04-30
+updated = 2023-04-15
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats"]
 tags = ["dataframe", "dplyr", "pandas", "EDA", "filter", "modify", "aggregate"]
@@ -15,6 +16,8 @@ I keep my eye out for blog posts illustrating data analysis tasks in R that I ca
 The R package, [`gapminder`](https://cran.r-project.org/web/packages/gapminder/), provides an excerpt of the data available at [Gapminder.org](https://www.gapminder.org/). I've written the data from that package to a CSV file ([available here](/data/gapminder.csv)).
 
 *Base R*
+
+I've added a little function, `head10`, to simplify subsequent code. It is not necessary. By default, `head` provides six rows. I've changed it to 10 to match the default for `dataframe-display`. The main thing to note here is that because we are using base R, we don't need to load any packages.
 
 ```
 > gapminder <- read.csv("gapminder.csv")
@@ -34,9 +37,9 @@ The R package, [`gapminder`](https://cran.r-project.org/web/packages/gapminder/)
 10 Afghanistan      Asia 1997  41.763 22227415  635.3414
 ```
 
-I've added a little function, `head10`, to simplify subsequent code. It is not necessary. By default, `head` provides six rows. I've changed it to 10 to match the default for `dataframe-display`. The main thing to note here is that because we are using base R, we don't need to load any packages.
-
 *Chez Scheme*
+
+The code here is more verbose than in base R. We need to import a couple of libraries. Also, `read-delim` reads data row-wise, which I'm calling a `rowtable`, and needs to be converted to a column-wise `dataframe`. Moreover, `read-delim` doesn't do any type conversion; all values are read as strings. In this example, 4 of 6 columns need to be converted from `string` to `number`. 
 
 ```
 > (import (chez-stats)
@@ -61,8 +64,6 @@ I've added a little function, `head10`, to simplify subsequent code. It is not n
   Afghanistan       Asia  1992.  41.6740  1.632E+7   649.3414 
   Afghanistan       Asia  1997.  41.7630  2.223E+7   635.3414 
 ```
-
-The code here is more verbose than in base R. We need to import a couple of libraries. Also, `read-delim` reads data row-wise, which I'm calling a `rowtable`, and needs to be converted to a column-wise `dataframe`. Moreover, `read-delim` doesn't do any type conversion; all values are read as strings. In this example, 4 of 6 columns need to be converted from `string` to `number`. 
 
 ## Filtering
 
@@ -90,6 +91,8 @@ Filter the dataset to retain only rows where `year` is `2007`.
 
 *Chez Scheme*
 
+This example introduces the thread-first operator (`->`), which takes the result of the previous procedure and passes it to the first argument of the next procedure. For data analysis, I strongly prefer the threading (or piping) approach over writing the code inside-out or creating lots of intermediate datasets.
+
 ```
 > (-> gapminder
       (dataframe-filter
@@ -110,13 +113,13 @@ Filter the dataset to retain only rows where `year` is `2007`.
       Belgium     Europe  2007.  79.4410  1.039E+7 33692.6051 
 ```
 
-This example introduces the thread-first operator (`->`), which takes the result of the previous procedure and passes it to the first argument of the next procedure. For data analysis, I strongly prefer the threading (or piping) approach over writing the code inside-out or creating lots of intermediate datasets.
-
 ### Problem 2
 
 Filter the dataset to retain only rows where `year` is `2007` and `continent` is `Americas`.
 
 *Base R*
+
+In this case, I've used `subset` rather than the more conventional `[` subsetting used in Problem 1. The advantage of `subset` is that I only need to type `gapminder` once instead of three times.
 
 ```
 > head10(subset(gapminder, year == 2007 & continent == "Americas"))
@@ -134,9 +137,9 @@ Filter the dataset to retain only rows where `year` is `2007` and `continent` is
 456            Ecuador  Americas 2007  74.994  13755680  6873.262
 ```
 
-In this case, I've used `subset` rather than the more conventional `[` subsetting used in Problem 1. The advantage of `subset` is that I only need to type `gapminder` once instead of three times.
-
 *Chez Scheme*
+
+`dataframe-filter` was designed to avoid having to repeat the dataframe name in each sub-expression of the `filter-expr`, but requires typing `year` and `continent` two times each in this example.
 
 ```
 > (-> gapminder
@@ -160,13 +163,13 @@ In this case, I've used `subset` rather than the more conventional `[` subsettin
              Ecuador   Americas  2007.  74.9940  1.376E+7  6873.2623 
 ```
 
-`dataframe-filter` was designed to avoid having to repeat the dataframe name in each sub-expression of the `filter-expr`, but requires typing `year` and `continent` two times each in this example.
-
 ### Problem 3
 
 Filter the dataset to retain only rows where `year` is `2007` and `continent` is `Americas` and `country` is `United States`. This last filter is a little silly because the `country` condition makes the `continent` condition unnecessary, but the point is to show how code complexity increases with additional conditions.
 
 *Base R*
+
+Thanks to `subset`, adding additional conditions is straightforward with zero redundancy.
 
 ```
 > subset(gapminder, 
@@ -177,8 +180,6 @@ Filter the dataset to retain only rows where `year` is `2007` and `continent` is
            country continent year lifeExp       pop gdpPercap
 1620 United States  Americas 2007  78.242 301139947  42951.65
 ```
-
-Thanks to `subset`, adding additional conditions is straightforward with zero redundancy.
 
 *Chez Scheme*
 
@@ -211,6 +212,8 @@ Calculate the average life expectancy worldwide in 2007.
 
 *Chez Scheme*
 
+This example introduces the `$` operator, which was inspired by R, to extract the values of a column (e.g., `lifeExp`). The difference in verbosity between base R and Chez Scheme in this example is related to the filtering step. Extracting a column and calculating the mean involve nearly the same number of characters. `mean` is provided by `chez-stats`, but is simple procedure. `(mean x)` is equivalent to `(/ (apply + x) (length x))`.
+
 ```
 > (-> gapminder
       (dataframe-filter
@@ -220,13 +223,13 @@ Calculate the average life expectancy worldwide in 2007.
 67.00742253521126    
 ```
 
-This example introduces the `$` operator, which was inspired by R, to extract the values of a column (e.g., `lifeExp`). The difference in verbosity between base R and Chez Scheme in this example is related to the filtering step. Extracting a column and calculating the mean involve nearly the same number of characters. `mean` is provided by `chez-stats`, but is simple procedure. `(mean x)` is equivalent to `(/ (apply + x) (length x))`.
-
 ### Problem 2
 
 Calculate the average life expectancy for every continent in 2007.
 
 *Base R*
+
+`aggregate` allows for use of the formula syntax (e.g., `lifeExp ~ continent`) to concisely describe the summarized value (`lifeExp`) and grouping variable(s).
 
 ```
 > aggregate(lifeExp ~ continent, 
@@ -241,9 +244,9 @@ Calculate the average life expectancy for every continent in 2007.
 5   Oceania 80.71950
 ```
 
-`aggregate` allows for use of the formula syntax (e.g., `lifeExp ~ continent`) to concisely describe the summarized value (`lifeExp`) and grouping variable(s).
-
 *Chez Scheme*
+
+One difference to note here is that `dataframe-aggregate` doesn't automatically sort by the grouping variable. We would have to explicitly add that sorting step.
 
 ```
 > (-> gapminder
@@ -262,8 +265,6 @@ Calculate the average life expectancy for every continent in 2007.
        Asia       70.7285 
      Africa       54.8060 
 ```
-
-One difference to note here is that `dataframe-aggregate` doesn't automatically sort by the grouping variable. We would have to explicitly add that sorting step.
 
 ### Problem 3
 
@@ -284,8 +285,6 @@ Calculate the total population per continent in 2007 and sort the results in des
 4    Europe  586098529
 5   Oceania   24549947
 ```
-
-Base R is getting a new pipe operator soon (discussed [here](https://youtu.be/X_eDHNVceCU?t=4021)) that will allow for skipping the step of creating an intermediate dataframe (i.e., `total_pop`). 
 
 *Chez Scheme*
 
@@ -316,6 +315,8 @@ Calculate the total GDP by multiplying `pop` and `gdpPercap`.
 
 *Base R*
 
+The help page for `transform` advises that it is only intended for interactive use. Alternatively, you could use: `gapminder$GPD = gapminder$pop * gapminder$gdpPercap`. 
+
 ```
 > head10(transform(gapminder, GDP = pop * gdpPercap))
 
@@ -331,8 +332,6 @@ Calculate the total GDP by multiplying `pop` and `gdpPercap`.
 9  Afghanistan      Asia 1992  41.674 16317921  649.3414 10595901589
 10 Afghanistan      Asia 1997  41.763 22227415  635.3414 14121995875
 ```
-
-The help page for `transform` advises that it is only intended for interactive use. Alternatively, you could use: `gapminder$GPD = gapminder$pop * gapminder$gdpPercap`. 
 
 *Chez Scheme*
 
@@ -362,6 +361,8 @@ Find the top 10 countries in percentile of `gdpPercap`.
 
 *Base R*
 
+There is probably already a function in Base R that does the equivalent of `percentile` here, but, in this case, it was easier to write a short function than to search for a function.
+
 ```
 > percentile <- function(x){
     rank_x = rank(x)
@@ -385,9 +386,11 @@ Find the top 10 countries in percentile of `gdpPercap`.
 696           Iceland    Europe 2007  81.757    301931  36180.79  0.9366197
 ```
 
-There is probably already a function in Base R that does the equivalent of `percentile` here, but, in this case, it was easier to write a short function than to search for a function.
-
 *Chez Scheme*
+
+This example reveals a weak spot in the `dataframe` API. The issue is that `rank%` operates on a `list` whereas `dataframe-modify` expects that the `modify-expr` takes only scalars as inputs because the `modify-expr` is mapped over all rows in a `dataframe`. The workaround to avoid the mapping is to specify that no columns (i.e., `()`) from the dataframe are used in the `modify-expr`, then the list created in the subsequent expression (e.g., `(rank% ($ df 'gdpPercap))`) will be used as the column values.
+ 
+ Because the `dataframe` library only has thread-first (`->`) and thread-last (`->>`) operators, we have to create the awkward `lambda` procedure to get the output of `dataframe-filter` to the right place in `dataframe-modify`. [SRFI 197](https://srfi.schemers.org/srfi-197/srfi-197.html) provides a pipeline operator that requires that the location of the output of the previous procedure is explicitly specified with `_`, which would likely simplify this code. An earlier, simpler version of SRFI 197 was the source for `->` and `->>` in the `dataframe` library.
 
 ```
 > (define (rank% lst)
@@ -418,11 +421,7 @@ There is probably already a function in Base R that does the equivalent of `perc
               Canada   Americas  2007.  80.6530  3.339E+7   36319.24      0.9437 
              Iceland     Europe  2007.  81.7570  3.019E+5   36180.79      0.9366 
 ```
-
-This example reveals a weak spot in the `dataframe` API. The issue is that `rank%` operates on a `list` whereas `dataframe-modify` expects that the `modify-expr` takes only scalars as inputs because the `modify-expr` is mapped over all rows in a `dataframe`. The workaround to avoid the mapping is to specify that no columns (i.e., `()`) from the dataframe are used in the `modify-expr`, then the list created in the subsequent expression (e.g., `(rank% ($ df 'gdpPercap))`) will be used as the column values.
  
- Because the `dataframe` library only has thread-first (`->`) and thread-last (`->>`) operators, we have to create the awkward `lambda` procedure to get the output of `dataframe-filter` to the right place in `dataframe-modify`. [SRFI 197](https://srfi.schemers.org/srfi-197/srfi-197.html) provides a pipeline operator that requires that the location of the output of the previous procedure is explicitly specified with `_`, which would likely simplify this code. An earlier, simpler version of SRFI 197 was the source for `->` and `->>` in the `dataframe` library.
-
  If we create an intermediate `dataframe`, we get simpler syntax.
 
 ```
