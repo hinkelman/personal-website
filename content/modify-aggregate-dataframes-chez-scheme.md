@@ -1,7 +1,7 @@
 +++
 title = "Modify and aggregate dataframes in Chez Scheme"
 date = 2020-09-05
-updated = 2021-04-26
+updated = 2023-04-15
 [taxonomies]
 categories = ["Chez Scheme", "dataframe"]
 tags = ["dataframe", "data-structures", "association-list", "modify", "modify-at", "dplyr", "mutate", "mutate_at", "aggregate", "macros"]
@@ -130,7 +130,7 @@ In [previous posts](/categories/dataframe/) on macros used in filtering and sort
 
 ### Aggregate
 
-In base R, dataframes are aggregated by first splitting into groups, applying the summary statistic, and then complining the pieces. This example uses the formula syntax where the left side indicates the columns to be summarized and the right side indicates the grouping variables.
+In base R, dataframes are aggregated by first splitting into groups, applying the summary statistic, and then combining the pieces. This example uses the formula syntax where the left side indicates the columns to be summarized and the right side indicates the grouping variables.
 
 ```
 > aggregate(cbind(adult, juv) ~ grp + trt, data = df, sum)
@@ -147,8 +147,8 @@ In base R, dataframes are aggregated by first splitting into groups, applying th
 > (dataframe-display
    (dataframe-aggregate df
                         '(grp trt)
-                         (aggregate-expr (adult-sum (adult) (apply + adult))
-                         (juv-sum (juv) (apply + juv)))))
+                        (aggregate-expr (adult-sum (adult) (apply + adult))
+                                        (juv-sum (juv) (apply + juv)))))
  dim: 4 rows x 4 cols
    grp   trt  adult-sum  juv-sum 
      a     x         1.      10. 
