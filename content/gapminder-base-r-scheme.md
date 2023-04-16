@@ -361,8 +361,6 @@ Find the top 10 countries in percentile of `gdpPercap`.
 
 *Base R*
 
-There is probably already a function in Base R that does the equivalent of `percentile` here, but, in this case, it was easier to write a short function than to search for a function.
-
 ```
 > percentile <- function(x){
     rank_x = rank(x)
