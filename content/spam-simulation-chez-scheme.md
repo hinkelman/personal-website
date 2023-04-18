@@ -1,7 +1,7 @@
 +++
 title = "Spam simulation in Chez Scheme"
 date = 2020-12-12
-updated = 2021-06-19
+updated = 2023-04-17
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats"]
 tags = ["simulation", "random-variates", "dataframe"]
@@ -115,14 +115,12 @@ We aggregate `sim-waiting` to find the number of spam comments within each `tria
 
 ```
 > (define sim-waiting-times
-   (-> sim-waiting
-       (dataframe-aggregate
-        '(trial time)
-        (aggregate-expr
-         (num-comments (cumulative time)
-                       (length (filter (lambda (x) (< x 0))
-                                       (map (lambda (cs t) (- cs t))
-                                            cumulative time))))))))
+    (-> sim-waiting
+        (dataframe-modify
+         (modify-expr (comment (cumulative time) (if (< cumulative time) 1 0))))
+        (dataframe-aggregate
+         '(trial time)
+         (aggregate-expr (num-comments (comment) (apply + comment))))))
 
 > (dataframe-display sim-waiting-times)
  dim: 650 rows x 3 cols
