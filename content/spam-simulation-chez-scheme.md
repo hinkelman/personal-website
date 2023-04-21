@@ -1,7 +1,7 @@
 +++
 title = "Spam simulation in Chez Scheme"
 date = 2020-12-12
-updated = 2023-04-17
+updated = 2023-04-21
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats"]
 tags = ["simulation", "random-variates", "dataframe"]
@@ -26,143 +26,116 @@ First, let's import the necessary libraries (after following installation instru
         (dataframe))
 ```
 
-`dataframe-crossing` takes an `alist` and returns the cartesian product of the values in the alist. The original post used 25,000 trials. We are only using 50 trials because the performance of this solution is poor. We are using the `->` operator to build up a chain of operations in a more readable way.
+`dataframe-crossing` takes either dataframes or lists structured as dataframe columns (e.g., `(col1 1 2 3)`) and returns the cartesian product of the objects. The original post used 25,000 trials. We are only using 50 trials because the [performance of dataframe-split (see below) is poor with large numbers of groups](https://github.com/hinkelman/dataframe/issues/5). We are using the `->` operator to build up a chain of operations in a more readable way.
 
 ```
-(define sim-waiting
-  (-> (list (cons 'trial (map add1 (iota 50)))
-            (cons 'time (map (lambda (x) (* x 0.25)) (iota 13)))
-            (cons 'observation (map add1 (iota 300))))
-      (dataframe-crossing)))
+(> define sim-waiting
+    (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
+                            (cons 'observation (map add1 (iota 300))))))
 
 > (dataframe-display sim-waiting)
- dim: 195000 rows x 3 cols
-  trial  time  observation 
-     1.    0.           1. 
-     1.    0.           2. 
-     1.    0.           3. 
-     1.    0.           4. 
-     1.    0.           5. 
-     1.    0.           6. 
-     1.    0.           7. 
-     1.    0.           8. 
-     1.    0.           9. 
-     1.    0.          10. 
+ dim: 15000 rows x 2 cols
+  trial  observation 
+     1.           1. 
+     1.           2. 
+     1.           3. 
+     1.           4. 
+     1.           5. 
+     1.           6. 
+     1.           7. 
+     1.           8. 
+     1.           9. 
+     1.          10. 
 ```
 
 We continue to build up the `sim-waiting` dataframe by adding a column with waiting times by drawing from an exponential distribution with the observation as the rate parameter (used by `rexp` in R). However, `random-exponential` from `chez-stats` takes the mean of the distribution as the parameter, which is equal to `1/rate`.  
 
 ```
 > (define sim-waiting
-   (-> (list (cons 'trial (map add1 (iota 0)))
-             (cons 'time (map (lambda (x) (* x 0.25)) (iota 13)))
-             (cons 'observation (map add1 (iota 300))))
-       (dataframe-crossing)
-       (dataframe-modify
-        (modify-expr (waiting (observation)
-                              (random-exponential (/ 1 observation)))))))
+    (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
+                            (cons 'observation (map add1 (iota 300))))
+        (dataframe-modify
+         (modify-expr (waiting (observation)
+                               (random-exponential (/ 1 observation)))))))
 
 > (dataframe-display sim-waiting)
- dim: 195000 rows x 4 cols
-  trial  time  observation  waiting 
-     1.    0.           1.   1.8179 
-     1.    0.           2.   0.7011 
-     1.    0.           3.   0.3383 
-     1.    0.           4.   0.2445 
-     1.    0.           5.   0.0135 
-     1.    0.           6.   0.2159 
-     1.    0.           7.   0.1129 
-     1.    0.           8.   0.0396 
-     1.    0.           9.   0.0110 
-     1.    0.          10.   0.0177 
+ dim: 15000 rows x 3 cols
+  trial  observation  waiting 
+     1.           1.   4.0240 
+     1.           2.   0.7942 
+     1.           3.   0.1657 
+     1.           4.   0.1317 
+     1.           5.   0.3113 
+     1.           6.   0.1318 
+     1.           7.   0.1321 
+     1.           8.   0.0987 
+     1.           9.   0.1180 
+     1.          10.   0.0040 
 ```
 
-The next step uses the `split-apply-combine` strategy to return the cumulative sum of the `waiting` column for each `trial`/`time` combination. `->` pipes into the first argument of the next procedure whereas `->>` pipes into the last. In the apply step, we add a new column for each dataframe that came out of `dataframe-split` with `(cumulative () (cumulative-sum ($ df 'waiting)))`. If a `modify-expr` contains a list of the same length as the number of rows in the dataframe, then `dataframe-modify` adds that list to the dataframe as a column with the specified name, which is `cumulative` in this example.
+The next step uses the `split-apply-combine` strategy to return the cumulative sum of the `waiting` column for each `trial`. `->` pipes into the first argument of the next procedure whereas `->>` pipes into the last. In the apply step, we add a new column for each dataframe that came out of `dataframe-split` with `(cumulative () (cumulative-sum ($ df 'waiting)))`. If a `modify-expr` contains a list of the same length as the number of rows in the dataframe, then `dataframe-modify` adds that list to the dataframe as a column with the specified name, which is `cumulative` in this example.
 
 ```
 > (define sim-waiting
-   (-> (list (cons 'trial (map add1 (iota 50)))
-             (cons 'time (map (lambda (x) (* x 0.25)) (iota 13)))
-             (cons 'observation (map add1 (iota 300))))
-       (dataframe-crossing)
-       (dataframe-modify
-        (modify-expr (waiting (observation)
-                              (random-exponential (/ 1 observation)))))
-       (dataframe-split 'trial 'time)
-       (->> (map (lambda (df)
-	           (dataframe-modify
-	            df
-	            (modify-expr
-		     (cumulative () (cumulative-sum ($ df 'waiting))))))))
-       (->> (apply dataframe-bind))))
+    (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
+                            (cons 'observation (map add1 (iota 300))))
+        (dataframe-modify
+         (modify-expr (waiting (observation)
+                               (random-exponential (/ 1 observation)))))
+        (dataframe-split 'trial)
+        (->> (map (lambda (df)
+	            (dataframe-modify
+	             df
+	             (modify-expr
+		      (cumulative () (cumulative-sum ($ df 'waiting))))))))
+        (->> (apply dataframe-bind))))
 
 > (dataframe-display sim-waiting)
- dim: 195000 rows x 5 cols
-  trial  time  observation  waiting  cumulative 
-     1.    0.           1.   0.0052      0.0052 
-     1.    0.           2.   0.4459      0.4511 
-     1.    0.           3.   0.3299      0.7810 
-     1.    0.           4.   0.3592      1.1402 
-     1.    0.           5.   0.0644      1.2046 
-     1.    0.           6.   0.1608      1.3654 
-     1.    0.           7.   0.0726      1.4381 
-     1.    0.           8.   0.0596      1.4977 
-     1.    0.           9.   0.0058      1.5035 
-     1.    0.          10.   0.2524      1.7559 
+ dim: 15000 rows x 4 cols
+  trial  observation  waiting  cumulative 
+     1.           1.   0.6134      0.6134 
+     1.           2.   0.7247      1.3381 
+     1.           3.   0.2311      1.5691 
+     1.           4.   0.2258      1.7950 
+     1.           5.   0.2347      2.0296 
+     1.           6.   0.0311      2.0608 
+     1.           7.   0.0699      2.1307 
+     1.           8.   0.1507      2.2814 
+     1.           9.   0.1168      2.3981 
+     1.          10.   0.0014      2.3995 
 ```
 
-We aggregate `sim-waiting` to find the number of spam comments within each `trial` and `time`. The `cumulative` column gives the total time that has elapsed. We are counting the number of rows where `cumulative` is less than `time` to determine the number of comments received in a specified `time`. 
-
-```
-> (define sim-waiting-times
-    (-> sim-waiting
-        (dataframe-modify
-         (modify-expr (comment (cumulative time) (if (< cumulative time) 1 0))))
-        (dataframe-aggregate
-         '(trial time)
-         (aggregate-expr (num-comments (comment) (apply + comment))))))
-
-> (dataframe-display sim-waiting-times)
- dim: 650 rows x 3 cols
-  trial    time  num-comments 
-     1.  0.0000            0. 
-     1.  0.2500            0. 
-     1.  0.5000            0. 
-     1.  0.7500            0. 
-     1.  1.0000            2. 
-     1.  1.2500            4. 
-     1.  1.5000            6. 
-     1.  1.7500           12. 
-     1.  2.0000           10. 
-     1.  2.2500            0. 
-```
-
-The last step is to calculate the average number of spam comments for each time across all trials.
+We cross `sim-waiting` with a new `time` column to find the number of spam comments within each `trial` and `time` combination. The `cumulative` column gives the total time that has elapsed. We are counting the number of rows where `cumulative` is less than `time` to determine the number of comments received in a specified `time`. The last step is to calculate the average number of spam comments for each time across all trials.
 
 ```
 > (define average-over-time
-   (dataframe-aggregate
-    sim-waiting-times
-    '(time)
-    (aggregate-expr
-     (average (num-comments) (exact->inexact (mean num-comments))))))
+    (-> sim-waiting
+        (dataframe-crossing (cons 'time (map (lambda (x) (* x 0.25)) (iota 13))))
+        (dataframe-modify
+         (modify-expr (comment (cumulative time) (< cumulative time))))
+        (dataframe-aggregate
+         '(trial time)
+         (aggregate-expr (num-comments (comment) (sum comment))))
+        (dataframe-aggregate
+         '(time)
+         (aggregate-expr (average (num-comments) (exact->inexact (mean num-comments)))))))
 
 > (dataframe-display average-over-time 13)
  dim: 13 rows x 2 cols
     time  average 
   0.0000   0.0000 
-  0.2500   0.3600 
-  0.5000   0.8000 
-  0.7500   0.9800 
-  1.0000   1.4000 
-  1.2500   2.1800 
-  1.5000   4.1400 
-  1.7500   5.2400 
-  2.0000   5.7800 
-  2.2500  11.2200 
-  2.5000  11.8600 
-  2.7500  16.2000 
-  3.0000  17.3000 
+  0.2500   0.3200 
+  0.5000   0.7200 
+  0.7500   1.2600 
+  1.0000   1.9200 
+  1.2500   2.8400 
+  1.5000   3.9000 
+  1.7500   5.2000 
+  2.0000   6.8000 
+  2.2500   9.3000 
+  2.5000  12.2200 
+  2.7500  16.2400 
+  3.0000  20.9000 
 ```
 
 ### Idiomatic Scheme approach
@@ -216,7 +189,7 @@ The last step is to vary the times used in the simulation.
      6.38984 8.48071 11.13153 14.64021 19.07148)
 ```
 
-This approach uses 100,000 trials and is effectively instantaneous whereas only 50 trials in the `dataframe` approach took a few seconds for every operation and hundreds of trials was likely to freeze Emacs. The `dataframe` library is not capable of working with hundreds of thousands of row. Fortunately, many data analysis projects involve datasets much smaller than that. More importantly, idiomatic Scheme code is well suited for simulations like this spam comments problem.
+This approach uses 100,000 trials and is effectively instantaneous whereas only 50 trials in the `dataframe` approach took several seconds and hundreds of trials was likely to freeze Emacs. The `dataframe` library is not capable of working with hundreds of thousands of row. Fortunately, many data analysis projects involve datasets much smaller than that. More importantly, idiomatic Scheme code is well suited for simulations like this spam comments problem.
 
 ***
 
