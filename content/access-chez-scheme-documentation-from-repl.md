@@ -1,6 +1,7 @@
 +++
 title = "Access Chez Scheme documentation from the REPL"
 date = 2020-01-01
+updated = 2023-05-02
 [taxonomies]
 categories = ["chez-docs", "Chez Scheme", "R"]
 tags = ["rvest", "web-scraping", "tsv", "association-list", "system"]
@@ -9,6 +10,8 @@ tags = ["rvest", "web-scraping", "tsv", "association-list", "system"]
 In the process of learning Chez Scheme, I've missed R's ability to quickly pull up documentation from the console via [`help` or `?`](https://www.r-project.org/help.html). I've toyed with the idea of trying to format the contents of the [Chez Scheme User's Guide](https://cisco.github.io/ChezScheme/csug9.5/) for display in the REPL (similar to [Clojure Docs](https://clojuredocs.org/clojure.repl/doc)). But that is probably too big of a task for me at this point. It recently occurred to me, though, that I can write a simple library, [`chez-docs`](https://github.com/hinkelman/chez-docs), with only one procedure, `doc`, that will make it a bit easier to access the Chez Scheme User's Guide.
 
 <!-- more --> 
+
+UPDATE: I overhauled the code behind `chez-docs`. The web scraping is now all done in Chez Scheme (see [here](https://github.com/hinkelman/chez-docs-scrape)), not R, and more of the documentation is displayed from the REPL. 
 
 My typical entry point to learning about Chez Scheme is the [Summary of Forms](https://cisco.github.io/ChezScheme/csug9.5/summary.html) page of the Chez Scheme User's Guide. The simple idea behind `chez-docs` is to scrape [[1]](#1) the data from the Summary of Forms page and write a procedure that opens links to the documentation from the REPL. 
 
