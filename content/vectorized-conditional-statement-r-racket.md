@@ -6,7 +6,7 @@ categories = ["R", "Racket"]
 tags = ["conditional", "if", "ifelse", "map", "sapply"]
 +++
 
-In a [previous post](/post/for-loop-r-racket/), I wrote that Racket's `if` is similar to `ifelse` in R. That's not quite right. This is a short post to clarify the comparison. The more accurate description is that this Racket code
+Racket's `if` is not vectorized like `ifelse` in R. Instead, this Racket code
 
 <!-- more -->
 
@@ -21,7 +21,7 @@ is the same as this R code.
 ```
 if (test_expr){
   true_expr
-}else{
+} else {
   false_expr
 }
 ```
