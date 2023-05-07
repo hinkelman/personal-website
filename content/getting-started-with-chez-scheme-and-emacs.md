@@ -51,7 +51,7 @@ The REPL has several nice features including:
 > (example 1 2 3)
 5
 ```
-When navigating through previous expressions, only the first line of a multi-line expression is shown. To see (and edit) all lines, type <kbd>CTRL</kbd>+<kbd>L</kbd>. In the middle of an expression, <kbd>RET</kbd> creates a new line; to enter an expression from the middle of an expression, use <kbd>CTRL</kbd>+<kbd>J</kbd>.
+When navigating through previous expressions, only the first line of a multi-line expression is shown. To see (and edit) all lines, type <kbd>CTRL</kbd>+<kbd>L</kbd>. In the middle of an expression, <kbd>RET</kbd> creates a new line; to execute an expression from the middle of an expression, use <kbd>CTRL</kbd>+<kbd>J</kbd>.
 
 ### Library Directory
 
