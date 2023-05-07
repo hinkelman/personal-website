@@ -82,7 +82,7 @@ Racket has a [serialization library](https://docs.racket-lang.org/reference/seri
 (equal? nested-hash (read-rktd "hash.rktd"))   ; read hash table from file and compare to original
 ```
 
-The `save-rktd` function first checks if the data structure is serializable and returns an error if it is not [[2]](#2). The `with-output-to-file` function handles opening and closing a port to the file. While the port is open, the anonymous function (specified with `(lambda)`) indicates that the data should first be serialized and then written to the output port. The keyword argument `#:exists` is set to `'replace` because overwriting the existing file is familiar to me from `saveRDS`.
+The `save-rktd` function first checks if the data structure is serializable and returns an error if it is not. The `with-output-to-file` function handles opening and closing a port to the file. While the port is open, the anonymous function (specified with `(lambda)`) indicates that the data should first be serialized and then written to the output port. The keyword argument `#:exists` is set to `'replace` because overwriting the existing file is familiar to me from `saveRDS`.
 
 In `read-rktd`, a port is opened and closed with `with-input-from-file` and the anonymous function first reads the file and then deserializes the data. The `save-rktd` and `read-rktd` functions are then applied in the same way as `saveRDS` and `readRDS`. 
 
@@ -101,6 +101,4 @@ One key difference between the R functions and my Racket versions is that the R 
 
 ***
 
-<a name="1"></a> [1] I didn't spend much time trying to work through how the objects are different or how to make them the same. 
-
-<a name="2"></a> [2] Racket’s `if` is similar to `ifelse` in R.
+<a name="1"></a> [1] I didn't spend much time trying to work through how the objects are different or how to make them the same.
