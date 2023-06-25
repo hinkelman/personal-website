@@ -45,9 +45,12 @@ Similarly, `dataframe-filter*` returns the rows where the `expr` is `#t`. `dataf
 
 ```
 > (dataframe-display
-   (dataframe-filter* df (trt grp)
-                      (and (string=? trt "a")
-                           (string=? grp "y"))))
+   (dataframe-filter*
+    df
+    (trt grp)
+    (and (string=? trt "a")
+         (string=? grp "y"))))
+
  dim: 3 rows x 4 cols
    trt   grp   rsp   ind 
      a     y    2.    3. 
@@ -72,13 +75,17 @@ I spent a lot of time wrestling with whether I should use `eval` or macros to si
 The following are equivalent
 
 ```
-(dataframe-filter* df (trt grp)
-                   (and (string=? trt "a")
-                        (string=? grp "y")))
+(dataframe-filter*
+ df
+ (trt grp)
+ (and (string=? trt "a")
+      (string=? grp "y")))
 
-(dataframe-filter df '(trt grp)
-                  (lambda (trt grp) (and (string=? trt "a")
-                                         (string=? grp "y"))))
+(dataframe-filter
+ df
+ '(trt grp)
+ (lambda (trt grp) (and (string=? trt "a")
+                        (string=? grp "y"))))
 ```
 
 Admittedly, that is not a very compelling simplification. My primary concern with the expanded form was that passing names (e.g., `(trt grp)`) separately and as part of the `lambda` expression introduces a potential source of errors (e.g, names provided in different order). 
