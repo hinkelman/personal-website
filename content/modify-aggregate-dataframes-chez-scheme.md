@@ -1,7 +1,7 @@
 +++
 title = "Modify and aggregate dataframes in Chez Scheme"
 date = 2020-09-05
-updated = 2023-04-15
+updated = 2023-06-24
 [taxonomies]
 categories = ["Chez Scheme", "dataframe"]
 tags = ["dataframe", "data-structures", "association-list", "modify", "modify-at", "dplyr", "mutate", "mutate_at", "aggregate", "macros"]
@@ -48,14 +48,17 @@ In R, `dplyr::mutate` changes all the values in a column according to the expres
 5   B   y     5  50    55     16  10
 ```
 
-`dataframe-modify` takes a `modify-expr` (see more below) to replicate the core behavior of `dplyr::mutate`. When passing values directly (e.g., scalar or list with length equal to number of rows), the column names used in the expression need to be explicitly specified as missing with `()`.
+`dataframe-modify*` attempts to replicate the core behavior of `dplyr::mutate`. When passing values directly (e.g., scalar or list with length equal to number of rows), the column names used in the expression need to be explicitly specified as missing with `()`.
 
 ```
 > (define df2
-    (dataframe-modify df (modify-expr (grp (grp) (string-upcase grp))
-                                      (total (adult juv) (+ adult juv))
-                                      (scalar () 16)
-                                      (lst () '(2 4 6 8 10)))))
+    (dataframe-modify*
+     df
+     (grp (grp) (string-upcase grp))
+     (total (adult juv) (+ adult juv))
+     (scalar () 16)
+     (lst () '(2 4 6 8 10))))
+
 > (dataframe-display df2)
  dim: 5 rows x 7 cols
    grp   trt  adult   juv  total  scalar   lst 
@@ -94,39 +97,41 @@ In R, `dplyr::mutate` changes all the values in a column according to the expres
 
 #### Implementation
 
-`modify-expr` is a macro that allows for a more concise syntax when writing the expressions used to modify a dataframe. 
+`dataframe-modify*` is a macro that allows for a more concise syntax when writing the expressions used to modify a dataframe. 
 
 ```
-(define-syntax modify-expr
+(define-syntax dataframe-modify*
   (syntax-rules ()
-    [(_ (new-name names expr) ...)
-     (list
-      (list (quote new-name) ...)
-      (list (quote names) ...)
-      (list (lambda names expr) ...))]))
+                [(_ df (new-name names expr) ...)
+                 (df-modify
+                  df
+                  (list (quote new-name) ...)
+                  (list (quote names) ...)
+                  (list (lambda names expr) ...)
+                  "(dataframe-modify* df (new-name names expr) ...)")]))
 ```
 
-The following `modify-expr` 
+The following are equivalent
 
 ```
-(modify-expr (grp (grp) (string-upcase grp))
-             (total (adult juv) (+ adult juv))
-             (scalar () 16)
-             (lst () '(2 4 6 8 10)))
+(dataframe-modify*
+ df
+ (grp (grp) (string-upcase grp))
+ (total (adult juv) (+ adult juv))
+ (scalar () 16)
+ (lst () '(2 4 6 8 10)))
+
+(dataframe-modify
+ df
+ '(grp total scalar lst)
+ '((grp) (adult juv) () ())
+ (lambda (grp) (string-upcase grp))
+ (lambda (adult juv) (+ adult juv))
+ (lambda () 16)
+ (lambda () '(2 4 6 8 10)))
 ```
 
-expands to
-
-```
-'((grp total scalar lst)
-  ((grp) (adult juv) () ())
-  (lambda (grp) (string-upcase grp))
-  (lambda (adult juv) (+ adult juv))
-  (lambda () 16)
-  (lambda () '(2 4 6 8 10)))
-```
-
-In [previous posts](/categories/dataframe/) on macros used in filtering and sorting dataframes, I've acknowledged that the `filter-expr` and `sort-expr` macros don't provide a very compelling simplification. In this case, though, the `modify-expr` macro is helpful both for reducing the number of characters and keeping the pieces of the expression together. The use of `filter-expr` and `sort-expr` follows from `modify-expr` and provides more consistent syntax across all of the dataframe procedures.
+In [previous posts](/categories/dataframe/) on macros used in filtering and sorting dataframes, I've acknowledged that the `dataframe-filter*` and `dataframe-sort*` macros don't provide a very compelling simplification. In this case, though, the `dataframe-modify*` macro is helpful both for reducing the number of characters and keeping the pieces of the expression together.
 
 ### Aggregate
 
@@ -141,14 +146,16 @@ In base R, dataframes are aggregated by first splitting into groups, applying th
 4   b   y     9  90
 ```
 
-`dataframe-aggregate` also uses the split-apply-combine approach, but uses similar syntax to `dataframe-modify`. 
+`dataframe-aggregate*` also uses the split-apply-combine approach, but uses similar syntax to `dataframe-modify*`. 
 
 ```
 > (dataframe-display
-   (dataframe-aggregate df
-                        '(grp trt)
-                        (aggregate-expr (adult-sum (adult) (apply + adult))
-                                        (juv-sum (juv) (apply + juv)))))
+   (dataframe-aggregate*
+    df
+    (grp trt)
+    (adult-sum (adult) (apply + adult))
+    (juv-sum (juv) (apply + juv))))
+    
  dim: 4 rows x 4 cols
    grp   trt  adult-sum  juv-sum 
      a     x         1.      10. 

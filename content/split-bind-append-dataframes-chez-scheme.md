@@ -1,7 +1,7 @@
 +++
 title =  "Split, bind, and append dataframes in Chez Scheme"
 date = 2020-04-04
-updated = 2021-04-26
+updated = 2023-06-24
 [taxonomies]
 categories = ["dataframe", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "replicate", "rep", "cbind", "dplyr", "bind_rows"]
@@ -193,12 +193,12 @@ The first step in `dataframe-split` is to find the unique values of the grouping
 (("a" "x"))
 ```
 
-We loop through the rows of the unique groups and partition the dataframe [[3]](#3). `dataframe-partition` returns two dataframes. The `keep` and `drop` dataframes contain the rows where the `filter-expr` is `#t` and `#f`, respectively. 
+We loop through the rows of the unique groups and partition the dataframe [[3]](#3). `dataframe-partition*` returns two dataframes. The `keep` and `drop` dataframes contain the rows where the `expr` is `#t` and `#f`, respectively. I'm using `*` to indicate that this is a macro. There is a more verbose option without the `*` in the name.
 
 ```
 > (define-values (keep drop)
-    (dataframe-partition
-     df1 (filter-expr (trt grp) (and (string=? trt "a") (string=? grp "x")))))
+    (dataframe-partition*
+     df1 (trt grp) (and (string=? trt "a") (string=? grp "x"))))
      
 > (dataframe-display keep)
   dim: 3 rows x 3 cols
@@ -271,7 +271,7 @@ df_a <- dplyr::filter(df1, trt == "a")
 df_b <- dplyr::filter(df1, trt == "b")
 
 (define-values (df-a df-b)
-  (dataframe-partition df1 (filter-expr (trt) (string=? trt "a"))))
+  (dataframe-partition* df1 (trt) (string=? trt "a")))
 ```
 
 `dplyr::bind_rows` fills missing columns with `NA`. 
@@ -335,7 +335,7 @@ In contrast, `dataframe-bind` will drop all columns not shared across the datafr
 
 ### Final thoughts
 
-With the exception of `dataframe-split`, all of the procedures described in the first three posts in the [dataframe series](/categories/dataframe/) involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `filter-expr`) and familiarity/consistency with Chez Scheme's standard library. In the next post, I will describe how to filter, partition, and sort dataframes in Chez Scheme. 
+With the exception of `dataframe-split`, all of the procedures described in the first three posts in the [dataframe series](/categories/dataframe/) involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `dataframe-partition*`) and familiarity/consistency with Chez Scheme's standard library. In the next post, I will describe how to filter, partition, and sort dataframes in Chez Scheme. 
 
 ***
 
