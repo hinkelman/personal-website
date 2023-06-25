@@ -1,7 +1,7 @@
 +++
 title = "Spam simulation in Chez Scheme"
 date = 2020-12-12
-updated = 2023-04-21
+updated = 2023-06-25
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats"]
 tags = ["simulation", "random-variates", "dataframe"]
@@ -29,9 +29,9 @@ First, let's import the necessary libraries (after following installation instru
 `dataframe-crossing` takes either dataframes or lists structured as dataframe columns (e.g., `(col1 1 2 3)`) and returns the cartesian product of the objects. The original post used 25,000 trials. We are only using 50 trials because the [performance of dataframe-split (see below) is poor with large numbers of groups](https://github.com/hinkelman/dataframe/issues/5). We are using the `->` operator to build up a chain of operations in a more readable way.
 
 ```
-(> define sim-waiting
-    (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
-                            (cons 'observation (map add1 (iota 300))))))
+(define sim-waiting
+  (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
+                          (cons 'observation (map add1 (iota 300))))))
 
 > (dataframe-display sim-waiting)
  dim: 15000 rows x 2 cols
@@ -51,12 +51,11 @@ First, let's import the necessary libraries (after following installation instru
 We continue to build up the `sim-waiting` dataframe by adding a column with waiting times by drawing from an exponential distribution with the observation as the rate parameter (used by `rexp` in R). However, `random-exponential` from `chez-stats` takes the mean of the distribution as the parameter, which is equal to `1/rate`.  
 
 ```
-> (define sim-waiting
-    (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
-                            (cons 'observation (map add1 (iota 300))))
-        (dataframe-modify
-         (modify-expr (waiting (observation)
-                               (random-exponential (/ 1 observation)))))))
+(define sim-waiting
+  (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
+                          (cons 'observation (map add1 (iota 300))))
+      (dataframe-modify*
+       (waiting (observation) (random-exponential (/ 1 observation))))))
 
 > (dataframe-display sim-waiting)
  dim: 15000 rows x 3 cols
@@ -73,22 +72,20 @@ We continue to build up the `sim-waiting` dataframe by adding a column with wait
      1.          10.   0.0040 
 ```
 
-The next step uses the `split-apply-combine` strategy to return the cumulative sum of the `waiting` column for each `trial`. `->` pipes into the first argument of the next procedure whereas `->>` pipes into the last. In the apply step, we add a new column for each dataframe that came out of `dataframe-split` with `(cumulative () (cumulative-sum ($ df 'waiting)))`. If a `modify-expr` contains a list of the same length as the number of rows in the dataframe, then `dataframe-modify` adds that list to the dataframe as a column with the specified name, which is `cumulative` in this example.
+The next step uses the `split-apply-combine` strategy to return the cumulative sum of the `waiting` column for each `trial`. `->` pipes into the first argument of the next procedure whereas `->>` pipes into the last. In the apply step, we add a new column for each dataframe that came out of `dataframe-split` with `(cumulative () (cumulative-sum ($ df 'waiting)))`. If a `dataframe-modify*` contains a list of the same length as the number of rows in the dataframe, then it is added to the dataframe as a column with the specified name, which is `cumulative` in this example.
 
 ```
-> (define sim-waiting
-    (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
-                            (cons 'observation (map add1 (iota 300))))
-        (dataframe-modify
-         (modify-expr (waiting (observation)
-                               (random-exponential (/ 1 observation)))))
-        (dataframe-split 'trial)
-        (->> (map (lambda (df)
-	            (dataframe-modify
-	             df
-	             (modify-expr
-		      (cumulative () (cumulative-sum ($ df 'waiting))))))))
-        (->> (apply dataframe-bind))))
+(define sim-waiting
+  (-> (dataframe-crossing (cons 'trial (map add1 (iota 50)))
+                          (cons 'observation (map add1 (iota 300))))
+      (dataframe-modify*
+       (waiting (observation) (random-exponential (/ 1 observation))))
+      (dataframe-split 'trial)
+      (->> (map (lambda (df)
+	          (dataframe-modify*
+	           df
+		   (cumulative () (cumulative-sum ($ df 'waiting)))))))
+      (->> (apply dataframe-bind))))
 
 > (dataframe-display sim-waiting)
  dim: 15000 rows x 4 cols
@@ -108,17 +105,17 @@ The next step uses the `split-apply-combine` strategy to return the cumulative s
 We cross `sim-waiting` with a new `time` column to find the number of spam comments within each `trial` and `time` combination. The `cumulative` column gives the total time that has elapsed. We are counting the number of rows where `cumulative` is less than `time` to determine the number of comments received in a specified `time`. The last step is to calculate the average number of spam comments for each time across all trials.
 
 ```
-> (define average-over-time
-    (-> sim-waiting
-        (dataframe-crossing (cons 'time (map (lambda (x) (* x 0.25)) (iota 13))))
-        (dataframe-modify
-         (modify-expr (comment (cumulative time) (< cumulative time))))
-        (dataframe-aggregate
-         '(trial time)
-         (aggregate-expr (num-comments (comment) (sum comment))))
-        (dataframe-aggregate
-         '(time)
-         (aggregate-expr (average (num-comments) (exact->inexact (mean num-comments)))))))
+(define average-over-time
+  (-> sim-waiting
+      (dataframe-crossing (cons 'time (map (lambda (x) (* x 0.25)) (iota 13))))
+      (dataframe-modify*
+       (comment (cumulative time) (< cumulative time)))
+      (dataframe-aggregate*
+       (trial time)
+       (num-comments (comment) (sum comment)))
+      (dataframe-aggregate*
+       (time)
+       (average (num-comments) (exact->inexact (mean num-comments))))))
 
 > (dataframe-display average-over-time 13)
  dim: 13 rows x 2 cols

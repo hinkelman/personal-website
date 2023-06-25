@@ -1,7 +1,7 @@
 +++
 title = "Analyzing gapminder dataset with base R and Scheme"
 date = 2021-04-30
-updated = 2023-04-15
+updated = 2023-06-25
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats"]
 tags = ["dataframe", "dplyr", "pandas", "EDA", "filter", "modify", "aggregate"]
@@ -42,13 +42,15 @@ I've added a little function, `head10`, to simplify subsequent code. It is not n
 The code here is more verbose than in base R. We need to import a couple of libraries. Also, `read-delim` reads data row-wise, which I'm calling a `rowtable`, and needs to be converted to a column-wise `dataframe`. Moreover, `read-delim` doesn't do any type conversion; all values are read as strings. In this example, 4 of 6 columns need to be converted from `string` to `number`. 
 
 ```
-> (import (chez-stats)
-          (dataframe))
-> (define gapminder
-    (-> (read-delim "gapminder.csv")
-        (rowtable->dataframe #t)
-        (dataframe-modify-at
-         string->number 'year 'lifeExp 'pop 'gdpPercap)))
+(import (chez-stats)
+        (dataframe))
+
+(define gapminder
+  (-> (read-delim "gapminder.csv")
+      (rowtable->dataframe #t)
+      (dataframe-modify-at
+       string->number 'year 'lifeExp 'pop 'gdpPercap)))
+
 > (dataframe-display gapminder)
 
  dim: 1704 rows x 6 cols
@@ -95,8 +97,7 @@ This example introduces the thread-first operator (`->`), which takes the result
 
 ```
 > (-> gapminder
-      (dataframe-filter
-       (filter-expr (year) (= year 2007)))
+      (dataframe-filter* (year) (= year 2007))
       dataframe-display)
 
  dim: 142 rows x 6 cols
@@ -139,14 +140,14 @@ In this case, I've used `subset` rather than the more conventional `[` subsettin
 
 *Chez Scheme*
 
-`dataframe-filter` was designed to avoid having to repeat the dataframe name in each sub-expression of the `filter-expr`, but requires typing `year` and `continent` two times each in this example.
+`dataframe-filter*` was designed to avoid having to repeat the dataframe name in each sub-expression, i.e., `(= year 2007)` and `(string=? continent "Americas")`, but requires typing `year` and `continent` two times each in this example.
 
 ```
 > (-> gapminder
-      (dataframe-filter
-       (filter-expr (year continent)
-                    (and (= year 2007)
-                         (string=? continent "Americas"))))
+      (dataframe-filter*
+       (year continent)
+       (and (= year 2007)
+            (string=? continent "Americas")))
       dataframe-display)
 
  dim: 25 rows x 6 cols
@@ -185,11 +186,11 @@ Thanks to `subset`, adding additional conditions is straightforward with zero re
 
 ```
 > (-> gapminder
-      (dataframe-filter
-       (filter-expr (year continent country)
-                    (and (= year 2007)
-                         (string=? continent "Americas")
-                         (string=? country "United States"))))
+      (dataframe-filter*
+       (year continent country)
+       (and (= year 2007)
+            (string=? continent "Americas")
+            (string=? country "United States")))
       dataframe-display)
 
  dim: 1 rows x 6 cols
@@ -216,10 +217,10 @@ This example introduces the `$` operator, which was inspired by R, to extract th
 
 ```
 > (-> gapminder
-      (dataframe-filter
-       (filter-expr (year) (= year 2007)))
+      (dataframe-filter* (year) (= year 2007))
       ($ 'lifeExp)
       (mean))
+
 67.00742253521126    
 ```
 
@@ -250,11 +251,10 @@ One difference to note here is that `dataframe-aggregate` doesn't automatically 
 
 ```
 > (-> gapminder
-      (dataframe-filter
-       (filter-expr (year) (= year 2007)))
-      (dataframe-aggregate
-       '(continent)
-       (aggregate-expr (mean-lifeExp (lifeExp) (mean lifeExp))))
+      (dataframe-filter* (year) (= year 2007))
+      (dataframe-aggregate*
+       (continent)
+       (mean-lifeExp (lifeExp) (mean lifeExp)))
       (dataframe-display))
 
  dim: 5 rows x 2 cols
@@ -290,12 +290,11 @@ Calculate the total population per continent in 2007 and sort the results in des
 
 ```
 > (-> gapminder
-      (dataframe-filter
-       (filter-expr (year) (= year 2007)))
-      (dataframe-aggregate
-       '(continent)
-       (aggregate-expr (total-pop (pop) (apply + pop))))
-      (dataframe-sort (sort-expr (> total-pop)))
+      (dataframe-filter* (year) (= year 2007))
+      (dataframe-aggregate*
+       (continent)
+       (total-pop (pop) (sum pop)))
+      (dataframe-sort* (> total-pop))
       (dataframe-display))
 
  dim: 5 rows x 2 cols
@@ -337,8 +336,8 @@ The help page for `transform` advises that it is only intended for interactive u
 
 ```
 > (-> gapminder
-      (dataframe-modify
-       (modify-expr (GDP (pop gdpPercap) (* pop gdpPercap))))
+      (dataframe-modify*
+       (GDP (pop gdpPercap) (* pop gdpPercap)))
       (dataframe-display))
 
      dim: 1704 rows x 7 cols
@@ -386,24 +385,23 @@ Find the top 10 countries in percentile of `gdpPercap`.
 
 *Chez Scheme*
 
-This example reveals a weak spot in the `dataframe` API. The issue is that `rank%` operates on a `list` whereas `dataframe-modify` expects that the `modify-expr` takes only scalars as inputs because the `modify-expr` is mapped over all rows in a `dataframe`. The workaround to avoid the mapping is to specify that no columns (i.e., `()`) from the dataframe are used in the `modify-expr`, then the list created in the subsequent expression (e.g., `(rank% ($ df 'gdpPercap))`) will be used as the column values.
+This example reveals a weak spot in the `dataframe` API. The issue is that `rank%` operates on a `list` whereas `dataframe-modify*` takes only scalars as inputs because the `expr` is mapped over all rows in a `dataframe`. The workaround to avoid the mapping is to specify that no columns (i.e., `()`) from the dataframe are used, then the list created in the subsequent expression (e.g., `(rank% ($ df 'gdpPercap))`) will be used as the column values.
  
- Because the `dataframe` library only has thread-first (`->`) and thread-last (`->>`) operators, we have to create the awkward `lambda` procedure to get the output of `dataframe-filter` to the right place in `dataframe-modify`. [SRFI 197](https://srfi.schemers.org/srfi-197/srfi-197.html) provides a pipeline operator that requires that the location of the output of the previous procedure is explicitly specified with `_`, which would likely simplify this code. An earlier, simpler version of SRFI 197 was the source for `->` and `->>` in the `dataframe` library.
+Because the `dataframe` library only has thread-first (`->`) and thread-last (`->>`) operators, we have to create the awkward `lambda` procedure to get the output of `dataframe-filter*` to the right place in `dataframe-modify*`. [SRFI 197](https://srfi.schemers.org/srfi-197/srfi-197.html) provides a pipeline operator that requires that the location of the output of the previous procedure is explicitly specified with `_`, which would likely simplify this code. An earlier, simpler version of SRFI 197 was the source for `->` and `->>` in the `dataframe` library.
 
 ```
-> (define (rank% lst)
-    (let* ([rank-lst (rank lst 'mean)]
-           [max-rank (apply max rank-lst)])
-      (map (lambda (x) (exact->inexact (/ x max-rank))) rank-lst)))
+(define (rank% lst)
+  (let* ([rank-lst (rank lst 'mean)]
+         [max-rank (apply max rank-lst)])
+    (map (lambda (x) (exact->inexact (/ x max-rank))) rank-lst)))
 
 > (-> gapminder
-      (dataframe-filter
-       (filter-expr (year) (= year 2007)))
+      (dataframe-filter* (year) (= year 2007))
       (->> ((lambda (df)
-             (dataframe-modify
-              df
-              (modify-expr (percentile () (rank% ($ df 'gdpPercap))))))))
-      (dataframe-sort (sort-expr (> gdpPercap)))
+              (dataframe-modify*
+               df
+               (percentile () (rank% ($ df 'gdpPercap)))))))
+      (dataframe-sort* (> gdpPercap))
       (dataframe-display))
 
 >  dim: 142 rows x 7 cols
@@ -424,14 +422,12 @@ This example reveals a weak spot in the `dataframe` API. The issue is that `rank
 
 ```
 (define gapminder2007
-  (dataframe-filter
-   gapminder
-   (filter-expr (year) (= year 2007))))
+  (dataframe-filter* gapminder (year) (= year 2007)))
 
-(-> (dataframe-modify
+(-> (dataframe-modify*
      gapminder2007
-     (modify-expr (percentile () (rank% ($ gapminder2007 'gdpPercap)))))
-    (dataframe-sort (sort-expr (> gdpPercap)))
+     (percentile () (rank% ($ gapminder2007 'gdpPercap))))
+    (dataframe-sort* (> gdpPercap))
     (dataframe-display))
 ```
 
@@ -439,8 +435,8 @@ This example reveals a weak spot in the `dataframe` API. The issue is that `rank
 
 The main outcome of writing this post was that it led me to completely rewrite `dataframe-display` because it previously didn't handle large numbers well, which was made abundantly clear in working with the `gapminder` data. The new version of `dataframe-display` is much improved and I gained a greater appreciation for all of the decisions that go into how to print a representation of a data structure to the screen. One lingering example of the difficulties in writing a good implementation of `dataframe-display` can be seen in the output above with `"Hong Kong, China"`. The quotation marks are there to prevent the comma in the string from being interpreted as a field separator in the CSV file. If I would have written the file as tab-delimited, then `Hong Kong, China` would have displayed correctly. But, clearly, R handles that case without a problem even with CSV input whereas `dataframe-display` would need another layer of logic in the string processing to handle the extra quotation marks.
 
-If you are not familiar with Scheme code, you might find it to be unacceptably verbose in the examples above and, especially, when compared to `dplyr` code. Because of Scheme's macro system, `dataframe` could be written in a more terse style. But I made the decision early on to stick to relatively simple macro usage and write `dataframe` in a way that I thought would be familiar to Scheme programmers. And that often involves more verbose code. For example, nearly all of the `dataframe` procedures have `dataframe` in the name, e.g., `dataframe-filter`, `dataframe-modify`, etc. This is following the example for hashtables, e.g., `hashtable-ref`, `hashtable-values`, etc. I also hope that experienced Scheme programmers can see that the `dataframe` macros mostly exist to reduce the number of times that `lambda` is written but the shape of the code should still feel familiar. While Scheme code might be more verbose in the small, I find it extremely expressive in the large because the core ideas compose so well.  
+If you are not familiar with Scheme code, you might find it to be unacceptably verbose in the examples above and, especially, when compared to `dplyr` code. Because of Scheme's macro system, `dataframe` could be written in a more terse style. But I made the decision early on to stick to relatively simple macro usage and write `dataframe` in a way that I thought would be familiar to Scheme programmers. And that often involves more verbose code. For example, nearly all of the `dataframe` procedures have `dataframe` in the name, e.g., `dataframe-filter*`*, `dataframe-modify*`, etc. This is following the example for hashtables, e.g., `hashtable-ref`, `hashtable-values`, etc. I also hope that experienced Scheme programmers can see that the `dataframe` macros mostly exist to reduce the number of times that `lambda` is written but the shape of the code should still feel familiar. While Scheme code might be more verbose in the small, I find it extremely expressive in the large because the core ideas compose so well.  
 
 ***
 
-<a name="1"></a> [1] Chez Scheme is the only Scheme implementation that I use so I tend to use 'Scheme' and 'Chez Scheme' interchangeably. However, after a recent pull request from John Cowan to remove the Chez-isms, `dataframe` should now be more portable and work with other R6RS Scheme implementations.
+<a name="1"></a> [1] Chez Scheme is the only Scheme implementation that I use so I tend to use 'Scheme' and 'Chez Scheme' interchangeably. However, after a pull request from John Cowan to remove the Chez-isms, `dataframe` should now be more portable and work with other R6RS Scheme implementations.

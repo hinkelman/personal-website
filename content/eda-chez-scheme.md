@@ -1,7 +1,7 @@
 +++
 title = "Exploratory data analysis in Chez Scheme"
 date = 2020-09-12
-updated = 2023-04-15
+updated = 2023-06-25
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "chez-stats", "gnuplot-pipe"]
 tags = ["EDA", "macros", "dataframe"]
@@ -103,18 +103,17 @@ We need a dataframe with no missing values because we can't pass missing values 
   Abilene  2000.    10.   101.  7.040E+6  59300.  2000.7500 
 ```
 
-Now that we have cleaned up the dataset we will aggregate the data for plotting to look for annual and seasonal patterns. `dataframe-aggregate` takes an `aggregate-expr` as one of its arguments. If we separately define an `aggregate-expr`, then we can easily use it with different grouping variables.
+Now that we have cleaned up the dataset we will aggregate the data for plotting to look for annual and seasonal patterns. 
 
 ```
-> (define agg-expr
-    (aggregate-expr
-      (avg-sales (sales) (exact->inexact (mean sales)))
-      (avg-volume (volume) (exact->inexact (mean volume)))
-      (avg-median (median) (exact->inexact (mean median)))))
-    
-> (define df-agg-year
-    (dataframe-aggregate df-complete '(year) agg-expr))
-    
+(define df-agg-year
+  (dataframe-aggregate*
+   df-complete
+   (year)
+   (avg-sales (sales) (exact->inexact (mean sales)))
+   (avg-volume (volume) (exact->inexact (mean volume)))
+   (avg-median (median) (exact->inexact (mean median)))))
+
 > (dataframe-display df-agg-year)
  dim: 16 rows x 4 cols
    year  avg-sales  avg-volume  avg-median 
@@ -162,7 +161,10 @@ The code for a plot with multiple lines based on a dataframe would be verbose an
     (list (list "" ($ df (quote x)) ($ df (quote y))))]
     [(_ df x y grp)
      (map (lambda (grp-val)
-            (let ([df-sub (dataframe-filter df (filter-expr (grp) (string=? grp grp-val)))])
+            (let ([df-sub (dataframe-filter*
+                           df
+                           (grp)
+                           (string=? grp grp-val))])
               (list
                (string-append "title '" grp-val "'")
                ($ df-sub (quote x))
@@ -181,26 +183,27 @@ We can now use our `plot-expr` to plot the data that we aggregated by year acros
 
 ![](/img/MedianSalePriceByYear.png)
 
-Next, we create a `filter-expr` to filter by the largest cities in future aggregations. 
+In this next code block, we filter for the selected cities, aggregate by city and year, and then bind the previously aggregated dataframe, `df-agg-year`, while adding a city column to `df-agg-year` with the value of `All` in every row. We create a new dataframe, `df-city`, because we will use it again below.
 
 ```
-(define city-filter
-  (filter-expr
+(define df-city
+  (dataframe-filter*
+   df-complete
    (city)
-   (member city '("Austin" "Dallas" "El Paso" "Houston" "Lubbock" "San Antonio"))))
-```
+   (member city '("Austin" "Dallas" "El Paso" "Houston"
+                  "Lubbock" "San Antonio"))))
 
-In this next code block, we filter for the selected cities, aggregate by city and year, and then bind the previously aggregated dataframe, `df-agg-year`, while adding a city column to `df-agg-year` with the value of `All` in every row.
-
-```
 (define df-agg-city-year
-  (->  df-complete
-       (dataframe-filter city-filter)
-       (dataframe-aggregate '(city year) agg-expr)
+  (->  df-city
+       (dataframe-aggregate*
+        (city year)
+        (avg-sales (sales) (exact->inexact (mean sales)))
+        (avg-volume (volume) (exact->inexact (mean volume)))
+        (avg-median (median) (exact->inexact (mean median))))
        (dataframe-bind
-        (dataframe-modify
+        (dataframe-modify*
          df-agg-year
-         (modify-expr (city () "All"))))))
+         (city () "All")))))
 ```
 
 The next plot includes 7 lines, but the `plot-expr` is mostly the same as for plotting one line. 
@@ -219,8 +222,12 @@ The code is very similar for monthly patterns.
 ```
 (define df-agg-month
   (-> df-complete
-      (dataframe-aggregate '(month) agg-expr)))
-      (dataframe-sort (sort-expr (< month)))))
+      (dataframe-aggregate*
+       (month)
+       (avg-sales (sales) (exact->inexact (mean sales)))
+       (avg-volume (volume) (exact->inexact (mean volume)))
+       (avg-median (median) (exact->inexact (mean median))))
+      (dataframe-sort* (< month))))
 
 (define df-agg-city-month
   (->  df-complete
@@ -240,7 +247,7 @@ The code is very similar for monthly patterns.
 
 ![](/img/MedianSalePriceByMonthAndCity.png)
 
-In conclusion, it's been fun to see that something I built is moderately useful for exploratory data analysis, but it would be a HUGE amount of work to take these libraries to a place where it could even partially replace R for me. To be clear, I wasn't trying to replace R. I was just learning Scheme. I don't anticipate investing too much more time in the `dataframe` or `gnuplot-pipe` libraries, but I might slowly add features to `chez-stats`.
+In conclusion, it's been fun to see that something I built is moderately useful for exploratory data analysis, but it would be a HUGE amount of work to take these libraries to a place where it could even partially replace R for me. To be clear, I wasn't trying to replace R. I was just learning Scheme.
 
 ***
 
