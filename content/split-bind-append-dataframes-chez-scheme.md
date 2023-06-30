@@ -1,7 +1,7 @@
 +++
 title =  "Split, bind, and append dataframes in Chez Scheme"
 date = 2020-04-04
-updated = 2023-06-24
+updated = 2023-06-30
 [taxonomies]
 categories = ["dataframe", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "replicate", "rep", "cbind", "dplyr", "bind_rows"]
@@ -133,16 +133,7 @@ $b.y
 
 ```
 > (for-each dataframe-display (dataframe-split df1 'trt 'grp))
- dim: 3 rows x 3 cols
-   trt   grp   rsp 
-     b     x    3. 
-     b     x    3. 
-     b     x    3. 
- dim: 3 rows x 3 cols
-   trt   grp   rsp 
-     b     y    4. 
-     b     y    4. 
-     b     y    4. 
+
  dim: 3 rows x 3 cols
    trt   grp   rsp 
      a     x    1. 
@@ -153,75 +144,17 @@ $b.y
      a     y    2. 
      a     y    2. 
      a     y    2. 
-```
-
-#### Implementation
-
-The first step in `dataframe-split` is to find the unique values of the grouping columns [[1]](#1).
-
-```
-> (dataframe-display (dataframe-unique (dataframe-select df1 'trt 'grp)))
- dim: 4 rows x 2 cols
-   trt   grp 
-     a     x 
-     a     y 
-     b     x 
-     b     y 
-```
-
-`dataframe-unique` involves transposing the alist to a row-based structure to remove duplicates and then transposing back to the column-based structure. This is another example of me choosing a straightforward solution over an efficient one [[2]](#2).
-
-```
-(define (transpose ls) (apply map list ls))
-
-;; https://stackoverflow.com/questions/8382296/scheme-remove-duplicated-numbers-from-list
-(define (remove-duplicates ls)
-  (cond [(null? ls)
-         '()]
-        [(member (car ls) (cdr ls))
-         (remove-duplicates (cdr ls))]
-        [else
-         (cons (car ls) (remove-duplicates (cdr ls)))]))
-         
-> (remove-duplicates '((trt "a" "a" "a") (grp "x" "x" "x")))
-((trt "a" "a" "a") (grp "x" "x" "x"))
-
-> (transpose '((trt "a" "a" "a") (grp "x" "x" "x")))
-((trt grp) ("a" "x") ("a" "x") ("a" "x"))
-
-> (remove-duplicates (cdr (transpose '((trt "a" "a" "a") (grp "x" "x" "x")))))
-(("a" "x"))
-```
-
-We loop through the rows of the unique groups and partition the dataframe [[3]](#3). `dataframe-partition*` returns two dataframes. The `keep` and `drop` dataframes contain the rows where the `expr` is `#t` and `#f`, respectively. I'm using `*` to indicate that this is a macro. There is a more verbose option without the `*` in the name.
-
-```
-> (define-values (keep drop)
-    (dataframe-partition*
-     df1 (trt grp) (and (string=? trt "a") (string=? grp "x"))))
-     
-> (dataframe-display keep)
-  dim: 3 rows x 3 cols
+ dim: 3 rows x 3 cols
    trt   grp   rsp 
-     a     x    1. 
-     a     x    1. 
-     a     x    1. 
-
-> (dataframe-display drop)
- dim: 9 rows x 3 cols
+     b     x    3. 
+     b     x    3. 
+     b     x    3. 
+ dim: 3 rows x 3 cols
    trt   grp   rsp 
-     a     y    2. 
-     a     y    2. 
-     a     y    2. 
-     b     x    3. 
-     b     x    3. 
-     b     x    3. 
      b     y    4. 
      b     y    4. 
      b     y    4. 
 ```
-
-The `keep` dataframe becomes the first dataframe in the list of dataframes returned by `dataframe-split`. The algorithm continues looping through the rows of unique groups and partitions the `drop` dataframe in each subsequent iteration. 
 
 ### Bind
 
@@ -336,11 +269,3 @@ In contrast, `dataframe-bind` will drop all columns not shared across the datafr
 ### Final thoughts
 
 With the exception of `dataframe-split`, all of the procedures described in the first three posts in the [dataframe series](/categories/dataframe/) involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `dataframe-partition*`) and familiarity/consistency with Chez Scheme's standard library. In the next post, I will describe how to filter, partition, and sort dataframes in Chez Scheme. 
-
-***
-
-<a name="1"></a> [1] I'm illustrating the ideas with the user-facing `dataframe` procedures, but inside `dataframe-split`, and most `dataframe` procedures, are procedures that work directly on alists to avoid the overhead of unwrapping and rewrapping the alists as dataframes. 
-
-<a name="2"></a> [2] This is not to say that I know a more efficient solution, but, rather, that I opted for a straightforward solution even though it contains the (significant?) overhead of transposing the list a couple of times.
-
-<a name="3"></a> [3] `dataframe-partition` will be covered in the next post of this series.

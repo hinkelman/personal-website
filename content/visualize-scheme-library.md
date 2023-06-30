@@ -1,6 +1,7 @@
 +++
 title = "Visualizing Scheme library procedures with an interactive network graph in R"
 date = 2021-06-05
+updated = 2023-06-30
 [taxonomies]
 categories = ["Chez Scheme", "dataframe", "R", "Shiny"]
 tags = ["dataframe", "visNetwork", "pkgnet"]
@@ -9,6 +10,8 @@ tags = ["dataframe", "visNetwork", "pkgnet"]
 As a learning exercise, I wrote a [`dataframe`](https://github.com/hinkelman/dataframe/) library for Scheme. Because I was learning Scheme while I wrote `dataframe`, I did not prioritize performance. However, as I've tried to use the `dataframe` library ([exploratory data analysis](/eda-chez-scheme), [spam simulation](/spam-simulation-chez-scheme/), [gapminder](/gapminder-base-r-scheme/)), I've encountered performance pitfalls that make `dataframe` largely unusable for datasets with more than a few thousand rows. I have a rough idea of where the bottlenecks are, but I thought it would be a useful to take a step back and visualize the `dataframe` procedures as a network graph. 
 
 <!-- more -->
+
+UPDATE: I recently improved `dataframe` such that performance is reasonable on datasets up to roughly one hundred thousand rows. 
 
 I had [some experience](https://twitter.com/travishinkelman/status/1202359425635241984) with the R package, [`pkgnet`](https://uptake.github.io/pkgnet/), which allows for exploring the structure of a package by building a graph representation. I had also spent a little time using the package, [`visNetwork`](https://datastorm-open.github.io/visNetwork/), that `pkgnet` uses to build the function graph. Moreover, because code is data in Scheme, it is relatively straightforward to analyze Scheme code and I had briefly experimented with that in a [previous blog post](/viewing-source-code-r-chez-scheme). 
 
@@ -137,8 +140,9 @@ output$networkGraph <- renderVisNetwork({
 
 ## Conclusions
 
-I haven't yet spent much time investigating the network graph for the `dataframe` procedures and I have only a few observations.
+Here are a few observations from the network graph:
 
-* I almost always use `named let` for recursion so there are very few nodes with arrows looping back to themselves (see `alist-modify-loop` as an exception).
+* `get-edges` doesn't handle macros, e.g., `dataframe-modify*`, so those are represented as disconnected points.
+* I almost always use `named let` for recursion so there are very few nodes with arrows looping back to themselves (see `alist-modify-loop` and `flatten` as exceptions).
 * Unsurprisingly, a few procedures are called by a lot of other procedures, e.g., `make-dataframe`, `dataframe-alist`, `check-dataframe`.
 * A few procedures (`make-dataframe`, `dataframe-alist`, `dataframe-dim`) are created automatically as part of defining the dataframe record type. I added them to the list of procedure names by appending the list of exported procedure names to the list of extracted procedure names (and removing duplicates from the appended list). I think the only connection that is lost in this approach is that `check-alist` is called from `make-dataframe` but that is not reflected in the graph.

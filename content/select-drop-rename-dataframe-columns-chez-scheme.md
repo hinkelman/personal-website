@@ -1,7 +1,7 @@
 +++
 title = "Select, drop, and rename dataframe columns in Chez Scheme"
 date = 2020-03-29
-updated = 2021-04-26
+updated = 2023-06-30
 [taxonomies]
 categories = ["dataframe", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "dplyr"]
@@ -85,10 +85,10 @@ With `dplyr::select`, columns can be renamed during selection, but `dplyr::renam
 3 3   6   9
 ```
 
-`dataframe-select` does not allow for renaming during selection, but `dataframe-rename` works similarly to `dplyr::rename`. However, in the absence of the `=` syntax (where I think it is intutive for the new name to be on the left), I decided that it was more natural to write `'((old-name new-name))`. 
+`dataframe-select` does not allow for renaming during selection, but `dataframe-rename` works similarly to `dplyr::rename`. However, in the absence of the `=` syntax (where I think it is intutive for the new name to be on the left), I decided that it was more natural to write `'(old-name new-name)`. 
 
 ```
-> (dataframe-display (dataframe-rename df '((b Bee) (c Sea))))
+> (dataframe-display (dataframe-rename df '(b Bee) '(c Sea)))
  dim: 3 rows x 3 cols
      a   Bee   Sea 
     1.    4.    7. 
