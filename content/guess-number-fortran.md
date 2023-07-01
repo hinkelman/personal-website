@@ -34,7 +34,7 @@ end subroutine random_uniform
 
 The first thing to note is that Fortran has both subroutines and functions. I have only a fuzzy understanding of when you would choose one over the other. In this case, it seems that `random_stduniform` and `random_uniform` could have also been written as functions (but I didn't try). Perhaps the fact that `random_number` is a subroutine makes it more intuitive to build subroutines on top of it. When calling a subroutine, you need to preface the statement with `call`, which is not required for functions. Also, in a subroutine, assignment is handled by passing the variable name as an argument. For example, in `random_stduniform`, the variable `r` is declared with type `real` and then assigned a value when passed to the `random_normal` subroutine. 
 
-One of the other unusual (to me) components of these subroutines is `implicit none`, which means that the types of variables need to be explicitly declared and not implicitly inferred from the variable names. Here is an [argument](https://milancurcic.com/2019/10/17/implicit-none-and-carry-on.html) for embracing `implicit none` rather than seeking to change it in a future version of the Fortran Standard.
+One of the other unusual (to me) components of these subroutines is `implicit none`, which means that the types of variables need to be explicitly declared and not implicitly inferred from the variable names. Here is an [argument](https://medium.com/modern-fortran/implicit-none-and-carry-on-860a1a0f143b) for embracing `implicit none` rather than seeking to change it in a future version of the Fortran Standard.
 
 Armed with those two sub-routines, here is the full program for the number guessing game:
 

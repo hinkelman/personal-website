@@ -12,7 +12,7 @@ The stochastic logistic population model described in [this blog post](https://w
 
 ### Standalone Fortran Program
 
-First, I wrote a [standalone Fortran program](https://github.com/hinkelman/stochastic-population-model/blob/main/stochastic-logistic.f90) of the stochastic population model. The main thing that tripped me up was reading arguments from the command line. I initialized a 1D array for holding the values of the arguments. 
+First, I wrote a [standalone Fortran program](https://github.com/hinkelman/stochastic-population-model/blob/main/R-Fortran/stochastic-logistic.f90) of the stochastic population model. The main thing that tripped me up was reading arguments from the command line. I initialized a 1D array for holding the values of the arguments. 
 
 ```
 character(len=20), dimension(5) :: args
@@ -38,7 +38,7 @@ read(args(1), *) t
 
 ### Fortran Subroutines
 
-I also created a [file](https://github.com/hinkelman/stochastic-population-model/blob/main/stochastic-logistic-subroutines.f90) that only contains subroutines for calling from R. Two of the subroutines (`rstduniform` and `rnormal`) are mostly the same as from the main program, but the names are changed because the R help for the `.Fortran` function recommended not using underscores in the subroutine names and the type of several parameters is `double precision`, not `real`, for compatibility with R. One of the subroutines, `rnorm`, is only included as a test of `rnormal`. 
+I also created a [file](https://github.com/hinkelman/stochastic-population-model/blob/main/R-Fortran/stochastic-logistic-subroutines.f90) that only contains subroutines for calling from R. Two of the subroutines (`rstduniform` and `rnormal`) are mostly the same as from the main program, but the names are changed because the R help for the `.Fortran` function recommended not using underscores in the subroutine names and the type of several parameters is `double precision`, not `real`, for compatibility with R. One of the subroutines, `rnorm`, is only included as a test of `rnormal`. 
 
 ```
 subroutine rnorm(reps, mu, sigma, arr)
@@ -63,7 +63,7 @@ R CMD SHLIB stochastic-logistic-subroutines.f90
 
 ### Calling Fortran from R
 
-In the [R code](https://github.com/hinkelman/stochastic-population-model/blob/main/stochastic-logistic.R), we load the shared object with
+In the [R code](https://github.com/hinkelman/stochastic-population-model/blob/main/R-Fortran/stochastic-logistic.R), we load the shared object with
 
 ```
 dyn.load("stochastic-logistic-subroutines.so")

@@ -111,7 +111,7 @@ for (j in c("CSUG", "TSPL")){
 
 ### Data Preparation with Chez Scheme
 
-I used my [`chez-stats` library](https://github.com/hinkelman/chez-stats/blob/dev/csv.ss) to read the tab-delimited files, dropped the header row, and combine the two lists into a list for writing to file.
+I used my [`chez-stats` library](https://github.com/hinkelman/chez-stats/blob/master/chez-stats/delimited.sls) to read the tab-delimited files, dropped the header row, and combine the two lists into a list for writing to file.
 
 ```
 (import (chez-stats))

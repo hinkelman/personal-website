@@ -214,7 +214,7 @@ With a more complicated model, where a population is tracked in many dimensions 
 
 ***
 
-<a name="1"></a> [1] The [threading module](http://lexi-lambda.github.io/threading/threading.html) allows for writing Racket code in "pipelines" to reduce deeply nested code.
+<a name="1"></a> [1] The [threading module](https://docs.racket-lang.org/threading/index.html) allows for writing Racket code in "pipelines" to reduce deeply nested code.
 
 <a name="2"></a> [2] Admittedly, four of those parantheses are superfluous but I find it more readable to make the order of operations explicit.
 

@@ -26,7 +26,7 @@ In base R, `read.csv` [[1]](#1) includes sensible defaults that make reading a C
  $ yn     : Factor w/ 2 levels "N","Y": 2 2 2 1 1 2 1 1 2 2 ...
 ```
 
-The `str` function shows the structure of an R object. For a `data.frame` object, each column in the `data.frame` is previewed in a row with the column name, followed by the column type, followed by the values for the first few rows in that column. Most of the columns in `example.csv` were converted to factors by `read.csv`. The factor levels are encoded as integers (e.g., `"true"` and `"false"` as `1` and `2`). I won't re-hash the [explanation for this default behavior](https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/), but I now typically set `stringsAsFactors = FALSE` to read non-numeric data as strings. 
+The `str` function shows the structure of an R object. For a `data.frame` object, each column in the `data.frame` is previewed in a row with the column name, followed by the column type, followed by the values for the first few rows in that column. Most of the columns in `example.csv` were converted to factors by `read.csv`. The factor levels are encoded as integers (e.g., `"true"` and `"false"` as `1` and `2`). I won't re-hash the [explanation for this default behavior](https://simplystatistics.org/posts/2015-07-24-stringsasfactors-an-unauthorized-biography/), but I now typically set `stringsAsFactors = FALSE` to read non-numeric data as strings. 
 
 ```
 > str(read.csv("example.csv", stringsAsFactors = FALSE))

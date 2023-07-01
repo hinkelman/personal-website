@@ -10,7 +10,7 @@ I've been an enthusiastic Mac user for about 12 years, but hardware problems wit
 
 <!-- more -->
 
-I have been [learning Chez Scheme](/categories/chezscheme/) over the past 6 months and had previously written about [getting started with Chez Scheme and Emacs on macOS and Windows](/post/getting-started-with-chez-scheme-and-emacs/). For this post, I've copied the text of the previous post and updated only the components that needed to be changed to work with Ubuntu. 
+I have been [learning Chez Scheme](/categories/chez-scheme/) over the past 6 months and had previously written about [getting started with Chez Scheme and Emacs on macOS and Windows](/post/getting-started-with-chez-scheme-and-emacs/). For this post, I've copied the text of the previous post and updated only the components that needed to be changed to work with Ubuntu. 
 
 ***
 
