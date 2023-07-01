@@ -1,13 +1,13 @@
 +++
-title =  "Split, bind, and append dataframes in Chez Scheme"
+title =  "Split, bind, and append dataframes in Scheme"
 date = 2020-04-04
-updated = 2023-06-30
+updated = 2023-07-01
 [taxonomies]
-categories = ["dataframe", "Chez Scheme"]
+categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "replicate", "rep", "cbind", "dplyr", "bind_rows"]
 +++
 
-This post is the third in a [series](/categories/dataframe/) on the [`dataframe` library](https://github.com/hinkelman/dataframe/) for Chez Scheme. In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for splitting, binding, and appending dataframes.
+This post is the third in a [series](/categories/dataframe/) on the [`dataframe` library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for splitting, binding, and appending dataframes.
 
 <!-- more -->
 
@@ -77,7 +77,7 @@ I'm using `append` to refer to a `cbind` operation in R.
 6   a   y   2   5    6
 ```
 
-In Chez Scheme, we append dataframes with equal numbers of rows via `dataframe-append`.
+In Scheme, we append dataframes with equal numbers of rows via `dataframe-append`.
 
 ```
 > (dataframe-display (dataframe-append df1 df2) 6)
@@ -91,7 +91,7 @@ In Chez Scheme, we append dataframes with equal numbers of rows via `dataframe-a
      a     y    2.    5.    6. 
 ```
 
-I chose `dataframe-append` as the name because alists, which are at the heart of dataframes, are straightforwardly combined with `append` in Chez Scheme.
+I chose `dataframe-append` as the name because alists, which are at the heart of dataframes, are straightforwardly combined with `append` in Scheme.
 
 ```
 > (append '((a 1 2 3)) '((b 4 5 6)))
@@ -226,7 +226,7 @@ dplyr::bind_rows(df_a, df_b[,c("trt", "grp")])
 12   b   y  NA
 ```
 
-Because Chez Scheme doesn't have explicit missing values, I created a separate procedure, `dataframe-bind-all`, for binding dataframes where missing columns are filled by the specified missing value.
+Because Scheme doesn't have explicit missing values, I created a separate procedure, `dataframe-bind-all`, for binding dataframes where missing columns are filled by the specified missing value.
 
 ```
 > (dataframe-display (dataframe-bind-all -999 df-a (dataframe-drop df-b 'rsp)) 12)
@@ -268,4 +268,4 @@ In contrast, `dataframe-bind` will drop all columns not shared across the datafr
 
 ### Final thoughts
 
-With the exception of `dataframe-split`, all of the procedures described in the first three posts in the [dataframe series](/categories/dataframe/) involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `dataframe-partition*`) and familiarity/consistency with Chez Scheme's standard library. In the next post, I will describe how to filter, partition, and sort dataframes in Chez Scheme. 
+With the exception of `dataframe-split`, all of the procedures described in the first three posts in the [dataframe series](/categories/dataframe/) involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `dataframe-partition*`) and familiarity/consistency with Scheme's standard library. In the next post, I will describe how to filter, partition, and sort dataframes in Scheme. 

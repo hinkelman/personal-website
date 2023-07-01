@@ -1,13 +1,13 @@
 +++
-title = "Exploratory data analysis in Chez Scheme"
+title = "Exploratory data analysis in Scheme"
 date = 2020-09-12
-updated = 2023-06-25
+updated = 2023-07-01
 [taxonomies]
-categories = ["Chez Scheme", "dataframe", "chez-stats", "gnuplot-pipe"]
+categories = ["Scheme", "Chez Scheme", "dataframe", "chez-stats", "gnuplot-pipe"]
 tags = ["EDA", "macros", "dataframe"]
 +++
 
-When I started learning Scheme, I took the common approach of learning a new language by implementing features from familiar languages (namely R). That approach sent me down the path of writing the [`chez-stats`](https://github.com/hinkelman/chez-stats) and [`dataframe`](https://github.com/hinkelman/dataframe/) libraries and porting [`gnuplot-pipe`](https://github.com/hinkelman/gnuplot-pipe) from Chicken to Chez Scheme. Those three libraries now allow me to conduct simple exploratory data analysis (EDA) in Chez Scheme that should be feel relatively familiar to R programmers. In this post, I will work through a simple example, which mostly serves to reinforce how much better suited R is for these types of tasks.
+When I started learning Scheme (R6RS), I took the common approach of learning a new language by implementing features from familiar languages (namely R). That approach sent me down the path of writing the [`chez-stats`](https://github.com/hinkelman/chez-stats) and [`dataframe`](https://github.com/hinkelman/dataframe/) libraries and porting [`gnuplot-pipe`](https://github.com/hinkelman/gnuplot-pipe) from Chicken to Chez Scheme. Those three libraries now allow me to conduct simple exploratory data analysis (EDA) in Scheme that should feel relatively familiar to R programmers. In this post, I will work through a simple example, which mostly serves to reinforce how much better suited R is for these types of tasks.
 
 <!-- more -->
 
@@ -58,7 +58,7 @@ The `#t` in `rowtable->dataframe` indicates that the the rowtable has a header r
   Abilene  2000.    10.   101.  7.040E+6  59300.      764.     6.6000  2000.7500 
 ```
 
-In Chez Scheme, there is no built-in representation for missing values (like `NA` in R). We have to handle them manually. In our example, we have already converted 8 of the 9 columns from strings to numbers and can use `#f` as an indicator of missing values.
+In Scheme, there is no built-in representation for missing values (like `NA` in R). We have to handle them manually. In our example, we have already converted 8 of the 9 columns from strings to numbers and can use `#f` as an indicator of missing values.
 
 ```
 > (map string->number '("one" "2" ""))

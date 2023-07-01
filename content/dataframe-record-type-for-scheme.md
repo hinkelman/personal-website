@@ -1,13 +1,13 @@
 +++
-title = "A dataframe record type for Chez Scheme"
+title = "A dataframe record type for Scheme"
 date = 2020-03-27
-updated = 2021-04-26
+updated = 2023-07-01
 [taxonomies]
-categories = ["dataframe", "Chez Scheme"]
+categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list"]
 +++
 
-As an exercise in my Chez Scheme learning journey, I have implemented a [dataframe record type](https://github.com/hinkelman/dataframe/) and procedures to work with the dataframe record type. Dataframes are column-oriented, tabular data structures useful for data analysis found in several languages including [R](https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html), [Python](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html), [Julia](https://juliadata.github.io/DataFrames.jl/stable/), and [Go](https://github.com/rocketlaunchr/dataframe-go). In this post, I will introduce the dataframe record type and basic procedures for working with dataframes. In subsequent posts, I will describe other dataframe procedures, e.g., filter, sort, aggregate, etc.
+As an exercise in my Scheme (R6RS) learning journey, I have implemented a [dataframe record type](https://github.com/hinkelman/dataframe/) and procedures to work with the dataframe record type. Dataframes are column-oriented, tabular data structures useful for data analysis found in several languages including [R](https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html), [Python](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html), [Julia](https://juliadata.github.io/DataFrames.jl/stable/), and [Go](https://github.com/rocketlaunchr/dataframe-go). In this post, I will introduce the dataframe record type and basic procedures for working with dataframes. In subsequent posts, I will describe other dataframe procedures, e.g., filter, sort, aggregate, etc.
 
 <!-- more -->
 
@@ -71,7 +71,7 @@ Exception in (make-dataframe alist): names are not symbols
 
 ### Head and tail
 
-In R, I frequently use `head` to preview the first few rows of a dataframe and, less frequently, use `tail` to view the last few rows. Chez Scheme provides `list-head` and `list-tail` with similar functionality. However, `tail` in R returns the last `n` rows of the dataframe whereas `list-tail` in Chez Scheme returns the rest of the list starting at a given index. My first instinct was to write `dataframe-tail` to use the R behavior, but eventually decided that `dataframe-tail` should follow the behavior established by `list-tail`. I was trying to think in terms of the [principle of least surprise](https://en.wikipedia.org/wiki/Principle_of_least_astonishment), but the degree of surprise depends on the potential users. Am I targeting R or Scheme programmers? The most realistic scenario is that future me is the only potential user and I want that guy to think in terms of typical Scheme patterns.
+In R, I frequently use `head` to preview the first few rows of a dataframe and, less frequently, use `tail` to view the last few rows. Scheme provides `list-head` and `list-tail` with similar functionality. However, `tail` in R returns the last `n` rows of the dataframe whereas `list-tail` in Scheme returns the rest of the list starting at a given index. My first instinct was to write `dataframe-tail` to use the R behavior, but eventually decided that `dataframe-tail` should follow the behavior established by `list-tail`. I was trying to think in terms of the [principle of least surprise](https://en.wikipedia.org/wiki/Principle_of_least_astonishment), but the degree of surprise depends on the potential users. Am I targeting R or Scheme programmers? The most realistic scenario is that future me is the only potential user and I want that guy to think in terms of typical Scheme patterns.
 
 ```
 (define (dataframe-head df n)

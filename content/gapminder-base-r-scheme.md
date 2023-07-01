@@ -1,13 +1,13 @@
 +++
 title = "Analyzing gapminder dataset with base R and Scheme"
 date = 2021-04-30
-updated = 2023-06-30
+updated = 2023-07-01
 [taxonomies]
-categories = ["Chez Scheme", "dataframe", "chez-stats"]
+categories = ["Scheme", "Chez Scheme", "dataframe", "chez-stats"]
 tags = ["dataframe", "dplyr", "pandas", "EDA", "filter", "modify", "aggregate"]
 +++
 
-I keep my eye out for blog posts illustrating data analysis tasks in R that I can use to test the functionality of my [`chez-stats`](https://github.com/hinkelman/chez-stats) and [`dataframe`](https://github.com/hinkelman/dataframe/) libraries for Chez Scheme [[1]](#1). A [post](https://appsilon.com/pandas-vs-dplyr/) comparing [`pandas`](https://pandas.pydata.org/) (Python) and [`dplyr`](https://dplyr.tidyverse.org/) (R) in a basic analysis of the gapminder dataset provides a nice little test case. In this post, I will also include base R code used to accomplish the same tasks as a contrast to both the Scheme code and the `dplyr` code from the other post. 
+I keep my eye out for blog posts illustrating data analysis tasks in R that I can use to test the functionality of my [`chez-stats`](https://github.com/hinkelman/chez-stats) and [`dataframe`](https://github.com/hinkelman/dataframe/) libraries for Scheme (R6RS). A [post](https://appsilon.com/pandas-vs-dplyr/) comparing [`pandas`](https://pandas.pydata.org/) (Python) and [`dplyr`](https://dplyr.tidyverse.org/) (R) in a basic analysis of the gapminder dataset provides a nice little test case. In this post, I will also include base R code used to accomplish the same tasks as a contrast to both the Scheme code and the `dplyr` code from the other post. 
 
 <!-- more -->
 
@@ -37,7 +37,7 @@ I've added a little function, `head10`, to simplify subsequent code. It is not n
 10      Asia Afghanistan 1997  41.763 22227415  635.3414
 ```
 
-*Chez Scheme*
+*Scheme*
 
 The code here is more verbose than in base R. We need to import a couple of libraries. Also, `read-delim` reads data row-wise, which I'm calling a `rowtable`, and needs to be converted to a column-wise `dataframe`. Moreover, `read-delim` doesn't do any type conversion; all values are read as strings. In this example, 4 of 6 columns need to be converted from `string` to `number`. 
 
@@ -91,7 +91,7 @@ Filter the dataset to retain only rows where `year` is `2007`.
 120    Europe     Belgium 2007  79.441  10392226 33692.6051
 ```
 
-*Chez Scheme*
+*Scheme*
 
 This example introduces the thread-first operator (`->`), which takes the result of the previous procedure and passes it to the first argument of the next procedure. For data analysis, I strongly prefer the threading (or piping) approach over writing the code inside-out or creating lots of intermediate datasets.
 
@@ -138,7 +138,7 @@ In this case, I've used `subset` rather than the more conventional `[` subsettin
 456  Americas            Ecuador 2007  74.994  13755680  6873.262
 ```
 
-*Chez Scheme*
+*Scheme*
 
 `dataframe-filter*` was designed to avoid having to repeat the dataframe name in each sub-expression, i.e., `(= year 2007)` and `(string=? continent "Americas")`, but requires typing `year` and `continent` two times each in this example.
 
@@ -182,7 +182,7 @@ Thanks to `subset`, adding additional conditions is straightforward with zero re
 1620  Americas United States 2007  78.242 301139947  42951.65
 ```
 
-*Chez Scheme*
+*Scheme*
 
 ```
 > (-> gapminder
@@ -211,9 +211,9 @@ Calculate the average life expectancy worldwide in 2007.
 [1] 67.00742
 ```
 
-*Chez Scheme*
+*Scheme*
 
-This example introduces the `$` operator, which was inspired by R, to extract the values of a column (e.g., `lifeExp`). The difference in verbosity between base R and Chez Scheme in this example is related to the filtering step. Extracting a column and calculating the mean involve nearly the same number of characters. `mean` is provided by `chez-stats`, but is simple procedure. `(mean x)` is equivalent to `(/ (apply + x) (length x))`.
+This example introduces the `$` operator, which was inspired by R, to extract the values of a column (e.g., `lifeExp`). The difference in verbosity between base R and Scheme in this example is related to the filtering step. Extracting a column and calculating the mean involve nearly the same number of characters. `mean` is provided by `chez-stats`, but is simple procedure. `(mean x)` is equivalent to `(/ (apply + x) (length x))`.
 
 ```
 > (-> gapminder
@@ -245,7 +245,7 @@ Calculate the average life expectancy for every continent in 2007.
 5   Oceania 80.71950
 ```
 
-*Chez Scheme*
+*Scheme*
 
 One difference to note here is that `dataframe-aggregate` doesn't automatically sort by the grouping variable. We would have to explicitly add that sorting step.
 
@@ -286,7 +286,7 @@ Calculate the total population per continent in 2007 and sort the results in des
 5   Oceania   24549947
 ```
 
-*Chez Scheme*
+*Scheme*
 
 ```
 > (-> gapminder
@@ -332,7 +332,7 @@ The help page for `transform` advises that it is only intended for interactive u
 10      Asia Afghanistan 1997  41.763 22227415  635.3414 14121995875
 ```
 
-*Chez Scheme*
+*Scheme*
 
 ```
 > (-> gapminder
@@ -383,7 +383,7 @@ Find the top 10 countries in percentile of `gdpPercap`.
 696     Europe          Iceland 2007  81.757    301931  36180.79  0.9366197
 ```
 
-*Chez Scheme*
+*Scheme*
 
 This example reveals a weak spot in the `dataframe` API. The issue is that `rank%` operates on a `list` whereas `dataframe-modify*` takes only scalars as inputs because the `expr` is mapped over all rows in a `dataframe`. The workaround to avoid the mapping is to specify that no columns (i.e., `()`) from the dataframe are used, then the list created in the subsequent expression (e.g., `(rank% ($ df 'gdpPercap))`) will be used as the column values.
  
@@ -437,6 +437,4 @@ The main outcome of writing this post was that it led me to completely rewrite `
 
 If you are not familiar with Scheme code, you might find it to be unacceptably verbose in the examples above and, especially, when compared to `dplyr` code. Because of Scheme's macro system, `dataframe` could be written in a more terse style. But I made the decision early on to stick to relatively simple macro usage and write `dataframe` in a way that I thought would be familiar to Scheme programmers. And that often involves more verbose code. For example, nearly all of the `dataframe` procedures have `dataframe` in the name, e.g., `dataframe-filter*`*, `dataframe-modify*`, etc. This is following the example for hashtables, e.g., `hashtable-ref`, `hashtable-values`, etc. I also hope that experienced Scheme programmers can see that the `dataframe` macros mostly exist to reduce the number of times that `lambda` is written but the shape of the code should still feel familiar. While Scheme code might be more verbose in the small, I find it extremely expressive in the large because the core ideas compose so well.  
 
-***
 
-<a name="1"></a> [1] Chez Scheme is the only Scheme implementation that I use so I tend to use 'Scheme' and 'Chez Scheme' interchangeably. However, after a pull request from John Cowan to remove the Chez-isms, `dataframe` should now be more portable and work with other R6RS Scheme implementations.

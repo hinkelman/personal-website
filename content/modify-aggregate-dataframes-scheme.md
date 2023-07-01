@@ -1,13 +1,13 @@
 +++
-title = "Modify and aggregate dataframes in Chez Scheme"
+title = "Modify and aggregate dataframes in Scheme"
 date = 2020-09-05
-updated = 2023-06-24
+updated = 2023-07-01
 [taxonomies]
-categories = ["Chez Scheme", "dataframe"]
+categories = ["Scheme", "Chez Scheme", "dataframe"]
 tags = ["dataframe", "data-structures", "association-list", "modify", "modify-at", "dplyr", "mutate", "mutate_at", "aggregate", "macros"]
 +++
 
-This post is part of a [series](/categories/dataframe/) on the [dataframe library](https://github.com/hinkelman/dataframe/) for Chez Scheme. In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for modifying and aggregating dataframes.
+This post is part of a [series](/categories/dataframe/) on the [dataframe library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for modifying and aggregating dataframes.
 
 <!-- more -->
 
@@ -166,6 +166,6 @@ In base R, dataframes are aggregated by first splitting into groups, applying th
 
 ***
 
-<a name="1"></a> [1] I opted not to use the term mutate in Chez's `datafame` library because it felt too directly contradictory with the fact that dataframes are immutable. Arguably, this was a silly choice because modify is a synonym of mutate.
+<a name="1"></a> [1] I opted not to use the term mutate in the `datafame` library because it felt too directly contradictory with the fact that dataframes are immutable. Arguably, this was a silly choice because modify is a synonym of mutate.
 
 <a name="2"></a> [2] These functions have been superseded by the use of `across` within `mutate`.

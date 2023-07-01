@@ -1,19 +1,19 @@
 +++
-title = "Filter, partition, and sort dataframes in Chez Scheme"
+title = "Filter, partition, and sort dataframes in Scheme"
 date = 2020-04-09
-updated = 2023-06-24
+updated = 2023-07-01
 [taxonomies]
-categories = ["dataframe", "Chez Scheme"]
+categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "dplyr", "arrange", "macros"]
 +++
 
-This post is the fourth in a [series](/categories/dataframe/) on the [dataframe library](https://github.com/hinkelman/dataframe/) for Chez Scheme. In this post, I will contrast the `dataframe` library with functions from the [`dplyr` R package](https://dplyr.tidyverse.org) for filtering, partitioning, and sorting dataframes. And discuss implementation decisions in the `dataframe` library.
+This post is the fourth in a [series](/categories/dataframe/) on the [dataframe library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from the [`dplyr` R package](https://dplyr.tidyverse.org) for filtering, partitioning, and sorting dataframes. And discuss implementation decisions in the `dataframe` library.
 
 <!-- more -->
 
 ### Set up
 
-First, let's create a dataframe in both languages. The `rep` procedure was introduced in the [previous post](/posts/split-bind-append-dataframes-chez-scheme/), but it is not part of the `dataframe` library.
+First, let's create a dataframe in both languages. The `rep` procedure was introduced in the [previous post](/split-bind-append-dataframes-scheme/), but it is not part of the `dataframe` library.
 
 ```
 df <- data.frame(trt = rep(c("a", "b"), each = 6),
@@ -92,7 +92,7 @@ Admittedly, that is not a very compelling simplification. My primary concern wit
 
 The `procedure` is mapped over the dataframe columns identified by `names` and returns a list of boolean values. The boolean values are used to filter each column. Because `filter` only accepts one list, I first zip the `bools` to the `vals` with `cons`, filter on the `bools` with `car`, and then unzip with `cdr` to get the filtered `vals`. 
 
-Throughout my posts on writing Chez Scheme libraries, you will find frequent disclaimers about how my libraries are not written with performance in mind. I simply don't understand Chez Scheme well enough to have good intuition about performance pitfalls. For example, you may have noticed that filtering a dataframe involves zipping the *same* list of boolean values to every column before filtering each column. If dataframes were row based, then the `bools` could be added to the begining of every row with `cons` and the whole dataframe filtered in one pass. That seems obviously better. However, a row-based structure makes extracting columns trickier.
+Throughout my posts on writing Scheme libraries, you will find frequent disclaimers about how my libraries are not written with performance in mind. I simply don't understand Scheme well enough to have good intuition about performance pitfalls. For example, you may have noticed that filtering a dataframe involves zipping the *same* list of boolean values to every column before filtering each column. If dataframes were row based, then the `bools` could be added to the begining of every row with `cons` and the whole dataframe filtered in one pass. That seems obviously better. However, a row-based structure makes extracting columns trickier.
 
 Instead of filtering on every column separately, I could transpose the dataframe to the row-based form, add the `bools`, filter on the whole dataframe at once, remove the `bools`, and transpose back to the column-based form. My guess is that transposing a dataframe to row based and back might generally be faster than zipping and unzipping every column with `bools`, particularly if a dataframe has lots of columns, but I find it easier to think about operating on columns and I was striving for internal consistency across the dataframe procedures. 
 
@@ -120,7 +120,7 @@ Because R doesn't allow multiple return values, you would partition a dataframe 
 6   b   y   4  11
 ```
 
-As mentioned in the [previous post](/posts/split-bind-append-dataframes-chez-scheme/), `dataframe-partition*` allows for partitioning a dataframe based on the `expr`. 
+As mentioned in the [previous post](/split-bind-append-dataframes-scheme/), `dataframe-partition*` allows for partitioning a dataframe based on the `expr`. 
 
 ```
 > (define-values (keep drop)

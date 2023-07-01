@@ -1,13 +1,13 @@
 +++
 title = "Visualizing Scheme library procedures with an interactive network graph in R"
 date = 2021-06-05
-updated = 2023-06-30
+updated = 2023-07-01
 [taxonomies]
-categories = ["Chez Scheme", "dataframe", "R", "Shiny"]
+categories = ["Scheme", "Chez Scheme", "dataframe", "R", "Shiny"]
 tags = ["dataframe", "visNetwork", "pkgnet"]
 +++
 
-As a learning exercise, I wrote a [`dataframe`](https://github.com/hinkelman/dataframe/) library for Scheme. Because I was learning Scheme while I wrote `dataframe`, I did not prioritize performance. However, as I've tried to use the `dataframe` library ([exploratory data analysis](/eda-chez-scheme), [spam simulation](/spam-simulation-chez-scheme/), [gapminder](/gapminder-base-r-scheme/)), I've encountered performance pitfalls that make `dataframe` largely unusable for datasets with more than a few thousand rows. I have a rough idea of where the bottlenecks are, but I thought it would be a useful to take a step back and visualize the `dataframe` procedures as a network graph. 
+As a learning exercise, I wrote a [`dataframe`](https://github.com/hinkelman/dataframe/) library for Scheme (R6RS). Because I was learning Scheme while I wrote `dataframe`, I did not prioritize performance. However, as I've tried to use the `dataframe` library ([exploratory data analysis](/eda-scheme), [spam simulation](/spam-simulation-scheme/), [gapminder](/gapminder-base-r-scheme/)), I've encountered performance pitfalls that make `dataframe` largely unusable for datasets with more than a few thousand rows. I have a rough idea of where the bottlenecks are, but I thought it would be a useful to take a step back and visualize the `dataframe` procedures as a network graph. 
 
 <!-- more -->
 
