@@ -1,7 +1,7 @@
 +++
 title = "A dataframe record type for Scheme"
 date = 2020-03-27
-updated = 2023-07-01
+updated = 2023-07-06
 [taxonomies]
 categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list"]
@@ -28,8 +28,8 @@ I won't profess to have a good understanding of record types. This is what I cam
                     (protocol
                      (lambda (new)
                        (lambda (alist)
-                         (let ([proc-string "(make-dataframe alist)"])
-                           (check-alist alist proc-string))
+                         (let ([who "(make-dataframe alist)"])
+                           (check-alist alist who))
                          (new alist
                               (map car alist)
                               (cons (length (cdar alist)) (length alist)))))))
@@ -75,18 +75,18 @@ In R, I frequently use `head` to preview the first few rows of a dataframe and, 
 
 ```
 (define (dataframe-head df n)
-  (let ([proc-string  "(dataframe-head df n)"])
-    (check-dataframe df proc-string)
-    (check-integer-positive n "n" proc-string)
-    (check-index n (car (dataframe-dim df)) proc-string)
+  (let ([who  "(dataframe-head df n)"])
+    (check-dataframe df who)
+    (check-integer-positive n "n" who)
+    (check-index n (car (dataframe-dim df)) who)
     (make-dataframe (alist-head-tail (dataframe-alist df) n list-head))))
 
 ;; dataframe-tail is based on list-tail, which does not work the same as tail in R
 (define (dataframe-tail df n)
-  (let ([proc-string  "(dataframe-tail df n)"])
-    (check-dataframe df proc-string)
-    (check-integer-gte-zero n "n" proc-string)
-    (check-index (sub1 n) (car (dataframe-dim df)) proc-string)
+  (let ([who  "(dataframe-tail df n)"])
+    (check-dataframe df who)
+    (check-integer-gte-zero n "n" who)
+    (check-index (sub1 n) (car (dataframe-dim df)) who)
     (make-dataframe (alist-head-tail (dataframe-alist df) n list-tail))))
 
 (define (alist-head-tail alist n proc)
@@ -105,22 +105,32 @@ Dataframes are a column-oriented data structure. However, the more natural patte
 > (dataframe->rowtable df)
 ((a b c) (100 4 700) (300 6 900))
 
-> (dataframe-display (rowtable->dataframe '((a b c) (1 4 7) (2 5 8) (3 6 9)) #t))
+> (dataframe-display 
+    (rowtable->dataframe '((a b c) (1 4 7) (2 5 8) (3 6 9))))
+
  dim: 3 rows x 3 cols
      a     b     c 
     1.    4.    7. 
     2.    5.    8. 
     3.    6.    9. 
 
-> (dataframe-display (rowtable->dataframe '((1 4 7) (2 5 8) (3 6 9)) #f))
+> (dataframe-display 
+    (rowtable->dataframe '(("a" "b" "c") (1 4 7) (2 5 8) (3 6 9))))
+
+ dim: 3 rows x 3 cols
+     a     b     c 
+    1.    4.    7. 
+    2.    5.    8. 
+    3.    6.    9. 
+
+> (dataframe-display 
+    (rowtable->dataframe '((1 4 7) (2 5 8) (3 6 9)) #f))
+
  dim: 3 rows x 3 cols
     V0    V1    V2 
     1.    4.    7. 
     2.    5.    8. 
     3.    6.    9. 
-
-> (rowtable->dataframe '(("a" "b" "c") (1 4 7) (2 5 8) (3 6 9)) #t)
-Exception in (make-dataframe alist): names are not symbols
 ```
 
 ### Read and write
@@ -173,6 +183,7 @@ If you are working exclusively with dataframes, you can read and write them dire
                                (juv 10 20 30 40 50))))
 
 > (dataframe-display (dataframe-ref df '(0 2 4)))
+
  dim: 3 rows x 4 cols
    grp   trt  adult   juv 
      a     a     1.   10. 
@@ -180,6 +191,7 @@ If you are working exclusively with dataframes, you can read and write them dire
      b     b     5.   50. 
 
 > (dataframe-display (dataframe-ref df '(0 2 4) 'adult 'juv))
+
  dim: 3 rows x 2 cols
   adult   juv 
      1.   10. 

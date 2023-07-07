@@ -1,7 +1,7 @@
 +++
 title = "Exploratory data analysis in Scheme"
 date = 2020-09-12
-updated = 2023-07-01
+updated = 2023-07-06
 [taxonomies]
 categories = ["Scheme", "Chez Scheme", "dataframe", "chez-stats", "gnuplot-pipe"]
 tags = ["EDA", "macros", "dataframe"]
@@ -34,16 +34,16 @@ For this post, we will use the Texas housing data included as part of the [`ggpl
 
 The `dataframe` library includes pipeline operators taken from on an early implementation of [SRFI 197](https://srfi.schemers.org/srfi-197/srfi-197.html) [[2]](#2). The `->` places the output of the previous expression as the first argument of the next expression. 
 
-The `#t` in `rowtable->dataframe` indicates that the the rowtable has a header row. `read-delim` reads all data as strings. `dataframe-modify-at` allows us to map the same procedure, `string->number`, over several columns (e.g., `year`, `sales`, etc.).
+`read-delim` reads all data as strings. By default, `rowtable->dataframe` automatically attempts to convert strings to numbers by checking if all values in the first 100 values (default) successfully convert to numbers. For this dataset, that was true for all numeric columns except for `listings` and `inventory` so we use `dataframe-modify-at` to map the procedure, `string->number`, over those two columns. 
 
 ```
 > (define df1
     (-> (read-delim "txhousing.csv")
-        (rowtable->dataframe #t)
-        (dataframe-modify-at
-         string->number 'year 'month 'sales 'volume 'median 'listings 'inventory 'date)))
+        (rowtable->dataframe)
+        (dataframe-modify-at string->number 'listings 'inventory)))
 
 > (dataframe-display df1)
+
  dim: 8602 rows x 9 cols
      city   year  month  sales    volume  median  listings  inventory       date 
   Abilene  2000.     1.    72.  5.380E+6  71400.      701.     6.3000  2000.0000 
@@ -89,6 +89,7 @@ We need a dataframe with no missing values because we can't pass missing values 
 (0 0 0 0 0 0 0)
 
 > (dataframe-display df-complete)
+
  dim: 7985 rows x 7 cols
      city   year  month  sales    volume  median       date 
   Abilene  2000.     1.    72.  5.380E+6  71400.  2000.0000 
@@ -115,6 +116,7 @@ Now that we have cleaned up the dataset we will aggregate the data for plotting 
    (avg-median (median) (exact->inexact (mean median)))))
 
 > (dataframe-display df-agg-year)
+
  dim: 16 rows x 4 cols
    year  avg-sales  avg-volume  avg-median 
   2000.   491.1244    7.379E+7    96442.00 

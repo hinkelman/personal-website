@@ -1,7 +1,7 @@
 +++
 title = "Analyzing gapminder dataset with base R and Scheme"
 date = 2021-04-30
-updated = 2023-07-01
+updated = 2023-07-06
 [taxonomies]
 categories = ["Scheme", "Chez Scheme", "dataframe", "chez-stats"]
 tags = ["dataframe", "dplyr", "pandas", "EDA", "filter", "modify", "aggregate"]
@@ -39,7 +39,7 @@ I've added a little function, `head10`, to simplify subsequent code. It is not n
 
 *Scheme*
 
-The code here is more verbose than in base R. We need to import a couple of libraries. Also, `read-delim` reads data row-wise, which I'm calling a `rowtable`, and needs to be converted to a column-wise `dataframe`. Moreover, `read-delim` doesn't do any type conversion; all values are read as strings. In this example, 4 of 6 columns need to be converted from `string` to `number`. 
+The code here is more verbose than in base R. We need to import a couple of libraries. Also, `read-delim` reads data row-wise, which I'm calling a `rowtable`, and needs to be converted to a column-wise `dataframe`. `rowtable->dataframe` does minimal type conversion; only converting strings to numbers.
 
 ```
 (import (chez-stats)
@@ -47,9 +47,7 @@ The code here is more verbose than in base R. We need to import a couple of libr
 
 (define gapminder
   (-> (read-delim "gapminder.csv")
-      (rowtable->dataframe #t)
-      (dataframe-modify-at
-       string->number 'year 'lifeExp 'pop 'gdpPercap)))
+      (rowtable->dataframe)))
 
 > (dataframe-display gapminder)
 
