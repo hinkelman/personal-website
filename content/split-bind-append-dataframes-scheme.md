@@ -1,7 +1,7 @@
 +++
 title =  "Split, bind, and append dataframes in Scheme"
 date = 2020-04-04
-updated = 2023-07-01
+updated = 2023-07-06
 [taxonomies]
 categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "replicate", "rep", "cbind", "dplyr", "bind_rows"]
@@ -68,6 +68,7 @@ I'm using `append` to refer to a `cbind` operation in R.
 
 ```
 > head(cbind(df1, df2))
+
   trt grp rsp asc desc
 1   a   x   1   0   11
 2   a   x   1   1   10
@@ -81,6 +82,7 @@ In Scheme, we append dataframes with equal numbers of rows via `dataframe-append
 
 ```
 > (dataframe-display (dataframe-append df1 df2) 6)
+
  dim: 12 rows x 5 cols
    trt   grp   rsp   asc  desc 
      a     x    1.    0.   11. 
@@ -95,6 +97,7 @@ I chose `dataframe-append` as the name because alists, which are at the heart of
 
 ```
 > (append '((a 1 2 3)) '((b 4 5 6)))
+
 ((a 1 2 3) (b 4 5 6))
 ```
 
@@ -104,6 +107,7 @@ In R, `split` returns a named list of dataframes where the names are based on th
 
 ```
 > split(df1, list(df1$trt, df1$grp))
+
 $a.x
   trt grp rsp
 1   a   x   1
@@ -162,6 +166,7 @@ For binding by rows, we will use functions from `dplyr`. In the first example, a
 
 ```
 > dplyr::bind_rows(split(df1, list(df1$trt, df1$grp)))
+
    trt grp rsp
 1    a   x   1
 2    a   x   1
@@ -180,7 +185,10 @@ For binding by rows, we will use functions from `dplyr`. In the first example, a
 `dataframe-bind` works similarly to `dplyr::bind_rows`, but we need to use `apply` to bust open the list of dataframes created by `dataframe-split`. 
 
 ```
-> (dataframe-display (apply dataframe-bind (dataframe-split df1 'trt 'grp)) 12)
+> (dataframe-display 
+    (apply dataframe-bind (dataframe-split df1 'trt 'grp)) 
+    12)
+
  dim: 12 rows x 3 cols
    trt   grp   rsp 
      a     x    1. 
@@ -211,6 +219,7 @@ df_b <- dplyr::filter(df1, trt == "b")
 
 ```
 dplyr::bind_rows(df_a, df_b[,c("trt", "grp")])
+
    trt grp rsp
 1    a   x   1
 2    a   x   1
@@ -229,7 +238,10 @@ dplyr::bind_rows(df_a, df_b[,c("trt", "grp")])
 Because Scheme doesn't have explicit missing values, I created a separate procedure, `dataframe-bind-all`, for binding dataframes where missing columns are filled by the specified missing value.
 
 ```
-> (dataframe-display (dataframe-bind-all -999 df-a (dataframe-drop df-b 'rsp)) 12)
+> (dataframe-display 
+    (dataframe-bind-all -999 df-a (dataframe-drop df-b 'rsp)) 
+    12)
+
  dim: 12 rows x 3 cols
    trt   grp    rsp 
      a     x     1. 
@@ -249,7 +261,10 @@ Because Scheme doesn't have explicit missing values, I created a separate proced
 In contrast, `dataframe-bind` will drop all columns not shared across the dataframes being bound.
 
 ```
-> (dataframe-display (dataframe-bind df-a (dataframe-drop df-b 'rsp)) 12)
+> (dataframe-display 
+    (dataframe-bind df-a (dataframe-drop df-b 'rsp)) 
+    12)
+
  dim: 12 rows x 2 cols
    trt   grp 
      a     x 
