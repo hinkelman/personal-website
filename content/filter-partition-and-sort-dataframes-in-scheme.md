@@ -1,7 +1,7 @@
 +++
 title = "Filter, partition, and sort dataframes in Scheme"
 date = 2020-04-09
-updated = 2023-07-01
+updated = 2023-07-06
 [taxonomies]
 categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "dplyr", "arrange", "macros"]
@@ -146,8 +146,6 @@ As mentioned in the [previous post](/split-bind-append-dataframes-scheme/), `dat
      b     y    4.   10. 
      b     y    4.   11. 
 ```
-
-The dirty little secret of `dataframe-partition*` is that it is simply two calls to `dataframe-filter*` under the covers and, thus, requires two passes over the whole dataframe (more inefficiency!).
 
 ### Sort
 
