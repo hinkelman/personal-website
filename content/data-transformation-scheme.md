@@ -183,7 +183,7 @@ The `dataframe` library does not include a procedure comparable to `dplyr::count
     (dataframe-display))
 ```
 
-### 4.3 The Pipe
+### 4.4 The Pipe
 
 ```
 (-> flights
