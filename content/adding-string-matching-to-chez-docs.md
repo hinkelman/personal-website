@@ -40,7 +40,7 @@ I first implemented the recursive algorithm [[3]](#3) thinking that it would be 
     (vector-ref x n)))
 ```
 
-This is the first time that I've used `do` loops in Scheme. In the example below, the looping index `i` is initialized to zero and incremented by one on each pass through the loop. The loop is exited when `(= i 10)`. The (sort of) equivalent syntax in R is `for (i in 0:9) print(i)`.
+This is the first time that I've used `do` loops in Scheme. In the example below, the looping index `i` is initialized to zero and incremented by one on each pass through the loop. The loop is exited when `(= i 10)`. The equivalent code in R is `for (i in 0:9) cat(paste0(i, " "))`.
 
 ```
 > (do ((i 0 (add1 i)))
