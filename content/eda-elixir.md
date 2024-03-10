@@ -12,7 +12,7 @@ I have been tinkering with lots of different programming languages (see [here](/
 
 I'm using Elixir on Ubuntu. There are lots of different ways to install Elixir on Linux. I opted to first install Erlang with `sudo apt install erlang`. Then I installed the [Elixir precompiled package](https://elixir-lang.org/install.html#precompiled-package) for the version of Erlang that I just installed (get Erlang/OTP version by running `erl -s halt`). I moved the unzipped folder to my home directory and added the following line to `.zshrc`: `export PATH="$PATH:/home/username/elixir-otp-25/bin"`.
 
-I installed Livebook by running `mix escript.install hex livebook` in the terminal and added the following line to `.zshrc`: `export PATH="$PATH:/home/datavore/.mix/escripts"`. After running `source .zshrc`, I was able to launch Livebook with `livebook server`. 
+I installed Livebook by running `mix escript.install hex livebook` in the terminal and added the following line to `.zshrc`: `export PATH="$PATH:/home/username/.mix/escripts"`. After running `source .zshrc`, I was able to launch Livebook with `livebook server`. 
 
 As with learning Scheme, I like to first try to recreate examples that I've written in other programming languages. Below, I've written Elixir code that corresponds to the Scheme examples in [this blog post](https://www.travishinkelman.com/eda-scheme/) based on the Texas housing dataset that is included as part of the `ggplot2` package for R. I wrote that post to try out my `dataframe` library for Scheme, but below I will focus on the comparison with R. I will highlight snippets of code in this post, but the full notebook is [here](https://github.com/hinkelman/livebook/blob/main/txhousing.livemd).
 
