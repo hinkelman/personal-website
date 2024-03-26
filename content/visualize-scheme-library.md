@@ -1,7 +1,7 @@
 +++
 title = "Visualizing Scheme library procedures with an interactive network graph in R"
 date = 2021-06-05
-updated = 2023-07-01
+updated = 2024-03-26
 [taxonomies]
 categories = ["Scheme", "Chez Scheme", "dataframe", "R", "Shiny"]
 tags = ["dataframe", "visNetwork", "pkgnet"]
@@ -143,6 +143,5 @@ output$networkGraph <- renderVisNetwork({
 Here are a few observations from the network graph:
 
 * `get-edges` doesn't handle macros, e.g., `dataframe-modify*`, so those are represented as disconnected points.
-* I almost always use `named let` for recursion so there are very few nodes with arrows looping back to themselves (see `alist-modify-loop` and `flatten` as exceptions).
-* Unsurprisingly, a few procedures are called by a lot of other procedures, e.g., `make-dataframe`, `dataframe-alist`, `check-dataframe`.
-* A few procedures (`make-dataframe`, `dataframe-alist`, `dataframe-dim`) are created automatically as part of defining the dataframe record type. I added them to the list of procedure names by appending the list of exported procedure names to the list of extracted procedure names (and removing duplicates from the appended list). I think the only connection that is lost in this approach is that `check-alist` is called from `make-dataframe` but that is not reflected in the graph.
+* Unsurprisingly, a few procedures are called by a lot of other procedures, e.g., `make-dataframe`, `dataframe-slist`, `check-dataframe`.
+* A few procedures (`make-series`, `make-dataframe`, etc.) are created automatically as part of defining the record types. I added them to the list of procedure names by appending the list of exported procedure names to the list of extracted procedure names (and removing duplicates from the appended list).
