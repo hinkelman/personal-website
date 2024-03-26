@@ -1,7 +1,7 @@
 +++
 title = "Modify and aggregate dataframes in Scheme"
 date = 2020-09-05
-updated = 2023-07-01
+updated = 2024-03-11
 [taxonomies]
 categories = ["Scheme", "Chez Scheme", "dataframe"]
 tags = ["dataframe", "data-structures", "association-list", "modify", "modify-at", "dplyr", "mutate", "mutate_at", "aggregate", "macros"]
@@ -22,10 +22,10 @@ df <- data.frame(grp = c("a", "a", "b", "b", "b"),
                  juv = c(10, 20, 30, 40, 50))
                  
 (define df
-  (make-dataframe '((grp "a" "a" "b" "b" "b")
-                    (trt "x" "y" "x" "y" "y")
-                    (adult 1 2 3 4 5)
-                    (juv 10 20 30 40 50))))
+  (make-df* (grp "a" "a" "b" "b" "b")
+            (trt "x" "y" "x" "y" "y")
+            (adult 1 2 3 4 5)
+            (juv 10 20 30 40 50)))
 ```
 
 ### Mutate/Modify [[1]](#1)
@@ -60,13 +60,15 @@ In R, `dplyr::mutate` changes all the values in a column according to the expres
      (lst () '(2 4 6 8 10))))
 
 > (dataframe-display df2)
+
  dim: 5 rows x 7 cols
-   grp   trt  adult   juv  total  scalar   lst 
-     A     x     1.   10.    11.     16.    2. 
-     A     y     2.   20.    22.     16.    4. 
-     B     x     3.   30.    33.     16.    6. 
-     B     y     4.   40.    44.     16.    8. 
-     B     y     5.   50.    55.     16.   10. 
+     grp     trt   adult     juv   total  scalar     lst 
+   <str>   <str>   <num>   <num>   <num>   <num>   <num> 
+       A       x      1.     10.     11.     16.      2. 
+       A       y      2.     20.     22.     16.      4. 
+       B       x      3.     30.     33.     16.      6. 
+       B       y      4.     40.     44.     16.      8. 
+       B       y      5.     50.     55.     16.     10. 
 ```
 
 `dplyr` also provides `mutate_at` and `mutate_all` [[2]](#2).
@@ -86,13 +88,15 @@ In R, `dplyr::mutate` changes all the values in a column according to the expres
 ```
 > (dataframe-display
    (dataframe-modify-at df2 sqrt 'total 'scalar 'lst))
+
  dim: 5 rows x 7 cols
-   grp   trt  adult   juv   total  scalar     lst 
-     A     x     1.   10.  3.3166      4.  1.4142 
-     A     y     2.   20.  4.6904      4.  2.0000 
-     B     x     3.   30.  5.7446      4.  2.4495 
-     B     y     4.   40.  6.6332      4.  2.8284 
-     B     y     5.   50.  7.4162      4.  3.1623 
+     grp     trt   adult     juv   total  scalar     lst 
+   <str>   <str>   <num>   <num>   <num>   <num>   <num> 
+       A       x      1.     10.  3.3166      4.  1.4142 
+       A       y      2.     20.  4.6904      4.  2.0000 
+       B       x      3.     30.  5.7446      4.  2.4495 
+       B       y      4.     40.  6.6332      4.  2.8284 
+       B       y      5.     50.  7.4162      4.  3.1623 
 ```
 
 #### Implementation
@@ -102,13 +106,13 @@ In R, `dplyr::mutate` changes all the values in a column according to the expres
 ```
 (define-syntax dataframe-modify*
   (syntax-rules ()
-                [(_ df (new-name names expr) ...)
-                 (df-modify
-                  df
-                  (list (quote new-name) ...)
-                  (list (quote names) ...)
-                  (list (lambda names expr) ...)
-                  "(dataframe-modify* df (new-name names expr) ...)")]))
+    [(_ df (new-name names expr) ...)
+     (df-modify-loop
+      df
+      (list (quote new-name) ...)
+      (list (quote names) ...)
+      (list (lambda names expr) ...)
+      "(dataframe-modify* df (new-name names expr) ...)")]))
 ```
 
 The following are equivalent
@@ -157,11 +161,12 @@ In base R, dataframes are aggregated by first splitting into groups, applying th
     (juv-sum (juv) (apply + juv))))
     
  dim: 4 rows x 4 cols
-   grp   trt  adult-sum  juv-sum 
-     a     x         1.      10. 
-     a     y         2.      20. 
-     b     x         3.      30. 
-     b     y         9.      90. 
+     grp     trt  adult-sum  juv-sum 
+   <str>   <str>      <num>    <num> 
+       a       x         1.      10. 
+       a       y         2.      20. 
+       b       x         3.      30. 
+       b       y         9.      90. 
 ```
 
 ***

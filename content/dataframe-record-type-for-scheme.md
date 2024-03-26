@@ -1,7 +1,7 @@
 +++
 title = "A dataframe record type for Scheme"
 date = 2020-03-27
-updated = 2023-07-06
+updated = 2024-03-12
 [taxonomies]
 categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list"]
@@ -11,46 +11,73 @@ As an exercise in my Scheme (R6RS) learning journey, I have implemented a [dataf
 
 <!-- more -->
 
-A key design decision was to opt for an immutable data structure. Thus, dataframes are based on association lists (alists) rather than hashtables. I find it easier to reason about immutable data and thought the performance trade-off was worth it for this excercise. Here are the properties of a dataframe:
+### Series record type
 
-* an alist where each sublist is a column;
-* the first element of each column is the column name;
-* the column name must be a symbol;
-* all column names must be unique;
-* all columns must have the same length.
+A dataframe is based on the series record type. A series record is a list where every element is the same type (one of bool, chr, str, sym, num, or other). The series record type includes the series `name`, source list (`src`), converted list (`lst`), list `type`, and list `length`. Only name and src are required to create a series; `lst`, `type`, and `length` are derived from `src`. Failed type conversions produce `'na` values.
+
+`define-record-type` creates a predicate, `series?`, constructor procedure, `make-series`, and accessor procedures for each field: `series-name`, `series-lst`, `series-type`, and `series-length`. [`series-src` is also created, but not exported to the dataframe namespace.] `make-series*` is macro to provide alternative syntax for making a series.
+
+```
+(define-record-type series
+  (fields name src lst type length)
+  (protocol
+    (lambda (new)
+      (lambda (name src)
+        (check-series name src "(make-series name src)")
+        (let* ([type (guess-type src 1000)]
+               [lst (convert-type src type)])
+          (new name src lst type (length lst)))))))
+
+> (define s1 (make-series 'a '(1 2 3)))
+> (define s2 (make-series* (a 1 2 3)))
+
+> (series-equal? s1 s2)
+#t
+
+> (series? s1)
+#t
+
+> (series-name s1)
+a
+
+> (series-lst s1)
+(1 2 3)
+
+> (series-length s1)
+3
+```
 
 ### Dataframe record type
 
-I won't profess to have a good understanding of record types. This is what I came up with for dataframes.
+The dataframe record type is based on a list of series (`slist`). The `names` and `dim` are derived from the `slist`. 
 
 ```
-(define-record-type dataframe (fields alist names dim)
-                    (protocol
-                     (lambda (new)
-                       (lambda (alist)
-                         (let ([who "(make-dataframe alist)"])
-                           (check-alist alist who))
-                         (new alist
-                              (map car alist)
-                              (cons (length (cdar alist)) (length alist)))))))
+(define-record-type dataframe
+  (fields slist names dim)
+  (protocol
+    (lambda (new)
+      (lambda (slist)
+        (check-slist slist "(make-dataframe slist)")
+        (let* ([names (map series-name slist)]
+               [rows (series-length (car slist))]
+               [cols (length names)])
+          (new slist names (cons rows cols)))))))
 ```
 
-A key component of the record definition is `check-alist`, which confirms that the alist meets the definition of a dataframe (see bulleted list above). Each dataframe has three fields (i.e., `alist`, `names`, and `dim`), but `alist` is the only required field. The other two are based on the properties of the `alist`. `define-record-type` creates a predicate, `dataframe?`, constructor procedure, `make-dataframe`, and accessor procedures for each field: `dataframe-alist`, `dataframe-names`, and `dataframe-dim`. 
+A key component of the record definition is `check-slist`, which confirms that all elements of `slist` are series with the same length and unique names. `define-record-type` creates a predicate, `dataframe?`, constructor procedure, `make-dataframe`, and accessor procedures for each field: `dataframe-slist`, `dataframe-names`, and `dataframe-dim`. `make-df*` is macro to provide alternative syntax for making a dataframe.
 
 ```
-> (define df (make-dataframe '((a 1 2 3) (b 4 5 6))))
+> (define df (make-df* (a 1 2 3) (b 4 5 6)))
 
 > df
-#[#{dataframe cziqfonusl4ihl0gdwa8clop7-3} ((a 1 2 3) (b 4 5 6)) (a b) (3 . 2)]
+#[#{dataframe f4aik6efdmw9tjrhx8ell3b2e-58} (#[#{series f4aik6efdmw9tjrhx8ell3b2e-59} a (1 2 3) (1 2 3) num 3] #[#{series f4aik6efdmw9tjrhx8ell3b2e-59} b (4 5 6) (4 5 6) num 3]) (a b) (3 . 2)]
 
 > (dataframe? df)
 #t
 
-> (dataframe? '((a 1 2 3) (b 4 5 6)))
-#f
-
-> (dataframe-alist df)  
-((a 1 2 3) (b 4 5 6))
+> (dataframe-slist df)  
+(#[#{series f4aik6efdmw9tjrhx8ell3b2e-59} a (1 2 3) (1 2 3) num 3]
+  #[#{series f4aik6efdmw9tjrhx8ell3b2e-59} b (4 5 6) (4 5 6) num 3])
 
 > (dataframe-names df)
 (a b)
@@ -58,15 +85,17 @@ A key component of the record definition is `check-alist`, which confirms that t
 > (dataframe-dim df)
 (3 . 2)                  ; (rows . columns)
 
-> (define df (make-dataframe '(("a" 1 2 3) ("b" 4 5 6))))
-Exception in (make-dataframe alist): names are not symbols
+> (make-df* (a 1 2 3) (a 4 5 6))
+Exception in (make-dataframe slist): names not unique
 
 > (dataframe-display df)
+
  dim: 3 rows x 2 cols
-     a     b 
-    1.    4. 
-    2.    5. 
-    3.    6. 
+       a       b 
+   <num>   <num> 
+      1.      4. 
+      2.      5. 
+      3.      6. 
 ```
 
 ### Head and tail
@@ -74,87 +103,63 @@ Exception in (make-dataframe alist): names are not symbols
 In R, I frequently use `head` to preview the first few rows of a dataframe and, less frequently, use `tail` to view the last few rows. Scheme provides `list-head` and `list-tail` with similar functionality. However, `tail` in R returns the last `n` rows of the dataframe whereas `list-tail` in Scheme returns the rest of the list starting at a given index. My first instinct was to write `dataframe-tail` to use the R behavior, but eventually decided that `dataframe-tail` should follow the behavior established by `list-tail`. I was trying to think in terms of the [principle of least surprise](https://en.wikipedia.org/wiki/Principle_of_least_astonishment), but the degree of surprise depends on the potential users. Am I targeting R or Scheme programmers? The most realistic scenario is that future me is the only potential user and I want that guy to think in terms of typical Scheme patterns.
 
 ```
-(define (dataframe-head df n)
-  (let ([who  "(dataframe-head df n)"])
-    (check-dataframe df who)
-    (check-integer-positive n "n" who)
-    (check-index n (car (dataframe-dim df)) who)
-    (make-dataframe (alist-head-tail (dataframe-alist df) n list-head))))
+> (define df (make-df* (a 1 2 3 1 2 3) (b 4 5 6 4 5 6) (c 7 8 9 -999 -999 -999)))
 
-;; dataframe-tail is based on list-tail, which does not work the same as tail in R
-(define (dataframe-tail df n)
-  (let ([who  "(dataframe-tail df n)"])
-    (check-dataframe df who)
-    (check-integer-gte-zero n "n" who)
-    (check-index (sub1 n) (car (dataframe-dim df)) who)
-    (make-dataframe (alist-head-tail (dataframe-alist df) n list-tail))))
-
-(define (alist-head-tail alist n proc)
-  (map (lambda (col) (cons (car col) (proc (cdr col) n))) alist))
-```
-
-`dataframe-head` and `dataframe-tail` illustrate a common pattern in the `dataframe` library: extracting the alist, breaking the alist into sublists, working on the sublists, and then rebuilding the alist and dataframe. In the case of `dataframe-head` and `dataframe-tail`, the core logic is so simple that most of the code involves checking inputs. 
-
-### Transpose
-
-Dataframes are a column-oriented data structure. However, the more natural pattern when [reading and writing CSV files](/posts/reading-writing-csv-files-chez-scheme/) is to use a row-oriented list, which I'm calling a `rowtable`. `dataframe->rowtable` and `rowtable->dataframe` allow for switching between row and column orientation.   
-
-```
-> (define df (make-dataframe '((a 100 300) (b 4 6) (c 700 900))))
-
-> (dataframe->rowtable df)
-((a b c) (100 4 700) (300 6 900))
-
-> (dataframe-display 
-    (rowtable->dataframe '((a b c) (1 4 7) (2 5 8) (3 6 9))))
+> (dataframe-display (dataframe-head df 3))
 
  dim: 3 rows x 3 cols
-     a     b     c 
-    1.    4.    7. 
-    2.    5.    8. 
-    3.    6.    9. 
+       a       b       c 
+   <num>   <num>   <num> 
+      1.      4.      7. 
+      2.      5.      8. 
+      3.      6.      9. 
 
-> (dataframe-display 
-    (rowtable->dataframe '(("a" "b" "c") (1 4 7) (2 5 8) (3 6 9))))
+> (dataframe-display df 3)
 
- dim: 3 rows x 3 cols
-     a     b     c 
-    1.    4.    7. 
-    2.    5.    8. 
-    3.    6.    9. 
+ dim: 5 rows x 4 cols
+     grp     trt   adult     juv 
+   <str>   <str>   <num>   <num> 
+       a       a      1.     10. 
+       a       b      2.     20. 
+       b       a      3.     30. 
 
-> (dataframe-display 
-    (rowtable->dataframe '((1 4 7) (2 5 8) (3 6 9)) #f))
+> (dataframe-display (dataframe-tail df 2))
 
- dim: 3 rows x 3 cols
-    V0    V1    V2 
-    1.    4.    7. 
-    2.    5.    8. 
-    3.    6.    9. 
+ dim: 4 rows x 3 cols
+       a       b       c 
+   <num>   <num>   <num> 
+      3.      6.      9. 
+      1.      4.   -999. 
+      2.      5.   -999. 
+      3.      6.   -999. 
 ```
 
 ### Read and write
 
-If you are working exclusively with dataframes, you can read and write them directly (i.e., without transposing to and from rowtables) with `dataframe-read` and `dataframe-write`. These procedures are straightforward because they are simply reading and writing the alists with `read` and `write`. 
+If you are working exclusively with dataframes in Scheme, you can read and write them directly with `dataframe-read` and `dataframe-write`. These procedures are straightforward because they are simply reading and writing the dataframe with `read` and `write`. 
 
 ```
-(define (dataframe-write df path overwrite?)
-  (when (and (file-exists? path) (not overwrite?))
-    (assertion-violation path "file already exists"))
-  (delete-file path)
-  (with-output-to-file path
-    (lambda () (write (dataframe-alist df)))))
+(define dataframe-write
+  (case-lambda
+    [(df path) (dataframe-write df path #t)]
+    [(df path overwrite)
+      (when (and (file-exists? path) (not overwrite))
+        (assertion-violation path "file already exists"))
+      (when (file-exists? path)
+        (delete-file path))
+      (with-output-to-file path
+        (lambda () (write df)))]))
 
 (define (dataframe-read path)
-  (make-dataframe (with-input-from-file path read)))
+  (with-input-from-file path read))
 ```
 
 ### Extract values
 
-`dataframe-values` returns all the values in a column as a simple list. Following R, I've included `$` as an alias for `dataframe-values`. This procedure is particularly useful when modifying and aggregating dataframes (as I will show in a future blog post). `dataframe-values-unique` returns the unique values from a column. 
+`dataframe-values` returns all the values in a column as a list. Following R, I've included `$` as an alias for `dataframe-values`. This procedure is particularly useful when modifying and aggregating dataframes (as I will show in a future blog post).
 
 ```
-> (define df (make-dataframe '((a 100 200 300) (b 4 5 6) (c 700 800 900))))
+> (define df (make-df* (a 100 200 300) (b 4 5 6) (c 700 800 900)))
 
 > (dataframe-values df 'b)
 (4 5 6)
@@ -165,37 +170,43 @@ If you are working exclusively with dataframes, you can read and write them dire
 > (map (lambda (name) ($ df name)) '(c a))
 ((700 800 900) (100 200 300))
 
-> (define df1 (make-dataframe '((x a a b) (y c d e))))
+> (define df1 (make-df* (x 'b 'a 'b) (y 'd 'e 'c)))
 
-> (dataframe-values-unique df1 'x)
-(a b)
+> (remove-duplicates ($ df1 'x))
+(b a)
 
-> (dataframe-values-unique df1 'y)
-(c d e)
+> (remove-duplicates ($ df1 'y))
+(d e c)
 ```
 
 `dataframe-ref` returns a dataframe based on a list of row indices and, optionally, the selected column names. I did not follow the principle of least surprise here because `dataframe-ref` takes a list of indices rather than a single value as in `list-ref`. For dataframes, the scenario of referencing a single row seemed less likely than a range of rows and I wanted to provide the option to simultaneously select the columns returned. 
 
 ```
-> (define df (make-dataframe '((grp "a" "a" "b" "b" "b")
-                               (trt "a" "b" "a" "b" "b")
-                               (adult 1 2 3 4 5)
-                               (juv 10 20 30 40 50))))
+> (define df 
+    (make-df* 
+      (grp "a" "a" "b" "b" "b")
+      (trt "a" "b" "a" "b" "b")
+      (adult 1 2 3 4 5)
+      (juv 10 20 30 40 50)))
 
-> (dataframe-display (dataframe-ref df '(0 2 4)))
+> (dataframe-display df)
 
- dim: 3 rows x 4 cols
-   grp   trt  adult   juv 
-     a     a     1.   10. 
-     b     a     3.   30. 
-     b     b     5.   50. 
+ dim: 5 rows x 4 cols
+     grp     trt   adult     juv 
+   <str>   <str>   <num>   <num> 
+       a       a      1.     10. 
+       a       b      2.     20. 
+       b       a      3.     30. 
+       b       b      4.     40. 
+       b       b      5.     50. 
 
 > (dataframe-display (dataframe-ref df '(0 2 4) 'adult 'juv))
 
  dim: 3 rows x 2 cols
-  adult   juv 
-     1.   10. 
-     3.   30. 
-     5.   50. 
+   adult     juv 
+   <num>   <num> 
+      1.     10. 
+      3.     30. 
+      5.     50. 
 ```
 

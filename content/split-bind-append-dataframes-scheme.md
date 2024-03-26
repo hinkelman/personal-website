@@ -1,7 +1,7 @@
 +++
 title =  "Split, bind, and append dataframes in Scheme"
 date = 2020-04-04
-updated = 2023-07-06
+updated = 2024-03-12
 [taxonomies]
 categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "replicate", "rep", "cbind", "dplyr", "bind_rows"]
@@ -24,43 +24,15 @@ df2 <- data.frame(asc = 0:11, desc = 11:0)
                  
 (define df1
   (make-dataframe
-   (list (cons 'trt (append (make-list 6 "a") (make-list 6 "b")))
-         (cons 'grp (append (make-list 3 "x") (make-list 3 "y")
-                            (make-list 3 "x") (make-list 3 "y")))
-         (cons 'rsp (append (make-list 3 1) (make-list 3 2)
-                            (make-list 3 3) (make-list 3 4))))))
+   (list (make-series 'trt (rep '("a" "b") 6 'each))
+         (make-series 'grp (rep (rep '("x" "y") 3 'each) 2 'times))
+         (make-series 'rsp (rep '(1 2 3 4) 3 'each)))))
 
 (define df2
   (make-dataframe
-   (list (cons 'asc (iota 12))
-         (cons 'desc (reverse (iota 12))))))
+   (list (make-series 'asc (iota 12))
+         (make-series 'desc (reverse (iota 12))))))
 ```
-
-I think the Scheme code for creating `df1` is clear, but I like the conciseness of the R code. I'm taking this post on a little detour to write a `rep` procedure to replicate (pun intended) the functionality of `rep`. 
-
-```
-(define (rep ls n type)
-  (cond [(symbol=? type 'each)
-         (apply append (map (lambda (x) (make-list n x)) ls))]
-        [(symbol=? type 'times)
-         (rep-times ls n)]
-        [else
-         (assertion-violation "(rep ls n type)"
-                              "type must be 'each or 'times")]))
-
-(define (rep-times ls n)
-  (define (loop ls-out n)
-    (if (= n 1) ls-out (loop (append ls ls-out) (sub1 n))))
-  (loop ls n))
-
-(define df1
-  (make-dataframe
-   (list (cons 'trt (rep '("a" "b") 6 'each))
-         (cons 'grp (rep (rep '("x" "y") 3 'each) 2 'times))
-         (cons 'rsp (rep '(1 2 3 4) 3 'each)))))
-```
-
-The `each` case was a simple `map`, but I couldn't think of a way to use higher-order functions for the `times` case. Instead, I wrote a separate recursive procedure, `rep-times`, to handle that case.
 
 ### Append
 
@@ -78,7 +50,7 @@ I'm using `append` to refer to a `cbind` operation in R.
 6   a   y   2   5    6
 ```
 
-In Scheme, we append dataframes with equal numbers of rows via `dataframe-append`.
+In `dataframe`, we append dataframes with equal numbers of rows via `dataframe-append`.
 
 ```
 > (dataframe-display (dataframe-append df1 df2) 6)
@@ -93,12 +65,12 @@ In Scheme, we append dataframes with equal numbers of rows via `dataframe-append
      a     y    2.    5.    6. 
 ```
 
-I chose `dataframe-append` as the name because alists, which are at the heart of dataframes, are straightforwardly combined with `append` in Scheme.
+I chose `dataframe-append` as the name because lists are straightforwardly combined with `append` in Scheme.
 
 ```
-> (append '((a 1 2 3)) '((b 4 5 6)))
+> (append '(1 2 3) '(4 5 6))
 
-((a 1 2 3) (b 4 5 6))
+(1 2 3 4 5 6)
 ```
 
 ### Split
@@ -139,25 +111,29 @@ $b.y
 > (for-each dataframe-display (dataframe-split df1 'trt 'grp))
 
  dim: 3 rows x 3 cols
-   trt   grp   rsp 
-     a     x    1. 
-     a     x    1. 
-     a     x    1. 
+     trt     grp     rsp 
+   <str>   <str>   <num> 
+       a       x      1. 
+       a       x      1. 
+       a       x      1. 
  dim: 3 rows x 3 cols
-   trt   grp   rsp 
-     a     y    2. 
-     a     y    2. 
-     a     y    2. 
+     trt     grp     rsp 
+   <str>   <str>   <num> 
+       a       y      2. 
+       a       y      2. 
+       a       y      2. 
  dim: 3 rows x 3 cols
-   trt   grp   rsp 
-     b     x    3. 
-     b     x    3. 
-     b     x    3. 
+     trt     grp     rsp 
+   <str>   <str>   <num> 
+       b       x      3. 
+       b       x      3. 
+       b       x      3. 
  dim: 3 rows x 3 cols
-   trt   grp   rsp 
-     b     y    4. 
-     b     y    4. 
-     b     y    4. 
+     trt     grp     rsp 
+   <str>   <str>   <num> 
+       b       y      4. 
+       b       y      4. 
+       b       y      4. 
 ```
 
 ### Bind
@@ -182,27 +158,26 @@ For binding by rows, we will use functions from `dplyr`. In the first example, a
 12   b   y   4
 ```
 
-`dataframe-bind` works similarly to `dplyr::bind_rows`, but we need to use `apply` to bust open the list of dataframes created by `dataframe-split`. 
+`dataframe-bind-all` works similarly to `dplyr::bind_rows`.
 
 ```
-> (dataframe-display 
-    (apply dataframe-bind (dataframe-split df1 'trt 'grp)) 
-    12)
+> (dataframe-display (dataframe-bind-all (dataframe-split df1 'trt 'grp)) 12)
 
  dim: 12 rows x 3 cols
-   trt   grp   rsp 
-     a     x    1. 
-     a     x    1. 
-     a     x    1. 
-     a     y    2. 
-     a     y    2. 
-     a     y    2. 
-     b     x    3. 
-     b     x    3. 
-     b     x    3. 
-     b     y    4. 
-     b     y    4. 
-     b     y    4. 
+     trt     grp     rsp 
+   <str>   <str>   <num> 
+       a       x      1. 
+       a       x      1. 
+       a       x      1. 
+       a       y      2. 
+       a       y      2. 
+       a       y      2. 
+       b       x      3. 
+       b       x      3. 
+       b       x      3. 
+       b       y      4. 
+       b       y      4. 
+       b       y      4. 
 ```
 
 To show how to bind dataframes with different columns, let's split up `df1`.
@@ -235,52 +210,28 @@ dplyr::bind_rows(df_a, df_b[,c("trt", "grp")])
 12   b   y  NA
 ```
 
-Because Scheme doesn't have explicit missing values, I created a separate procedure, `dataframe-bind-all`, for binding dataframes where missing columns are filled by the specified missing value.
+Because Scheme doesn't have explicit missing values, `dataframe` uses `'na` to indicate missing values. In `dataframe-bind` (and `dataframe-bind-all`), missing values are filled with `'na` by default, but a different fill value can be specified.
 
 ```
-> (dataframe-display 
-    (dataframe-bind-all -999 df-a (dataframe-drop df-b 'rsp)) 
-    12)
+> (dataframe-display (dataframe-bind df-a (dataframe-drop* df-b rsp)) 12)
 
  dim: 12 rows x 3 cols
-   trt   grp    rsp 
-     a     x     1. 
-     a     x     1. 
-     a     x     1. 
-     a     y     2. 
-     a     y     2. 
-     a     y     2. 
-     b     x  -999. 
-     b     x  -999. 
-     b     x  -999. 
-     b     y  -999. 
-     b     y  -999. 
-     b     y  -999. 
-```
-
-In contrast, `dataframe-bind` will drop all columns not shared across the dataframes being bound.
-
-```
-> (dataframe-display 
-    (dataframe-bind df-a (dataframe-drop df-b 'rsp)) 
-    12)
-
- dim: 12 rows x 2 cols
-   trt   grp 
-     a     x 
-     a     x 
-     a     x 
-     a     y 
-     a     y 
-     a     y 
-     b     x 
-     b     x 
-     b     x 
-     b     y 
-     b     y 
-     b     y 
+     trt     grp     rsp 
+   <str>   <str>   <num> 
+       a       x       1 
+       a       x       1 
+       a       x       1 
+       a       y       2 
+       a       y       2 
+       a       y       2 
+       b       x      na 
+       b       x      na 
+       b       x      na 
+       b       y      na 
+       b       y      na 
+       b       y      na 
 ```
 
 ### Final thoughts
 
-With the exception of `dataframe-split`, all of the procedures described in the first three posts in the [dataframe series](/categories/dataframe/) involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `dataframe-partition*`) and familiarity/consistency with Scheme's standard library. In the next post, I will describe how to filter, partition, and sort dataframes in Scheme. 
+With the exception of `dataframe-split`, all of the procedures described in the first three posts in the [dataframe series](/categories/dataframe/) involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `dataframe-partition*`) and familiarity/consistency with Scheme's standard library. In the next [post](/filter-partition-and-sort-dataframes-in-scheme/), I will describe how to filter, partition, and sort dataframes in Scheme. 

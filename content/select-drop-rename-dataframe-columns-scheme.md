@@ -1,7 +1,7 @@
 +++
 title = "Select, drop, and rename dataframe columns in Scheme"
 date = 2020-03-29
-updated = 2023-07-01
+updated = 2024-03-12
 [taxonomies]
 categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "dplyr"]
@@ -18,7 +18,7 @@ First, let's create a very simple dataframe in both languages.
 ```
 df <- data.frame("a" = 1:3, "b" = 4:6, "c" = 7:9)
 
-(define df (make-dataframe '((a 1 2 3) (b 4 5 6) (c 7 8 9))))
+(define df (make-df* (a 1 2 3) (b 4 5 6) (c 7 8 9)))
 ```
 
 ### Select
@@ -33,15 +33,17 @@ With `dplyr::select`, we can select and re-order columns in a single statement u
 3 9 3
 ```
 
-With `dataframe-select`, we can also select and re-order columns in a single statement using symbols for column names.
+With `dataframe-select*`, we can also select and re-order columns in a single statement using bare column names.
 
 ```
-> (dataframe-display (dataframe-select df 'c 'a))
+> (dataframe-display (dataframe-select* df c a))
+
  dim: 3 rows x 2 cols
-     c     a 
-    7.    1. 
-    8.    2. 
-    9.    3. 
+       c       a 
+   <num>   <num> 
+      7.      1. 
+      8.      2. 
+      9.      3. 
 ```
 
 ### Drop
@@ -56,15 +58,17 @@ With `dataframe-select`, we can also select and re-order columns in a single sta
 3 3 9
 ```
 
-In `dataframe`, dropping columns requires a separate procedure, `dataframe-drop`.
+In `dataframe`, dropping columns requires a separate procedure, `dataframe-drop*`.
 
 ```
-> (dataframe-display (dataframe-drop df 'b))
+> (dataframe-display (dataframe-drop* df b))
+
  dim: 3 rows x 2 cols
-     a     c 
-    1.    7. 
-    2.    8. 
-    3.    9. 
+       a       c 
+   <num>   <num> 
+      1.      7. 
+      2.      8. 
+      3.      9. 
 ```
 
 ### Rename
@@ -85,26 +89,30 @@ With `dplyr::select`, columns can be renamed during selection, but `dplyr::renam
 3 3   6   9
 ```
 
-`dataframe-select` does not allow for renaming during selection, but `dataframe-rename` works similarly to `dplyr::rename`. However, in the absence of the `=` syntax (where I think it is intutive for the new name to be on the left), I decided that it was more natural to write `'(old-name new-name)`. 
+`dataframe-select*` does not allow for renaming during selection, but `dataframe-rename` works similarly to `dplyr::rename`. However, in the absence of the `=` syntax (where I think it is intutive for the new name to be on the left), I decided that it was more natural to write `(old-name new-name)`. 
 
 ```
-> (dataframe-display (dataframe-rename df '(b Bee) '(c Sea)))
+> (dataframe-display (dataframe-rename* df (b Bee) (c Sea)))
+
  dim: 3 rows x 3 cols
-     a   Bee   Sea 
-    1.    4.    7. 
-    2.    5.    8. 
-    3.    6.    9. 
+       a     Bee     Sea 
+   <num>   <num>   <num> 
+      1.      4.      7. 
+      2.      5.      8. 
+      3.      6.      9. 
 ```
 
 When renaming all of the columns, `dataframe-rename-all` allows for specifying all new names as a list rather than `(old-name new-name)` pairs. 
 
 ```
 > (dataframe-display (dataframe-rename-all df '(A B C)))
+
  dim: 3 rows x 3 cols
-     A     B     C 
-    1.    4.    7. 
-    2.    5.    8. 
-    3.    6.    9. 
+       A       B       C 
+   <num>   <num>   <num> 
+      1.      4.      7. 
+      2.      5.      8. 
+      3.      6.      9. 
 ```
 
 ### Final thoughts

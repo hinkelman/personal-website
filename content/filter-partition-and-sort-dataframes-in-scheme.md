@@ -1,7 +1,7 @@
 +++
 title = "Filter, partition, and sort dataframes in Scheme"
 date = 2020-04-09
-updated = 2023-07-06
+updated = 2024-03-11
 [taxonomies]
 categories = ["dataframe", "Scheme", "Chez Scheme"]
 tags = ["dataframe", "data-structures", "association-list", "dplyr", "arrange", "macros"]
@@ -13,7 +13,7 @@ This post is the fourth in a [series](/categories/dataframe/) on the [dataframe 
 
 ### Set up
 
-First, let's create a dataframe in both languages. The `rep` procedure was introduced in the [previous post](/split-bind-append-dataframes-scheme/), but it is not part of the `dataframe` library.
+First, let's create a dataframe in both languages.
 
 ```
 df <- data.frame(trt = rep(c("a", "b"), each = 6),
@@ -23,10 +23,10 @@ df <- data.frame(trt = rep(c("a", "b"), each = 6),
                  
 (define df
   (make-dataframe
-   (list (cons 'trt (rep '("a" "b") 6 'each))
-         (cons 'grp (rep (rep '("x" "y") 3 'each) 2 'times))
-         (cons 'rsp (rep '(1 2 3 4) 3 'each))
-         (cons 'ind (iota 12)))))
+   (list (make-series 'trt (rep '("a" "b") 6 'each))
+         (make-series 'grp (rep (rep '("x" "y") 3 'each) 2 'times))
+         (make-series 'rsp (rep '(1 2 3 4) 3 'each))
+         (make-series 'ind (iota 12)))))
 ```
 
 ### Filter
@@ -52,10 +52,11 @@ Similarly, `dataframe-filter*` returns the rows where the `expr` is `#t`. `dataf
          (string=? grp "y"))))
 
  dim: 3 rows x 4 cols
-   trt   grp   rsp   ind 
-     a     y    2.    3. 
-     a     y    2.    4. 
-     a     y    2.    5. 
+     trt     grp     rsp     ind 
+   <str>   <str>   <num>   <num> 
+       a       y      2.      3. 
+       a       y      2.      4. 
+       a       y      2.      5. 
 ```
 
 #### Implementation
@@ -65,9 +66,9 @@ Similarly, `dataframe-filter*` returns the rows where the `expr` is `#t`. `dataf
 ```
 (define-syntax dataframe-filter*
   (syntax-rules ()
-                [(_ df names expr)
-                 (df-filter df (quote names) (lambda names expr)
-                            "(dataframe-filter* df names expr)")]))
+    [(_ df names expr)
+     (df-filter df (quote names) (lambda names expr)
+     "(dataframe-filter* df names expr)")]))
 ```
 
 I spent a lot of time wrestling with whether I should use `eval` or macros to simplify the syntax in my `dataframe` procedures. Or whether I should just stick to passing lambda expressions around. I pretty quickly concluded that I should avoid `eval` thanks to some guidance from [Reddit](https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/) and was intrigued by some suggested neat tricks that didn't involve `eval` or macros. Eventually, though, a better phrased [StackOverflow question](https://stackoverflow.com/questions/60625913/chez-scheme-macro-for-hiding-lambdas) prompted comments and answers that gave me clarity on understanding simple macros.
@@ -127,24 +128,28 @@ As mentioned in the [previous post](/split-bind-append-dataframes-scheme/), `dat
     (dataframe-partition* df (grp) (string=? grp "x")))
   
 > (dataframe-display keep)
+
  dim: 6 rows x 4 cols
-   trt   grp   rsp   ind 
-     a     x    1.    0. 
-     a     x    1.    1. 
-     a     x    1.    2. 
-     b     x    3.    6. 
-     b     x    3.    7. 
-     b     x    3.    8. 
-  
+     trt     grp     rsp     ind 
+   <str>   <str>   <num>   <num> 
+       a       x      1.      0. 
+       a       x      1.      1. 
+       a       x      1.      2. 
+       b       x      3.      6. 
+       b       x      3.      7. 
+       b       x      3.      8. 
+
 > (dataframe-display drop)
+
  dim: 6 rows x 4 cols
-   trt   grp   rsp   ind 
-     a     y    2.    3. 
-     a     y    2.    4. 
-     a     y    2.    5. 
-     b     y    4.    9. 
-     b     y    4.   10. 
-     b     y    4.   11. 
+     trt     grp     rsp     ind 
+   <str>   <str>   <num>   <num> 
+       a       y      2.      3. 
+       a       y      2.      4. 
+       a       y      2.      5. 
+       b       y      4.      9. 
+       b       y      4.     10. 
+       b       y      4.     11. 
 ```
 
 ### Sort
@@ -176,20 +181,20 @@ Similarly, `dataframe-sort*` sorts the dataframe in the order that predicates an
    12)
    
  dim: 12 rows x 4 cols
-   trt   grp   rsp   ind 
-     b     x    3.    8. 
-     b     x    3.    7. 
-     b     x    3.    6. 
-     a     x    1.    2. 
-     a     x    1.    1. 
-     a     x    1.    0. 
-     b     y    4.   11. 
-     b     y    4.   10. 
-     b     y    4.    9. 
-     a     y    2.    5. 
-     a     y    2.    4. 
-     a     y    2.    3. 
-
+     trt     grp     rsp     ind 
+   <str>   <str>   <num>   <num> 
+       b       x      3.      8. 
+       b       x      3.      7. 
+       b       x      3.      6. 
+       a       x      1.      2. 
+       a       x      1.      1. 
+       a       x      1.      0. 
+       b       y      4.     11. 
+       b       y      4.     10. 
+       b       y      4.      9. 
+       a       y      2.      5. 
+       a       y      2.      4. 
+       a       y      2.      3. 
 ```
 
 #### Implementation
@@ -199,9 +204,9 @@ Similarly, `dataframe-sort*` sorts the dataframe in the order that predicates an
 ```
 (define-syntax dataframe-sort*
   (syntax-rules ()
-                [(_ df (predicate name) ...)
-                 (df-sort df (list predicate ...) (list (quote name) ...)
-                          "(dataframe-sort* df (predicate name) ...)")]))
+    [(_ df (predicate name) ...)
+      (df-sort df (list predicate ...) (list (quote name) ...)
+              "(dataframe-sort* df (predicate name) ...)")]))
 ```
 
 The following are equivalent
