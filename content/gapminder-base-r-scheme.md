@@ -1,9 +1,9 @@
 +++
 title = "Analyzing gapminder dataset with base R and Scheme"
 date = 2021-04-30
-updated = 2023-07-06
+updated = 2024-03-26
 [taxonomies]
-categories = ["Scheme", "Chez Scheme", "dataframe", "chez-stats"]
+categories = ["Scheme", "Chez Scheme", "dataframe"]
 tags = ["dataframe", "dplyr", "pandas", "EDA", "filter", "modify", "aggregate"]
 +++
 
@@ -39,30 +39,29 @@ I've added a little function, `head10`, to simplify subsequent code. It is not n
 
 *Scheme*
 
-The code here is more verbose than in base R. We need to import a couple of libraries. Also, `read-delim` reads data row-wise, which I'm calling a `rowtable`, and needs to be converted to a column-wise `dataframe`. `rowtable->dataframe` does minimal type conversion; only converting strings to numbers.
+We need to first import the `dataframe` library. Otherwise, the code is similar.
 
 ```
-(import (chez-stats)
-        (dataframe))
+> (import (dataframe))
 
-(define gapminder
-  (-> (read-delim "gapminder.csv")
-      (rowtable->dataframe)))
+> (define gapminder (csv->dataframe "gapminder.csv"))
 
 > (dataframe-display gapminder)
 
  dim: 1704 rows x 6 cols
-  continent      country   year  lifeExp       pop  gdpPercap 
-       Asia  Afghanistan  1952.  28.8010  8.425E+6   779.4453 
-       Asia  Afghanistan  1957.  30.3320  9.241E+6   820.8530 
-       Asia  Afghanistan  1962.  31.9970  1.027E+7   853.1007 
-       Asia  Afghanistan  1967.  34.0200  1.154E+7   836.1971 
-       Asia  Afghanistan  1972.  36.0880  1.308E+7   739.9811 
-       Asia  Afghanistan  1977.  38.4380  1.488E+7   786.1134 
-       Asia  Afghanistan  1982.  39.8540  1.288E+7   978.0114 
-       Asia  Afghanistan  1987.  40.8220  1.387E+7   852.3959 
-       Asia  Afghanistan  1992.  41.6740  1.632E+7   649.3414 
-       Asia  Afghanistan  1997.  41.7630  2.223E+7   635.3414 
+  continent      country    year  lifeExp       pop  gdpPercap 
+      <str>        <str>   <num>    <num>     <num>      <num> 
+       Asia  Afghanistan   1952.  28.8010  8.425E+6   779.4453 
+       Asia  Afghanistan   1957.  30.3320  9.241E+6   820.8530 
+       Asia  Afghanistan   1962.  31.9970  1.027E+7   853.1007 
+       Asia  Afghanistan   1967.  34.0200  1.154E+7   836.1971 
+       Asia  Afghanistan   1972.  36.0880  1.308E+7   739.9811 
+       Asia  Afghanistan   1977.  38.4380  1.488E+7   786.1134 
+       Asia  Afghanistan   1982.  39.8540  1.288E+7   978.0114 
+       Asia  Afghanistan   1987.  40.8220  1.387E+7   852.3959 
+       Asia  Afghanistan   1992.  41.6740  1.632E+7   649.3414 
+       Asia  Afghanistan   1997.  41.7630  2.223E+7   635.3414 
+
 ```
 
 ## Filtering
@@ -99,17 +98,18 @@ This example introduces the thread-first operator (`->`), which takes the result
       dataframe-display)
 
  dim: 142 rows x 6 cols
-  continent      country   year  lifeExp       pop  gdpPercap 
-       Asia  Afghanistan  2007.  43.8280  3.189E+7   974.5803 
-     Europe      Albania  2007.  76.4230  3.601E+6  5937.0295 
-     Africa      Algeria  2007.  72.3010  3.333E+7  6223.3675 
-     Africa       Angola  2007.  42.7310  1.242E+7  4797.2313 
-   Americas    Argentina  2007.  75.3200  4.030E+7 12779.3796 
-    Oceania    Australia  2007.  81.2350  2.043E+7 34435.3674 
-     Europe      Austria  2007.  79.8290  8.200E+6 36126.4927 
-       Asia      Bahrain  2007.  75.6350  7.086E+5 29796.0483 
-       Asia   Bangladesh  2007.  64.0620  1.504E+8  1391.2538 
-     Europe      Belgium  2007.  79.4410  1.039E+7 33692.6051 
+  continent      country    year  lifeExp       pop  gdpPercap 
+      <str>        <str>   <num>    <num>     <num>      <num> 
+       Asia  Afghanistan   2007.  43.8280  3.189E+7   974.5803 
+     Europe      Albania   2007.  76.4230  3.601E+6  5937.0295 
+     Africa      Algeria   2007.  72.3010  3.333E+7  6223.3675 
+     Africa       Angola   2007.  42.7310  1.242E+7  4797.2313 
+   Americas    Argentina   2007.  75.3200  4.030E+7 12779.3796 
+    Oceania    Australia   2007.  81.2350  2.043E+7 34435.3674 
+     Europe      Austria   2007.  79.8290  8.200E+6 36126.4927 
+       Asia      Bahrain   2007.  75.6350  7.086E+5 29796.0483 
+       Asia   Bangladesh   2007.  64.0620  1.504E+8  1391.2538 
+     Europe      Belgium   2007.  79.4410  1.039E+7 33692.6051 
 ```
 
 ### Problem 2
@@ -149,17 +149,18 @@ In this case, I've used `subset` rather than the more conventional `[` subsettin
       dataframe-display)
 
  dim: 25 rows x 6 cols
-  continent             country   year  lifeExp       pop  gdpPercap 
-   Americas           Argentina  2007.  75.3200  4.030E+7 12779.3796 
-   Americas             Bolivia  2007.  65.5540  9.119E+6  3822.1371 
-   Americas              Brazil  2007.  72.3900  1.900E+8  9065.8008 
-   Americas              Canada  2007.  80.6530  3.339E+7 36319.2350 
-   Americas               Chile  2007.  78.5530  1.628E+7 13171.6389 
-   Americas            Colombia  2007.  72.8890  4.423E+7  7006.5804 
-   Americas          Costa Rica  2007.  78.7820  4.134E+6  9645.0614 
-   Americas                Cuba  2007.  78.2730  1.142E+7  8948.1029 
-   Americas  Dominican Republic  2007.  72.2350  9.320E+6  6025.3748 
-   Americas             Ecuador  2007.  74.9940  1.376E+7  6873.2623 
+  continent             country    year  lifeExp       pop  gdpPercap 
+      <str>               <str>   <num>    <num>     <num>      <num> 
+   Americas           Argentina   2007.  75.3200  4.030E+7 12779.3796 
+   Americas             Bolivia   2007.  65.5540  9.119E+6  3822.1371 
+   Americas              Brazil   2007.  72.3900  1.900E+8  9065.8008 
+   Americas              Canada   2007.  80.6530  3.339E+7 36319.2350 
+   Americas               Chile   2007.  78.5530  1.628E+7 13171.6389 
+   Americas            Colombia   2007.  72.8890  4.423E+7  7006.5804 
+   Americas          Costa Rica   2007.  78.7820  4.134E+6  9645.0614 
+   Americas                Cuba   2007.  78.2730  1.142E+7  8948.1029 
+   Americas  Dominican Republic   2007.  72.2350  9.320E+6  6025.3748 
+   Americas             Ecuador   2007.  74.9940  1.376E+7  6873.2623 
 ```
 
 ### Problem 3
@@ -192,8 +193,9 @@ Thanks to `subset`, adding additional conditions is straightforward with zero re
       dataframe-display)
 
  dim: 1 rows x 6 cols
-  continent        country   year  lifeExp       pop  gdpPercap 
-   Americas  United States  2007.  78.2420  3.011E+8   42951.65 
+  continent        country    year  lifeExp       pop  gdpPercap 
+      <str>          <str>   <num>    <num>     <num>      <num> 
+   Americas  United States   2007.  78.2420  3.011E+8   42951.65 
 ```
 
 ## Summary Statistics
@@ -211,7 +213,7 @@ Calculate the average life expectancy worldwide in 2007.
 
 *Scheme*
 
-This example introduces the `$` operator, which was inspired by R, to extract the values of a column (e.g., `lifeExp`). The difference in verbosity between base R and Scheme in this example is related to the filtering step. Extracting a column and calculating the mean involve nearly the same number of characters. `mean` is provided by `chez-stats`, but is simple procedure. `(mean x)` is equivalent to `(/ (apply + x) (length x))`.
+This example introduces the `$` operator, which was inspired by R, to extract the values of a column (e.g., `lifeExp`). The difference in verbosity between base R and Scheme in this example is related to the filtering step. Extracting a column and calculating the mean involve nearly the same number of characters.
 
 ```
 > (-> gapminder
@@ -257,11 +259,12 @@ One difference to note here is that `dataframe-aggregate` doesn't automatically 
 
  dim: 5 rows x 2 cols
   continent  mean-lifeExp 
-    Oceania       80.7195 
-     Europe       77.6486 
-   Americas       73.6081 
+      <str>         <num> 
        Asia       70.7285 
+     Europe       77.6486 
      Africa       54.8060 
+   Americas       73.6081 
+    Oceania       80.7195 
 ```
 
 ### Problem 3
@@ -297,6 +300,7 @@ Calculate the total population per continent in 2007 and sort the results in des
 
  dim: 5 rows x 2 cols
   continent  total-pop 
+      <str>      <num> 
        Asia   3.812E+9 
      Africa   9.295E+8 
    Americas   8.989E+8 
@@ -339,17 +343,18 @@ The help page for `transform` advises that it is only intended for interactive u
       (dataframe-display))
 
  dim: 1704 rows x 7 cols
-  continent      country   year  lifeExp       pop  gdpPercap        GDP 
-       Asia  Afghanistan  1952.  28.8010  8.425E+6   779.4453  6.567E+09 
-       Asia  Afghanistan  1957.  30.3320  9.241E+6   820.8530  7.585E+09 
-       Asia  Afghanistan  1962.  31.9970  1.027E+7   853.1007  8.759E+09 
-       Asia  Afghanistan  1967.  34.0200  1.154E+7   836.1971  9.648E+09 
-       Asia  Afghanistan  1972.  36.0880  1.308E+7   739.9811  9.679E+09 
-       Asia  Afghanistan  1977.  38.4380  1.488E+7   786.1134  1.170E+10 
-       Asia  Afghanistan  1982.  39.8540  1.288E+7   978.0114  1.260E+10 
-       Asia  Afghanistan  1987.  40.8220  1.387E+7   852.3959  1.182E+10 
-       Asia  Afghanistan  1992.  41.6740  1.632E+7   649.3414  1.060E+10 
-       Asia  Afghanistan  1997.  41.7630  2.223E+7   635.3414  1.412E+10 
+  continent      country    year  lifeExp       pop  gdpPercap        GDP 
+      <str>        <str>   <num>    <num>     <num>      <num>      <num> 
+       Asia  Afghanistan   1952.  28.8010  8.425E+6   779.4453  6.567E+09 
+       Asia  Afghanistan   1957.  30.3320  9.241E+6   820.8530  7.585E+09 
+       Asia  Afghanistan   1962.  31.9970  1.027E+7   853.1007  8.759E+09 
+       Asia  Afghanistan   1967.  34.0200  1.154E+7   836.1971  9.648E+09 
+       Asia  Afghanistan   1972.  36.0880  1.308E+7   739.9811  9.679E+09 
+       Asia  Afghanistan   1977.  38.4380  1.488E+7   786.1134  1.170E+10 
+       Asia  Afghanistan   1982.  39.8540  1.288E+7   978.0114  1.260E+10 
+       Asia  Afghanistan   1987.  40.8220  1.387E+7   852.3959  1.182E+10 
+       Asia  Afghanistan   1992.  41.6740  1.632E+7   649.3414  1.060E+10 
+       Asia  Afghanistan   1997.  41.7630  2.223E+7   635.3414  1.412E+10 
 ```
 
 ### Problem 2
@@ -387,11 +392,15 @@ This example reveals a weak spot in the `dataframe` API. The issue is that `rank
  
 Because the `dataframe` library only has thread-first (`->`) and thread-last (`->>`) operators, we have to create the awkward `lambda` procedure to get the output of `dataframe-filter*` to the right place in `dataframe-modify*`. [SRFI 197](https://srfi.schemers.org/srfi-197/srfi-197.html) provides a pipeline operator that requires that the location of the output of the previous procedure is explicitly specified with `_`, which would likely simplify this code. An earlier, simpler version of SRFI 197 was the source for `->` and `->>` in the `dataframe` library.
 
+We import only the `rank` procedure from `chez-stats` because there are name conflicts between `chez-stats` and `dataframe`. The conflicting procedures (e.g., `mean`, `median`, `sum`, etc.) in `dataframe` provide handling of missing values.
+
 ```
+(import (only (chez-stats) rank))
+
 (define (rank% lst)
   (let* ([rank-lst (rank lst 'mean)]
          [max-rank (apply max rank-lst)])
-    (map (lambda (x) (exact->inexact (/ x max-rank))) rank-lst)))
+    (map (lambda (x) (inexact (/ x max-rank))) rank-lst)))
 
 > (-> gapminder
       (dataframe-filter* (year) (= year 2007))
@@ -416,7 +425,7 @@ Because the `dataframe` library only has thread-first (`->`) and thread-last (`-
      Europe           Iceland  2007.  81.7570  3.019E+5   36180.79      0.9366 
 ```
  
- If we create an intermediate `dataframe`, we get simpler syntax.
+ If we create an intermediate `dataframe`, we get simpler code.
 
 ```
 (define gapminder2007
