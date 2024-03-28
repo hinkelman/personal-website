@@ -1,5 +1,5 @@
 +++
-title = "Comparing dataframe (Scheme) to pandas (Python) and dplyr (R)"
+title = "Comparing dataframe operations in Scheme, Python, and R"
 date = 2024-03-27
 [taxonomies]
 categories = ["Scheme", "Chez Scheme", "dataframe"]
