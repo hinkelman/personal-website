@@ -1,6 +1,7 @@
 +++
 title = "Dataframe manipulation in Scheme"
 date = 2024-04-22
+updated = 2024-05-10
 [taxonomies]
 categories = ["Scheme", "Chez Scheme", "dataframe"]
 tags = ["dataframe", "dplyr"]
@@ -50,9 +51,20 @@ First, we import the `dataframe` library and the `shuffle` procedure from [`chez
 
 ## Filter Observations
 
-The `dataframe` library includes some handling of missing values, represented as `'na`, but nothing currently that will handle `'na` values while filtering. You either need to remove `'na` values from the column, e.g., `(dataframe-filter* dat (col-name) (not (na? col-name)))` or the whole dataframe, e.g., `(dataframe-remove-na dat)`, up front or explicitly (and annoyingly) handle them in every filter (see below). In the original blog post, they built up to a compound filter with pipe operators, but here I will just cut to the chase and show the final version.
+The `dataframe` library includes some handling of missing values, represented as `'na`, but nothing currently that will automatically drop `'na` values while filtering as in `dplyr::filter`. A couple of options for handling `'na` are presented in the code below. In the original blog post, they built up to a compound filter with pipe operators, but here I will just cut to the chase and show the final version.
 
 ```
+;; this version is more readable, but requires two passes through the dataframe
+;; i.e., first with dataframe-remove-na and then with dataframe-filter
+(-> dat
+    (dataframe-remove-na 'body_mass_g 'sex)
+    (dataframe-filter*
+     (body_mass_g sex)
+     (and (> body_mass_g 4000)
+          (string=? sex "female")))
+    (dataframe-display))
+
+;; this version is more awkward to read (and write), but does all the filtering in one pass
 (-> dat
     (dataframe-filter*
      (body_mass_g sex)
@@ -114,11 +126,24 @@ It takes considerably more code to replicate `slice_min` and `slice_max` from `d
 
 ```
 ;; equivalent of `slice_min` example in original post
-(-> dat
-    (dataframe-filter*
+(-> (dataframe-filter*
+     dat
      (body_mass_g)
      (and (not (na? body_mass_g))
           (<= body_mass_g (quantile ($ dat 'body_mass_g) 0.25 7))))
+    (dataframe-sort* (< body_mass_g))
+    (dataframe-display))
+
+;; previous version only works with filter as the first step in the pipe
+;; this version works with filter step anywhere in the pipe
+(-> dat
+    (dataframe-remove-na 'body_mass_g)
+    (->>
+     ((lambda (dfx)
+        (dataframe-filter*
+         dfx
+         (body_mass_g)
+         (<= body_mass_g (quantile ($ dfx 'body_mass_g) 0.25 7))))))
     (dataframe-sort* (< body_mass_g))
     (dataframe-display))
 
@@ -137,8 +162,8 @@ It takes considerably more code to replicate `slice_min` and `slice_max` from `d
      Adelie        3000.  female   2007.
 
 ;; equivalent of `slice_max` example in original post
- (-> dat
-    (dataframe-filter*
+(-> (dataframe-filter*
+     dat
      (body_mass_g)
      (and (not (na? body_mass_g))
           (>= body_mass_g (quantile ($ dat 'body_mass_g) 0.75 7))))
@@ -215,10 +240,7 @@ Sorting also requires explicitly handling missing values. `dataframe-sort` first
 
 ```
 (-> dat
-    (dataframe-filter*
-     (body_mass_g sex)
-     (and (not (na? body_mass_g))
-          (not (na? sex))))
+    (dataframe-remove-na 'body_mass_g 'sex)
     (dataframe-sort* (< body_mass_g) (string<? sex))
     (dataframe-display))
 
