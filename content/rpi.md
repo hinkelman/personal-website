@@ -1,6 +1,6 @@
 +++
 title = "RPI and SOS in Scheme, Python, and Elixir"
-date = 2024-09-01
+date = 2024-09-02
 [taxonomies]
 categories = ["Scheme", "Python", "Elixir"]
 tags = ["rpi", "basketball", "dataframe", "Polars", "Explorer"]
@@ -52,7 +52,7 @@ This is the format of the raw data...
       1.      1.     Chow Men      Bob Ross           21.          10. 
 ```
 
-The approach to calculating W-L record involves two passes through the data, which is not costly with such a small dataset. The `type` parameter refers to the `winner` or `loser` column in the dataframe. Polars and Explorer both use square brackets for extracting a dataframe column whereas `$` is used in Scheme dataframe.
+The approach to calculating W-L record involves two passes through the data, which could prove costly with a larger dataset. The `type` parameter refers to the `winner` or `loser` column in the dataframe and is passed as a symbol (Scheme), string (Python), or atom (Elixir). Polars and Explorer both use square brackets for extracting a dataframe column whereas `$` is used in Scheme dataframe.
 
 ```
 ;; Scheme dataframe
@@ -284,7 +284,9 @@ teams =
   |> Series.to_enum()
 ```
 
-Finally, we put it all together and create a dataframe with all of our calculated columns sorted by descending RPI. The process is similar in all languages (but, again, most verbose in Scheme) and involves mapping (Scheme, Elixir) or list comprehensions (Python) to iterate over all the teams. In Scheme and Python, we set the number of rows displayed equal to the number of teams. I ran the Elixir code in Livebook and interactively changed the number of rows to display. I made no effort to write performant code because the dataset is so small, but the Python and Elixir code take 2-3 seconds on my machine while the Scheme code is effectively instanteous. I'm assuming that is mostly overhead of dealing with the Rust polars backend and would be a neglible element of the overall compute time with a larger dataset. 
+Finally, we put it all together and create a dataframe with all of our calculated columns sorted by descending RPI. The process is similar in all languages (but, again, most verbose in Scheme) and involves mapping (Scheme, Elixir) or list comprehensions (Python) to iterate over all the teams. In Scheme and Python, we set the number of rows displayed equal to the number of teams. I ran the Elixir code in Livebook and interactively changed the number of rows to display. 
+
+I made no effort to write performant code because the dataset is so small, but the Python and Elixir code take 2-3 seconds on my machine while the Scheme code is effectively instanteous. I'm assuming that is mostly overhead of dealing with the Rust polars backend and would be a neglible element of the overall compute time with a larger dataset. 
 
 ```
 ;; Scheme dataframe
