@@ -21,6 +21,10 @@
 [[redirects]]
   from = "/generate-random-numbers-r-racket/"
   to = "/generating-random-numbers-r-racket/"
+
+[[redirects]]
+  from = "/writing-chez-scheme-library/"
+  to = "/writing-a-chez-scheme-library/"
   
 [[redirects]]
   from = "/selecting-dropping-renaming-dataframe-columns-chez-scheme/"
