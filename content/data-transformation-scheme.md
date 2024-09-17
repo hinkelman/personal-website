@@ -1,7 +1,7 @@
 +++
 title = "Data transformation in Scheme"
 date = 2023-07-07
-updated = 2024-03-26
+updated = 2024-09-17
 [taxonomies]
 categories = ["Scheme", "Chez Scheme", "dataframe"]
 tags = ["R4DS", "dplyr"]
@@ -39,9 +39,10 @@ The `flights` dataset has 336,776 rows and 19 columns. Datasets of this size str
 
 *3.2.1*
 
-Piping all of the output to a `dataframe-display` will often not show clearly the operation was successful. The one liners below show that the operation yielded the expected result. Need to remove `'na` from the `dep_delay` column or the `>` operation will fail.
+Piping all of the output to a `dataframe-display` will often not show clearly the operation was successful. The one liners below show that the operation yielded the expected result. Need to remove `'na` from the `dep_delay` column or the `>` operation will fail. The version with `dataframe-remove-na` is more readable, but requires two passes through the data. 
 
 ```
+;; filter only version
 (define delayed-flights
   (-> flights
       (dataframe-filter*
@@ -49,52 +50,43 @@ Piping all of the output to a `dataframe-display` will often not show clearly th
        (and (not (na? dep_delay))
             (> dep_delay 120)))))
 
+;; remove na first
+(define delayed-flights
+  (-> flights
+      (dataframe-remove-na 'dep_delay)
+      (dataframe-filter* (dep_delay) (> dep_delay 120))))
+
 (apply min ($ delayed-flights 'dep_delay))
 
 (-> flights
-    (dataframe-filter*
-     (month day)
-     (and (not (or (na? month) (na? day)))
-          (= month 1)
-          (= day 1)))
+    (dataframe-remove-na 'month 'day)
+    (dataframe-filter* (month day) (and (= month 1) (= day 1)))
     (dataframe-glimpse))
 
 (define jan-feb-flights
   (-> flights
-      (dataframe-filter*
-       (month)
-       (and (not (na? month))
-            (or (= month 1)
-                (= month 2))))))
+      (dataframe-remove-na 'month)
+      (dataframe-filter* (month) (or (= month 1) (= month 2)))))
 
 (remove-duplicates ($ jan-feb-flights 'month))
 
 (-> flights
-    (dataframe-filter*
-     (month)
-     (and (not (na? month))
-          (member month '(1 2))))
-     (dataframe-glimpse))
+    (dataframe-remove-na 'month)
+    (dataframe-filter* (month) (member month '(1 2)))
+    (dataframe-glimpse))
 ```
 
 *3.2.3*
 
 ```
 (-> flights
-    (dataframe-filter*
-     (year month day dep_time)
-     (not (or (na? year) (na? month) (na? day) (na? dep_time))))
-    (dataframe-sort*
-     (< year) (< month) (< day) (< dep_time))
+    (dataframe-remove-na 'year 'month 'day 'dep_time)
+    (dataframe-sort* (< year) (< month) (< day) (< dep_time))
     (dataframe-glimpse))
 
-
 (-> flights
-    (dataframe-filter*
-     (dep_delay)
-     (not (na? dep_delay)))
-    (dataframe-sort*
-     (> dep_delay))
+    (dataframe-remove-na 'dep_delay)
+    (dataframe-sort* (> dep_delay))
     (dataframe-glimpse))
 ```
 
@@ -131,9 +123,7 @@ The `dataframe` library does not include a procedure comparable to `dplyr::count
 
 ```
 (-> flights
-    (dataframe-filter*
-     (dep_delay arr_delay distance air_time)
-     (not (or (na? dep_delay) (na? arr_delay) (na? distance) (na? air_time))))
+    (dataframe-remove-na 'dep_delay 'arr_delay 'distance 'air_time)
     (dataframe-modify*
      (gain (dep_delay arr_delay) (- dep_delay arr_delay))
      (speed (distance air_time) (* (/ distance air_time) 60)))
@@ -144,9 +134,7 @@ The `dataframe` library does not include a procedure comparable to `dplyr::count
 
 ```
 (-> flights
-    (dataframe-filter*
-     (dep_delay arr_delay distance air_time)
-     (not (or (na? dep_delay) (na? arr_delay) (na? distance) (na? air_time))))
+    (dataframe-remove-na 'dep_delay 'arr_delay 'distance 'air_time)
     (dataframe-modify*
      (gain (dep_delay arr_delay) (- dep_delay arr_delay))
      (speed (distance air_time) (inexact (* (/ distance air_time) 60))))
@@ -175,10 +163,8 @@ The `dataframe` library does not include a procedure comparable to `dplyr::count
 
 ```
 (-> flights
-    (dataframe-filter*
-     (dest distance air_time)
-     (and (not (or (na? dest) (na? distance) (na? air_time)))
-          (string=? dest "IAH")))
+    (dataframe-remove-na 'dest 'distance 'air_time)
+    (dataframe-filter* (dest) (string=? dest "IAH"))
     (dataframe-modify*
      (speed
       (distance air_time)
@@ -194,10 +180,8 @@ The `dataframe` library does not include a procedure comparable to `dplyr::count
   (dataframe-select*
    (dataframe-modify*
     (dataframe-filter*
-     flights
-     (dest distance air_time)
-     (and (not (or (na? dest) (na? distance) (na? air_time)))
-          (string=? dest "IAH")))
+     (dataframe-remove-na flights 'dest 'distance 'air_time)
+     (dest) (string=? dest "IAH"))
     (speed
      (distance air_time)
      (inexact (* (/ distance air_time) 60))))
@@ -206,10 +190,9 @@ The `dataframe` library does not include a procedure comparable to `dplyr::count
 
 (define flights1
   (dataframe-filter*
-   flights
+   (dataframe-remove-na flights 'dest 'distance 'air_time)
    (dest distance air_time)
-   (and (not (or (na? dest) (na? distance) (na? air_time)))
-        (string=? dest "IAH"))))
+   (string=? dest "IAH")))
 
 (define flights2
   (dataframe-modify*
@@ -243,9 +226,7 @@ The `dataframe` library does not include a procedure comparable to `dplyr::count
     (dataframe-display))
 
 (-> flights
-    (dataframe-filter*
-     (dep_delay)
-     (not (na? dep_delay)))
+    (dataframe-remove-na 'dep_delay)
     (dataframe-aggregate*
      (month)
      (avg_delay (dep_delay) (inexact (mean dep_delay)))
