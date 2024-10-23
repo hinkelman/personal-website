@@ -1,10 +1,9 @@
 +++
 title = "Getting started with Chez Scheme and Emacs on Ubuntu"
 date = 2020-02-08
-updated = 2024-02-11
+updated = 2024-10-23
 [taxonomies]
-categories = ["Chez Scheme", "Emacs"]
-tags = ["REPL", "packages", "libraries", "extensions", "Raven", "geiser", "Linux"]
+tags = ["Chez Scheme", "Emacs", "geiser"]
 +++
 
 I've been an enthusiastic Mac user for about 12 years, but hardware problems with a recent MacBook Pro and friction surrounding the Catalina upgrade pushed me to evaluate other Unix-like systems. I pulled out an old ASUS laptop that originally had Windows 7(?) installed, but was most recently running [CloudReady](https://www.neverware.com/freedownload). I first tried installing [FreeBSD](https://www.freebsd.org) because it seemed like an intriguing alternative, but the installation failed on the old hardware. I then tried [Debian](https://www.debian.org), but also failed. Finally, I reached for [Ubuntu](https://ubuntu.com) and, true to its reputation as being beginner friendly, was able to successfully complete the installation [[1]](#1).
@@ -118,20 +117,11 @@ Now, from a Chez REPL, we can see the effect of our changes.
 
 If we have a library at `home/username/chez-lib/srfi/s1/lists.sls`, then we import the library with `(import (srfi s1 lists))`, i.e., you pass the components of the path to import. If you can't import the library, look at the `library` call at the top of `lists.sls`, for example, because that will give you a clue of where the library expects to be placed in `library-directories`. 
 
-```
-> (xcons 1 2)
-Exception: variable xcons is not bound
-Type (debug) to enter the debugger.
-> (import (srfi s1 lists))
-> (xcons 1 2)
-(2 . 1)
-```
-
 ***
 
 ## Emacs
 
-[Emacs](https://www.gnu.org/software/emacs/emacs.html) is the standard editor for writing Scheme code. I'm slowly becoming more comfortable with Emacs, but I'm far from proficient.
+[Emacs](https://www.gnu.org/software/emacs/emacs.html) is a versatile text editor and the default choice for Scheme programming.
 
 ### Installation
 
@@ -143,7 +133,7 @@ sudo apt install emacs-gtk
 
 ### Basic Usage
 
-The power of Emacs is in the keyboard shortcuts and customization. I'm too early in my journey to have unlocked much of that potential. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., `C-x` `C-f` corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with `M` as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to `.bashrc`, Emacs can be customized through commands saved in the `.emacs` file [[4]](#4).
+The power of Emacs is in the keyboard shortcuts and customization. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., `C-x` `C-f` corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with `M` as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to `.bashrc`, Emacs can be customized through commands saved in the `.emacs` file.
 
 ### Geiser
 
@@ -153,27 +143,25 @@ Open Emacs, enter `C-x` `C-f` to find a file, and type `.emacs` at the prompt an
 
 ```
 (require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
 ```
 
-Save `.emacs` and restart Emacs. Then type `M-x` followed by `package-refresh-contents`. If that is successful, you will see the message `Package refresh done` in the [minibuffer](https://www.gnu.org/software/emacs/manual/html_node/emacs/Minibuffer.html). To install Geiser, type `M-x` and then `package-install`. In response to the `Install package: ` prompt, type `geiser` and hit return. You will also need to install `geiser-chez` following the same package installation steps. Lastly, you need to add `(require 'geiser-chez)` to the `.emacs` file. 
+Save `.emacs` and restart Emacs. Then type `M-x` followed by `package-refresh-contents`. If that is successful, you will see the message `Package refresh done` in the [minibuffer](https://www.gnu.org/software/emacs/manual/html_node/emacs/Minibuffer.html). To install Geiser, type `M-x` and then `package-install`. In response to the `Install package: ` prompt, type `geiser-chez` and hit return. You also need to add `(require 'geiser-chez)` to the `.emacs` file. 
   
-The Chez REPL is launched through Emacs with `M-x` followed by `run-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>. Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
+The Chez REPL is launched through Emacs with `M-x` followed by `geiser-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>. Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
 
 ### Miscellaneous
 
 In Emacs, there is an option to highlight matching parantheses, which I find very helpful. Select `Options/Highlight Matching Parantheses` and then `Options/Save Options`. I've also started using [company-mode](http://company-mode.github.io) for text completion. I was also pleased to discover that reindenting lines in Emacs is as simple as selecting the section to indent and pressing <kbd>TAB</kbd>.
 
-Add the following lines to your `.emacs` file for `scheme-mode` to recognize the `.sc` and `.sls` file extensions that are used with scheme code.
+Add the following lines to your `.emacs` file for `scheme-mode` to recognize the `.sls` file extension that is used with scheme code.
 
 ```
-(add-to-list 'auto-mode-alist
-             '("\\.sls\\'" . scheme-mode)
-             '("\\.sc\\'" . scheme-mode))
+(add-to-list 'auto-mode-alist '("\\.sls\\'" . scheme-mode))
 ```
 
-In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type `C-x` `C-e`. If the executed code displays any output, it will be shown in the minibuffer and not the REPL [[5]](#5). To evaluate several s-expressions, highlight the region and type `C-c` `C-r`. To select an s-expression, place your cursor at the beginning of the s-expression and type `M-C-space` (where space is the space bar). I've done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I was excited to discover this last one.
+In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type `C-x` `C-e`. If the executed code displays any output, it will be shown in the minibuffer and not the REPL [[4]](#4). To evaluate several s-expressions, highlight the region and type `C-c` `C-r`. To select an s-expression, place your cursor at the beginning of the s-expression and type `M-C-space` (where space is the space bar). I've done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I was excited to discover this last one.
 
 ***
 
@@ -183,6 +171,4 @@ In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most us
 
 <a name="3"></a> [3] You can find the current directory by with `current-directory`.
 
-<a name="4"></a> [4] More complicated file structures for customizing Emacs are possible, but my proficiency with Emacs is not at that level, yet.
-
-<a name="5"></a> [5] If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL (AFAIK).
+<a name="4"></a> [4] If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL.
