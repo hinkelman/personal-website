@@ -1,85 +1,85 @@
-{% extends "index.html" %}
-{% import "post_macros.html" as post_macros %}
+{% extends "_base.html" %}
+{% import "macros.html" as m %}
 
-{% block title %}{{config.title}} - {{page.title}}{% endblock title %}
+{% block description %}{{page.description}}{% endblock description %}
+
+{% block head %}
+<script src="/js/footnote.js"></script>
+{% endblock head %}
+
+{% block opengraph %}
+<meta property="og:title" content="{{page.title}}">
+<meta property="og:description" content="{{page.description}}">
+<meta property="og:url" content="{{page.permalink}}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="{{config.title}}">
+{% if page.extra.feather.opengraph.image %}
+<meta property="og:image" content="{{config.base_url}}/{{page.slug}}/{{page.extra.feather.opengraph.image}}">
+{% endif %}
+{% endblock opengraph %}
 
 {% block content %}
+<div class='container'>
+	<section class="post">
+		<div class="title-and-info">
+			<h2>{{ page.title }}</h2>
+			<div class="info">
+				<span>{{ page.date | date(format="%Y %b %d") }}</span>
+				{% if page.updated %}
+					<span class='divider' />
+					<span>Updated {{ page.updated | date(format="%Y %b %d") }}</span>
+				{% endif %}
 
-{% if page.toc %}
-<div class="post-toc" id="post-toc">
-    <h2 class="post-toc-title">Contents</h2>
-    <div class="post-toc-content always-active">
-        <nav id="TableOfContents">
-            <ul>
-                {% for h1 in page.toc %}
-                <li>
-                    <a href="{{h1.permalink | safe}}" class="toc-link">{{ h1.title }}</a>
-                    {% if h1.children %}
-                    <ul>
-                        {% for h2 in h1.children %}
-                        <li>
-                            <a href="{{h2.permalink | safe}}" class="toc-link">{{ h2.title }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                </li>
-                {% endfor %}
-            </ul>
-        </nav>
-    </div>
+				{% if config.extra.feather.social %}
+                    <span class='divider' />
+                    <a href="{{config.extra.feather.social.url}}" target="_blank">{{ config.extra.feather.social.display }}</a>
+				{% endif %}
+
+				{% if page.category %}
+				<span class='divider' />
+				<!-- link to page category if user is building categories -->
+				{% if config.generate_categories_pages %}
+				<span><a href="/categories/{{page.category}}">{{ page.category }}</a></span>
+				{% else %}
+				<span>{{ page.category }}</span>
+				{% endif %}
+				{% endif %}
+			</div>
+		</div>
+		<article>
+			{% set prev = false %}
+			{% set next = false %}
+			{% if page.extra.prev %}
+			{% set prev = page.extra.prev %}
+			{% endif %}
+			{% if page.extra.next %}
+			{% set next = page.extra.next %}
+			{% endif %}
+
+			{{ m::chapter(prev=prev, next=next) }}
+			{{ page.content | safe }}
+			{{ m::chapter(prev=prev, next=next) }}
+		</article>
+	</section>
+	{% if config.extra.feather.disqus_id %}
+	<div id='disqus_thread'></div>
+	<script> var disqus_config = function () { }; (function () { var d = document, s = d.createElement('script'); s.src = 'https://{{ config.extra.feather.disqus_id }}.disqus.com/embed.js'; s.setAttribute('data-timestamp', +new Date()); (d.head || d.body).appendChild(s); })();</script>
+	<noscript>Please enable JavaScript to view the <a href='https://disqus.com/?ref_noscript'>comments powered by
+			Disqus.</a></noscript>
+	{% endif %}
+	<div id="cusdis">
+		{% if config.extra.feather.cusdis_id %}
+				<div id="cusdis_thread"
+				style="background: none !important;"
+				data-host="https://cusdis.com"
+				data-app-id="{{config.extra.feather.cusdis_id}}"
+				data-page-id="{{page.permalink}}"
+				data-page-url="{{page.slug}}"
+				data-page-title="{{page.title}}"
+				data-theme="auto"
+				></div>
+				<script async defer src="/js/cusdis.es.js"></script>
+		{% endif %}
+	</div>
 </div>
-{% endif %}
-
-<article class="post">
-    {{ post_macros::title(page=page) }}
-    <div class="post-content">
-      {{ page.content | safe }}
-    </div>
-
-    {% block page_before_footer %}
-    {% endblock page_before_footer %}
-
-    <div class="post-footer">
-        {% block page_footer %}
-            {% if page.taxonomies.tags %}
-                <div class="post-tags">
-                    {% for tag in page.taxonomies.tags %}
-                        <a href="{{ get_taxonomy_url(kind="tags", name=tag) }}">#{{ tag }}</a>
-                    {% endfor %}
-                </div>
-            {% endif %}
-            {% if page.earlier or page.later or page.lighter or page.heavier %}
-                <div class="post-nav">
-                    {% if page.earlier %}
-                        <a class="previous" href="{{ page.earlier.permalink }}">‹ {{ page.earlier.title }}</a>
-                    {% endif %}
-                    {% if page.later %}
-                        <a class="next" href="{{ page.later.permalink }}">{{ page.later.title }} ›</a>
-                    {% endif %}
-                    {% if page.lighter %}
-                        <a class="previous" href="{{ page.lighter.permalink }}">‹ {{ page.lighter.title }}</a>
-                    {% endif %}
-                    {% if page.heavier %}
-                        <a class="next" href="{{ page.heavier.permalink }}">{{ page.heavier.title }} ›</a>
-                    {% endif %}
-                </div>
-            {% endif %}
-
-        {% endblock page_footer %}
-
-    </div>
-
-    {% block page_after_footer %}
-    <br>
-    <p style="text-align:center">
-      © {{ config.title }} {{ now() | date(format="%Y") }}. 
-      Powered by <a target="_blank" href="https://getzola.org/">Zola</a>, 
-      Theme <a target="_blank" href="https://github.com/getzola/even">Even</a>.
-    </p>
-
-    {% endblock page_after_footer %}
-</article>
-
 {% endblock content %}
-

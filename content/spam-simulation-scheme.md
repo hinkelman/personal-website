@@ -3,8 +3,7 @@ title = "Spam simulation in Scheme"
 date = 2020-12-12
 updated = 2024-03-26
 [taxonomies]
-categories = ["Scheme", "Chez Scheme", "dataframe"]
-tags = ["simulation", "random-variates", "dataframe"]
+tags = ["Scheme", "Chez Scheme", "dataframe", "simulation"]
 +++
 
 I learned a lot about Scheme (R6RS) by writing a few libraries and I expect that there is more to learn by trying to use those libraries (e.g., [EDA in Scheme](/eda-scheme/)). A [blog post](http://varianceexplained.org/r/spam-simulation/) about a stochastic simulation of spam comments in R caught my eye as an interesting example to test my [`dataframe`](https://github.com/hinkelman/dataframe/) library.

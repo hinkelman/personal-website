@@ -2,8 +2,7 @@
 title = "ASCII progress bar in R and Racket"
 date = 2019-07-17
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["raart"]
+tags = ["R", "Racket"]
 +++
 
 In a [previous post](/post/progress-bar-widget-in-r-and-racket/), I used GUI toolkits to make progress bars in R and Racket. However, I usually prefer the ASCII progress bars of the [`progress` package](https://github.com/r-lib/progress) in R. The `progress` package includes several options for formatting the progress bar. I particularly like the option to display the estimated time remaining. However, for this post, we will stick to the basic progress bar.

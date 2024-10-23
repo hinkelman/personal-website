@@ -2,8 +2,7 @@
 title = "Data serialization in R and Racket"
 date = 2019-03-26
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["data-structures", "matrix", "hashtable", "nested-list", "saveRDS", "readRDS", "serialize"]
+tags = ["R", "Racket"]
 +++
 
 When programming in R, I generally pass data around by reading and writing text files (typically, CSV files). The ubiquity of CSV files means that many different types of software will open them easily (e.g., Notepad, Excel, TextEdit, etc.). However, if the data structure is not flat or contains other attributes, then writing to CSV requires flattening and/or dropping attributes. The general solution to writing data to a file while retaining structure and attributes is [serialization](https://en.wikipedia.org/wiki/Serialization).

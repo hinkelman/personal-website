@@ -2,8 +2,7 @@
 title = "Avoiding namespace pollution in R and Chez Scheme"
 date = 2020-02-19
 [taxonomies]
-categories = ["R", "Chez Scheme"]
-tags = ["packages", "libraries", "namespaces"]
+tags = ["R", "Chez Scheme"]
 +++
 
 I was reading a [blog post](https://white.ucc.asn.au/2020/02/09/whycompositionaljulia.html) that mentioned that Julia has "[w]eak conventions about namespace pollution" and it got me thinking about how I manage namespace pollution in R and Chez Scheme. The short answer is that I don't. I developed bad habits in R centered around writing overly terse code. 

@@ -3,8 +3,7 @@ title = "Analyzing gapminder dataset with base R and Scheme"
 date = 2021-04-30
 updated = 2024-03-26
 [taxonomies]
-categories = ["Scheme", "Chez Scheme", "dataframe"]
-tags = ["dataframe", "dplyr", "pandas", "EDA", "filter", "modify", "aggregate"]
+tags = ["Scheme", "Chez Scheme", "dataframe"]
 +++
 
 I keep my eye out for blog posts illustrating data analysis tasks in R that I can use to test the functionality of my [`chez-stats`](https://github.com/hinkelman/chez-stats) and [`dataframe`](https://github.com/hinkelman/dataframe/) libraries for Scheme (R6RS). A [post](https://appsilon.com/pandas-vs-dplyr/) comparing [`pandas`](https://pandas.pydata.org/) (Python) and [`dplyr`](https://dplyr.tidyverse.org/) (R) in a basic analysis of the gapminder dataset provides a nice little test case. In this post, I will also include base R code used to accomplish the same tasks as a contrast to both the Scheme code and the `dplyr` code from the other post. 

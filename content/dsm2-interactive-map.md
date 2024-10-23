@@ -2,8 +2,7 @@
 title = "DSM2 interactive map"
 date = 2019-03-24
 [taxonomies]
-categories = ["R", "Shiny"]
-tags = ["DSM2", "leaflet"]
+tags = ["R", "Shiny", "leaflet"]
 +++
 
 The [Delta Simulation Model II (DSM2)](https://water.ca.gov/Library/Modeling-and-Analysis/Bay-Delta-Region-models-and-tools/Delta-Simulation-Model-II) is a hydrodynamic model used for [Sacramento-San Joaquin Delta](https://en.wikipedia.org/wiki/Sacramento%E2%80%93San_Joaquin_River_Delta) planning and management. When working with DSM2 output, I frequently need to look up the location of channels, nodes, and stations in the model. A map of all of the channels, nodes, and stations (and more) is provided with DSM2 as a [PDF file](/pdf/DSM2_Grid2.0.pdf), but that file is not easy to search.

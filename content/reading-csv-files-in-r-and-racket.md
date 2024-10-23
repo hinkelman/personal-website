@@ -2,8 +2,7 @@
 title = "Reading CSV files in R and Racket"
 date = 2019-06-09
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["data-structures", "dataframe", "list"]
+tags = ["R", "Racket", "dataframe"]
 +++
 
 In a [previous post](/post/data-serialization-in-r-and-racket/), I wrote about reading and writing data to file while retaining the structure and attributes of the data (i.e., data serialization). However, I more commonly pass data around as text files (usually, CSV files). For this post, I created an [example CSV file](/data/example.csv) with a [tool for generating test data](http://convertcsv.com/generate-test-data.htm), which allows for including different data types (e.g., dates, integers, names, phone numbers) in the output file.

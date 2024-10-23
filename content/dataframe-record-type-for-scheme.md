@@ -3,8 +3,7 @@ title = "A dataframe record type for Scheme"
 date = 2020-03-27
 updated = 2024-03-12
 [taxonomies]
-categories = ["dataframe", "Scheme", "Chez Scheme"]
-tags = ["dataframe", "data-structures", "association-list"]
+tags = ["dataframe", "Scheme", "Chez Scheme"]
 +++
 
 As an exercise in my Scheme (R6RS) learning journey, I have implemented a [dataframe record type](https://github.com/hinkelman/dataframe/) and procedures to work with the dataframe record type. Dataframes are column-oriented, tabular data structures useful for data analysis found in several languages including [R](https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html), [Python](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html), [Julia](https://juliadata.github.io/DataFrames.jl/stable/), and [Go](https://github.com/rocketlaunchr/dataframe-go). In this post, I will introduce the dataframe record type and basic procedures for working with dataframes. In subsequent posts, I will describe other dataframe procedures, e.g., filter, sort, aggregate, etc.

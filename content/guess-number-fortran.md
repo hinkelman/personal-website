@@ -2,8 +2,7 @@
 title = "Guess the number game in Fortran"
 date = 2021-04-07
 [taxonomies]
-categories = ["Fortran"]
-tags = ["guess-number", "random-variates"]
+tags = ["Fortran"]
 +++
 
 I recently came across [this blog post](https://opensource.com/article/21/4/compare-programming-languages) on writing simple test programs in different programming languages as a way to get a feel for a language. At the bottom of the post, there were links to articles on implementations of a number guessing game in 13 different languages, [including Fortran](https://opensource.com/article/21/1/fortran). I was curious about the Fortran example because I've been interested in learning a little Fortran after hearing about efforts to improve the tooling around Fortran (e.g., [here](https://ondrejcertik.com/blog/2021/03/resurrecting-fortran/) and [here](https://youtu.be/JUHS-JFvs90)). Well, the Fortran example was written in Fortran 77 so I decided that re-writing it in modern Fortran would be a nice little exercise.

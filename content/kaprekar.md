@@ -2,8 +2,7 @@
 title = "Proof of Kaprekar's constant in Scheme, Python, and Elixir"
 date = 2024-05-30
 [taxonomies]
-categories = ["Scheme", "Python", "Elixir"]
-tags = ["Kaprekar", "math"]
+tags = ["Scheme", "Python", "Elixir"]
 +++
 
 I thoroughly enjoyed this [delightful post](https://demian.ferrei.ro/blog/programmer-vs-mathematician) on [Kaprekar's constant](https://en.wikipedia.org/wiki/6174), which was new to me. Similar to the post author, I also like to use programming to understand mathematical concepts. I thought it would be a fun exercise to translate the example Ruby code to my favorite language, Scheme, and two other languages that I'm learning, Python and Elixir.

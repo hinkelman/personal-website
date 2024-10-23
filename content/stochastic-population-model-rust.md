@@ -2,8 +2,7 @@
 title = "Stochastic population model in Rust"
 date = 2020-12-12
 [taxonomies]
-categories = ["Rust"]
-tags = ["stochastic-population-model", "vector", "random-variates"]
+tags = ["Rust"]
 +++
 
 As I spent a little time learning [F#](https://fsharp.org/) over the last few months, I found that it wasn't holding my attention. My interest in F# was based on the idea that I could write more robust code (via static typing) than in R and that I could more easily turn that code into web or desktop applications. I still think that F# could be a valuable tool to add to my toolbox, but I encountered just enough friction that I wasn't having fun with it. My primary point of frustration is that so much material for learning F# assumes that you already know C# and .NET. Plus, the roll out of .NET 5 and F# 5 this fall, while exciting, creates a period of increased confusion for beginners. 

@@ -3,8 +3,7 @@ title = "Data transformation in Scheme"
 date = 2023-07-07
 updated = 2024-09-17
 [taxonomies]
-categories = ["Scheme", "Chez Scheme", "dataframe"]
-tags = ["R4DS", "dplyr"]
+tags = ["Scheme", "Chez Scheme", "dataframe", "dplyr"]
 +++
 
 I have done some recent work on my [`dataframe`](https://github.com/hinkelman/dataframe/) library for Scheme (R6RS) and thought I would run through the examples in the [Data Transformation chapter](https://r4ds.hadley.nz/data-transform.html) of [R for Data Science](https://r4ds.hadley.nz/) (R4DS). In this post, I won't reproduce any of the R code and will provide limited commentary on the Scheme code (which is also available via this [gist](https://gist.github.com/hinkelman/0945b3c905dcd244809bbed81d2faeb1)).

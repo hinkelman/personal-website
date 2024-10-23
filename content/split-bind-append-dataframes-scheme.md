@@ -3,8 +3,7 @@ title =  "Split, bind, and append dataframes in Scheme"
 date = 2020-04-04
 updated = 2024-03-12
 [taxonomies]
-categories = ["dataframe", "Scheme", "Chez Scheme"]
-tags = ["dataframe", "data-structures", "association-list", "replicate", "rep", "cbind", "dplyr", "bind_rows"]
+tags = ["dataframe", "Scheme", "Chez Scheme"]
 +++
 
 This post is the third in a [series](/categories/dataframe/) on the [`dataframe` library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for splitting, binding, and appending dataframes.

@@ -2,8 +2,7 @@
 title = "Comparing dataframe operations in Scheme, Python, and R"
 date = 2024-03-27
 [taxonomies]
-categories = ["Scheme", "Chez Scheme", "dataframe"]
-tags = ["dataframe", "dplyr", "pandas"]
+tags = ["Scheme", "Chez Scheme", "dataframe", "dplyr", "pandas"]
 +++
 
 I recently came across [this blog post](https://www.sumsar.net/blog/pandas-feels-clunky-when-coming-from-r/) that calls [`pandas`](https://pandas.pydata.org/) (Python) "clunky" compared to the "silky smooth" [`dplyr`](https://dplyr.tidyverse.org/) (R). No objections from me. `dplyr` is my favorite R package. I thought it would fun to compare the relative clunkiness of my [`dataframe`](https://github.com/hinkelman/dataframe/) library for Scheme (R6RS) to `pandas` and `dplyr`. I will include the R and Python code here to save some clicking back and forth, but will mostly be commenting on the Scheme code.

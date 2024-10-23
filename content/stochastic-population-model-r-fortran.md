@@ -2,8 +2,7 @@
 title = "Stochastic population model in R, Rcpp, and Fortran"
 date = 2021-05-09
 [taxonomies]
-categories = ["Fortran", "R"]
-tags = ["stochastic-population-model", "Rcpp", "timing"]
+tags = ["Fortran", "R"]
 +++
 
 The stochastic logistic population model described in [this blog post](https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html) has become my default exercise when I'm exploring a new programming language ([Racket](/stochastic-population-model-r-racket/), [F#](/stochastic-population-model-fsharp/), [Rust](/stochastic-population-model-rust/)). I ended that Rust post by noting that I was interested in Rust as a modern alternative for scientific computing and thought it would be a good learning exercise to re-write small legacy Fortran programs in Rust. In the process of looking for Fortran programs to translate to Rust, though, I found myself becoming more interested in the idea of learning Fortran than Rust, particularly after learning about the efforts to improve the tooling around Fortran (e.g., [here](https://ondrejcertik.com/blog/2021/03/resurrecting-fortran/) and [here](https://youtu.be/JUHS-JFvs90)). So, here we are...exploring Fortran via the [stochastic population model exercise](https://github.com/hinkelman/stochastic-population-model). 

@@ -2,8 +2,7 @@
 title = "Progress bar widget in R and Racket"
 date = 2019-07-13
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["GUI", "class", "object", "Tk"]
+tags = ["R", "Racket", "Tk", "GUI"]
 +++
 
 As an impatient person and an insecure programmer, I typically use progress bars for any code that takes more than a few minutes to run. In R, a progress bar widget is available through the [`tcltk` package](https://stat.ethz.ch/R-manual/R-devel/library/tcltk/html/tcltk-package.html). 

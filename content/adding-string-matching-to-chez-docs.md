@@ -2,8 +2,7 @@
 title = "Adding string matching to chez-docs"
 date = 2020-01-05
 [taxonomies]
-categories = ["chez-docs", "Chez Scheme"]
-tags = ["Levenshtein-distance", "strings", "do-loop"]
+tags = ["chez-docs", "Chez Scheme"]
 +++
 
 I recently wrote a little library, [`chez-docs`](https://github.com/hinkelman/chez-docs), to make accessing documentation easier while learning Chez Scheme ([blog post](/post/access-chez-scheme-documentation-from-repl/)). The main procedure, `doc`, in `chez-docs` only returns results for exact matches with `proc` [[1]](#1). To aid in discovery, I've added a procedure, `find-proc`, that provides exact and approximate matching of search strings.

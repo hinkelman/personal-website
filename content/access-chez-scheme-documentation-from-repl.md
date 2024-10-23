@@ -3,8 +3,7 @@ title = "Access Chez Scheme documentation from the REPL"
 date = 2020-01-01
 updated = 2023-05-02
 [taxonomies]
-categories = ["chez-docs", "Chez Scheme", "R"]
-tags = ["rvest", "web-scraping", "tsv", "association-list", "system"]
+tags = ["chez-docs", "Chez Scheme", "R", "rvest"]
 +++
 
 In the process of learning Chez Scheme, I've missed R's ability to quickly pull up documentation from the console via [`help` or `?`](https://www.r-project.org/help.html). I've toyed with the idea of trying to format the contents of the [Chez Scheme User's Guide](https://cisco.github.io/ChezScheme/csug9.5/) for display in the REPL (similar to [Clojure Docs](https://clojuredocs.org/clojure.repl/doc)). But that is probably too big of a task for me at this point. It recently occurred to me, though, that I can write a simple library, [`chez-docs`](https://github.com/hinkelman/chez-docs), with only one procedure, `doc`, that will make it a bit easier to access the Chez Scheme User's Guide.

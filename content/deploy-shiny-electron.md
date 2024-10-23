@@ -3,8 +3,7 @@ title = "Deploying a Shiny app as a desktop application with Electron"
 date = 2018-11-21
 updated = 2020-11-28
 [taxonomies]
-categories = ["R", "Shiny"]
-tags = ["DSM2", "Electron"]
+tags = ["R", "Shiny", "Electron"]
 +++
 
 In developing the [DSM2 HYDRO Viz Tool](https://github.com/fishsciences/dsm2-viz-tool), we were faced with deciding how to deploy a Shiny app that required interaction with large local files. I first heard about the possibility of using [Electron](https://electronjs.org/) to deploy Shiny apps as standalone desktop applications in this [talk by Katie Sasso](https://www.youtube.com/watch?v=ARrbbviGvjc), but it wasn't until I discovered the [R Shiny Electron (RSE) template](https://github.com/dirkschumacher/r-shiny-electron) that I decided to take the plunge. 

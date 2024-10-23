@@ -3,8 +3,7 @@ title = "Select, drop, and rename dataframe columns in Scheme"
 date = 2020-03-29
 updated = 2024-03-12
 [taxonomies]
-categories = ["dataframe", "Scheme", "Chez Scheme"]
-tags = ["dataframe", "data-structures", "association-list", "dplyr"]
+tags = ["dataframe", "Scheme", "Chez Scheme", "dplyr"]
 +++
 
 This post is the second in a [series](/categories/dataframe/) on the [dataframe library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from the [`dplyr` R package](https://dplyr.tidyverse.org) for selecting, dropping, and renaming columns.

@@ -2,8 +2,7 @@
 title = "Stochastic population model in F#"
 date = 2020-11-08
 [taxonomies]
-categories = ["F#"]
-tags = ["stochastic-population-model", "recursion", "lambda", "unfold"]
+tags = ["F#"]
 +++
 
 In [three](/programming-horizons/) [previous](/exploring-scheme-implementations/) [posts](/programming-horizons-revisited/), I wrote about different programming languages that I have considered learning. I mentioned about 15 different languages in those posts. [F#](https://fsharp.org/) was not on the list. Because my background is in R, I thought I was better off sticking to learning dynamically typed languages at this point. Moreover, I hold a longstanding bias against Microsoft and Windows and that bias was easy to transfer to F#. 

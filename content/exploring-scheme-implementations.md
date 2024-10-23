@@ -2,8 +2,7 @@
 title = "Exploring Scheme implementations"
 date = 2019-07-28
 [taxonomies]
-categories = ["Chez Scheme", "Racket", "Chicken"]
-tags = []
+tags = ["Chez Scheme", "Racket", "Chicken"]
 +++
 
 Over the last 6 months, I have been learning [Racket](https://racket-lang.org) in my free time. One of my [first posts on this blog](/post/programming-horizons/) laid out my reasons for choosing Racket. The relatively low barrier to entry (e.g., easy installation of Racket and packages, DrRacket IDE, good docs, etc.) allowed me to build momentum with Racket and I was feeling satisfied with my choice of Racket as an [alternative to Python](https://dustycloud.org/blog/racket-is-an-acceptable-python/).

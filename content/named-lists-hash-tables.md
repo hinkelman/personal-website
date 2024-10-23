@@ -2,8 +2,7 @@
 title = "Storing parameters in named lists and hash tables in R and Racket"
 date = 2019-03-20
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["named-lists", "hashtables", "data-structures"]
+tags = ["R", "Racket"]
 +++
 
 When building a simulation model in R, I might want to group related input parameters into a data structure. For example, in a life cycle model with resident and anadromous fish, you might use different fecundity parameters for each life history type. One option is to create different objects for each fecundity parameter.

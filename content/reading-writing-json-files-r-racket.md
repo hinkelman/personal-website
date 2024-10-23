@@ -2,8 +2,7 @@
 title = "Reading and writing JSON files in R and Racket"
 date = 2019-06-14
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["JSON", "data-structures", "dataframe", "hashtable", "list", "matrix", "array", "vector"]
+tags = ["R", "Racket", "dataframe"]
 +++
 
 In learning about [reading CSV files in Racket](/post/reading-csv-files-in-r-and-racket/), I have started to reconsider whether storing small(ish) datasets in CSV files is the best default behavior [[1]](#1). My default was set by primarily working in R, where reading and writing CSV files plays a central role in data analysis. When working solely in R, I expect that my old habits will die hard and CSV files will continue to play a prominent role. However, when passing small(ish) data between R and Racket, I think JSON might be a better alternative [[2]](#2).

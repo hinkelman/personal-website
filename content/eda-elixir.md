@@ -2,8 +2,7 @@
 title = "Exploratory data analysis in Elixir"
 date = 2023-07-08
 [taxonomies]
-categories = ["Elixir", "dataframe", "Kino", "Explorer"]
-tags = ["EDA", "dataframe"]
+tags = ["Elixir", "dataframe", "Kino", "Explorer"]
 +++
 
 I have been tinkering with lots of different programming languages (see [here](/programming-horizons/) and [here](/programming-horizons-revisited/)) over the last few years. Scheme is the only language so far that I have enjoyed enough to write a decent amount of code. [Elixir](https://elixir-lang.org/) first caught my eye back in April 2020, but I've only recently tried to write more than 'hello world' with it. So far, I think it is great and I'm excited to learn more. I haven't previously been a fan of code notebooks, but I think [Livebook](https://livebook.dev/) is amazing.

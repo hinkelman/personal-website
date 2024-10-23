@@ -2,8 +2,7 @@
 title = "Generating random numbers in R and Racket"
 date = 2019-04-05
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["runif", "rnorm", "rpois", "flnormal-sample", "flvector", "distributions"]
+tags = ["R", "Racket"]
 +++
 
 R makes it easy to generate random numbers from a wide variety of distributions with a consistent interface. For example, `runif`, `rnorm`, and `rpois` generate random numbers from uniform, normal, and Poisson distributions, respectively. 

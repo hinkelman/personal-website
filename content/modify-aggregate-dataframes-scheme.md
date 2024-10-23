@@ -3,8 +3,7 @@ title = "Modify and aggregate dataframes in Scheme"
 date = 2020-09-05
 updated = 2024-03-11
 [taxonomies]
-categories = ["Scheme", "Chez Scheme", "dataframe"]
-tags = ["dataframe", "data-structures", "association-list", "modify", "modify-at", "dplyr", "mutate", "mutate_at", "aggregate", "macros"]
+tags = ["Scheme", "Chez Scheme", "dataframe", "dplyr", "macros"]
 +++
 
 This post is part of a [series](/categories/dataframe/) on the [dataframe library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for modifying and aggregating dataframes.

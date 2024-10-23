@@ -3,8 +3,7 @@ title = "DataTables from the DT package as a Shiny CRUD app interface"
 date = 2019-03-10
 updated = 2023-03-27
 [taxonomies]
-categories = ["R", "Shiny"]
-tags = ["basketball", "DataTables", "DT", "CRUD"]
+tags = ["R", "Shiny"]
 +++
 
 [Shiny Scorekeeper](https://github.com/hinkelman/Shiny-Scorekeeper) is a basketball scorekeeper app built with the [Shiny](https://shiny.rstudio.com) web framework for [R](https://www.r-project.org). I needed a new app for scoring video of my son's basketball games and I decided it would be a good learning experience to try to build my own. In this post, I describe using [DataTables from the DT package](https://rstudio.github.io/DT/) as the interface to the CRUD (create-read-update-delete) features in Shiny Scorekeeper. The post assumes familiarity with features of Shiny apps, particularly [`reactiveValues()`](https://shiny.rstudio.com/reference/shiny/0.14/reactiveValues.html), [`observe()`](https://shiny.rstudio.com/reference/shiny/latest/observe.html), and [`observeEvent()`](https://shiny.rstudio.com/reference/shiny/1.0.1/observeEvent.html).

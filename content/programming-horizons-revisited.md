@@ -2,7 +2,6 @@
 title = "Programming horizons revisited"
 date = 2020-04-03
 [taxonomies]
-categories = ["navel-gazing"]
 tags = ["Scheme", "Racket", "ChezScheme", "Pharo", "Smalltalk", "Elixir", "Rust", "Clojure", "Julia", "Python", "C++", "JavaScript", "Red"]
 +++
 

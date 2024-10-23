@@ -2,8 +2,7 @@
 title = "Reading and writing CSV files in Chez Scheme"
 date = 2019-10-18
 [taxonomies]
-categories = ["chez-stats", "Chez Scheme"]
-tags = ["libraries", "packages", "statistics"]
+tags = ["chez-stats", "Chez Scheme"]
 +++
 
 I have added functionality for reading and writing CVS files to my Chez Scheme library, [`chez-stats`](https://github.com/hinkelman/chez-stats). In a [previous post](/post/reading-csv-files-in-r-and-racket/), I compared reading CSV files in R and Racket and made the following observation.

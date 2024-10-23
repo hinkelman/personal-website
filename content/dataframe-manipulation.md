@@ -3,8 +3,7 @@ title = "Dataframe manipulation in Scheme"
 date = 2024-04-22
 updated = 2024-05-10
 [taxonomies]
-categories = ["Scheme", "Chez Scheme", "dataframe"]
-tags = ["dataframe", "dplyr"]
+tags = ["Scheme", "Chez Scheme", "dataframe", "dplyr"]
 +++
 
 This is yet another post where I try out my [`dataframe`](https://github.com/hinkelman/dataframe/) library for Scheme (R6RS) on examples found in blog posts. This blog [post](https://statsandr.com/blog/introduction-to-data-manipulation-in-r-with-dplyr/) demonstrates data manipulation with [`dplyr`](https://dplyr.tidyverse.org/) (R). I provide only the Scheme code and some commentary. You will have to click through to the original post to see how it compares to R.

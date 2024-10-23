@@ -2,8 +2,7 @@
 title = "A simple microbenchmarking function in Racket"
 date = 2019-04-20
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["timing", "rnorm", "flnormal-sample", "recursion", "raart", "table", "time-apply"]
+tags = ["R", "Racket"]
 +++
 
 In a [previous post](/post/stochastic-population-model-r-racket/), I wrote a function to perform repeated timings of untyped and typed versions of the same Racket functions. 

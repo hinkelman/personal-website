@@ -2,8 +2,7 @@
 title = "RPI and SOS in Scheme, Python, and Elixir"
 date = 2024-09-02
 [taxonomies]
-categories = ["Scheme", "Python", "Elixir"]
-tags = ["rpi", "basketball", "dataframe", "Polars", "Explorer"]
+tags = ["Scheme", "Python", "Elixir", "dataframe", "Polars", "Explorer"]
 +++
 
 Last spring, I played in a 3x3 basketball leage with 14 teams and only 6 regular-season games. The unbalanced schedule made me wonder if we would end up with wonky playoff seeding. I thought it would be fun to calculate the Rating Percentage Index (RPI) and Strength Of Schedule (SOS) for each team to assess discrepancies between W-L record and team rating. I was mostly following the R code for RPI in [this post](http://dpmartin42.github.io/posts/r/college-basketball-rankings) and the SOS calculations [here](https://hackastat.eu/en/learn-a-stat-strength-of-schedule-sos/). For comparison, I wrote code in Scheme ([dataframe](https://github.com/hinkelman/dataframe)), Python ([Polars](https://pola.rs/)), and Elixir ([Explorer](https://hexdocs.pm/explorer/Explorer.html)), which is also using [Polars](https://docs.rs/polars/latest/polars/) as the backend. All code and data are available [here](https://github.com/hinkelman/rpi). Disclaimer: the Python and Elixir code works, but it may not be the most idiomatic or performant way to write that code. 

@@ -2,8 +2,7 @@
 title = "Nested for loops in R and Racket"
 date = 2019-03-17
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["Beverton-Holt", "recursion"]
+tags = ["R", "Racket"]
 +++
 
 I have recently started [learning Racket](/post/programming-horizons/). For a first task, I tried to build a simple age-structured population model. I hit a stumbling block and reached out to the helpful folks on the [Racket mailing list](https://groups.google.com/forum/#!topic/racket-users/IqM-bm42Ecw). In this post, I recap the mailing list exchange with a target audience of R programmers that are interested in learning more about Racket.

@@ -2,8 +2,7 @@
 title = "Vectorized conditional statement in R and Racket"
 date = 2019-04-15
 [taxonomies]
-categories = ["R", "Racket"]
-tags = ["conditional", "if", "ifelse", "map", "sapply"]
+tags = ["R", "Racket"]
 +++
 
 Racket's `if` is not vectorized like `ifelse` in R. Instead, this Racket code

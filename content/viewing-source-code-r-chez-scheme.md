@@ -2,8 +2,7 @@
 title = "Viewing source code in R and Chez Scheme"
 date = 2020-04-22
 [taxonomies]
-categories = ["Chez Scheme", "R"]
-tags = ["methods", "getAnywhere", "inspect", "introspection", "read", "filter"]
+tags = ["Chez Scheme", "R"]
 +++
 
 One of the advantages of open source software is being able to view, review, and learn from source code. Both R and Chez Scheme provide tools for accessing source code.

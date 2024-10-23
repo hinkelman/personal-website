@@ -2,8 +2,7 @@
 title = "ASCII progress bar in Chez Scheme"
 date = 2020-05-06
 [taxonomies]
-categories = ["Chez Scheme", "Racket", "R"]
-tags = ["carriage-return", "raart"]
+tags = ["Chez Scheme", "Racket", "R"]
 +++
 
 As an impatient person, I typically use progress bars for any code that takes more than a few minutes to run. In a [previous post](/posts/ascii-progress-bar-in-r-and-racket), I wrote about creating ASCII progress bars in R and Racket. The Racket version depended on the [`raart` module](https://docs.racket-lang.org/raart/index.html), which "provides an algebraic model of ASCII that can be used for art, user interfaces, and diagrams." Because I'm not aware of any such library for Chez Scheme [[1]](#1), I was left feeling stuck.

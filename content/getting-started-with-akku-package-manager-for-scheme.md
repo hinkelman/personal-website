@@ -3,8 +3,7 @@ title = "Getting started with Akku package manager for Scheme"
 date = 2020-05-16
 updated = 2021-05-17
 [taxonomies]
-categories = ["Chez Scheme", "Akku"]
-tags = ["libraries", "packages"]
+tags = ["Chez Scheme", "Akku"]
 +++
 
 [Akku](https://akkuscm.org) is a package manager for Scheme that currently supports numerous R6RS and R7RS Scheme implementations [[1]](#1). I was slow to embrace Akku because I encountered some initial friction with installation and setup. Moreover, coming from R, I was more familiar with a global package management model than Akku's project-based workflow. In the meantime, I was content to manually manage the few libraries that I had downloaded from different repos and placed in a directory found by Chez's `(library-directories)`.

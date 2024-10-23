@@ -2,8 +2,7 @@
 title = "Reading and writing JSON files in R and Chez Scheme"
 date = 2020-03-01
 [taxonomies]
-categories = ["R", "Chez Scheme"]
-tags = ["JSON", "data-structures", "dataframe", "list", "association-list", "vector", "array", "object"]
+tags = ["R", "Chez Scheme", "dataframe"]
 +++
 
 I have [previously written](/reading-writing-json-files-r-racket/) about how to read and write JSON files in R and Racket. In re-reading that old post, I'm struck by how it shows me tinkering without understanding. Now that I have pivoted [from learning Racket to learning Chez Scheme](/exploring-scheme-implementations/), I'm revisiting JSON as a data serialization format and actually reading about JSON instead of just playing with JSON packages. 

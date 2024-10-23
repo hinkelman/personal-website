@@ -2,7 +2,6 @@
 title = "Expanding my programming horizons"
 date = 2019-02-15
 [taxonomies]
-categories = ["navel-gazing"]
 tags = ["C++", "Clojure", "Elm", "Julia", "NetLogo", "Pharo", "Python", "R", "Racket", "Red"]
 +++
 

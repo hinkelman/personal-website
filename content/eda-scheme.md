@@ -3,8 +3,7 @@ title = "Exploratory data analysis in Scheme"
 date = 2020-09-12
 updated = 2023-03-26
 [taxonomies]
-categories = ["Scheme", "Chez Scheme", "dataframe", "gnuplot-pipe"]
-tags = ["EDA", "macros", "dataframe"]
+tags = ["Scheme", "Chez Scheme", "dataframe", "gnuplot-pipe", "macros"]
 +++
 
 When I started learning Scheme (R6RS), I took the common approach of learning a new language by implementing features from familiar languages (namely R). That approach sent me down the path of writing the [`dataframe`](https://github.com/hinkelman/dataframe/) library and porting [`gnuplot-pipe`](https://github.com/hinkelman/gnuplot-pipe) from Chicken to Chez Scheme. Those two libraries now allow me to conduct simple exploratory data analysis (EDA) in Scheme that should feel relatively familiar to R programmers. In this post, I will work through a simple example, which mostly serves to reinforce how much better suited R is for these types of tasks.
@@ -58,16 +57,16 @@ We will use the same aggregation repeatedly so we will define a custom procedure
  dim: 16 rows x 4 cols
     year  avg-sales  avg-volume  avg-median 
    <num>      <num>       <num>       <num> 
-   2000.   478.4581    7.170E+7    96442.00 
-   2001.   495.6167    7.667E+7   100801.55 
-   2002.   531.9728    8.571E+7   104365.11 
-   2003.   539.0849    8.848E+7   108008.28 
-   2004.   577.2337    9.738E+7   111096.75 
-   2005.   635.9074    1.138E+8   118384.31 
-   2006.   664.8815    1.247E+8   124263.48 
-   2007.   620.6458    1.220E+8   130156.63 
-   2008.   520.0451    1.019E+8   131297.93 
-   2009.   469.2169    8.906E+7   131483.76 
+   1.      478.4581    7.170E+7    96442.00 
+   2.      495.6167    7.667E+7   100801.55 
+   3.      531.9728    8.571E+7   104365.11 
+   4.      539.0849    8.848E+7   108008.28 
+   5.      577.2337    9.738E+7   111096.75 
+   6.      635.9074    1.138E+8   118384.31 
+   7.      664.8815    1.247E+8   124263.48 
+   8.      620.6458    1.220E+8   130156.63 
+   9.      520.0451    1.019E+8   131297.93 
+   10.     469.2169    8.906E+7   131483.76 
 ```
 
 We can plot data using `gnuplot-pipe`; a Chez Scheme interface for [`Gnuplot`](http://gnuplot.info/). I have only a rudimentary understanding of how to use `Gnuplot` so these plots will be very simple. 

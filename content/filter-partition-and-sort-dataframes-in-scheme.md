@@ -3,8 +3,7 @@ title = "Filter, partition, and sort dataframes in Scheme"
 date = 2020-04-09
 updated = 2024-03-11
 [taxonomies]
-categories = ["dataframe", "Scheme", "Chez Scheme"]
-tags = ["dataframe", "data-structures", "association-list", "dplyr", "arrange", "macros"]
+tags = ["dataframe", "Scheme", "Chez Scheme", "dplyr", "macros"]
 +++
 
 This post is the fourth in a [series](/categories/dataframe/) on the [dataframe library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from the [`dplyr` R package](https://dplyr.tidyverse.org) for filtering, partitioning, and sorting dataframes. And discuss implementation decisions in the `dataframe` library.
