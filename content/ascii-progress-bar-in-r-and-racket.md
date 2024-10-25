@@ -72,7 +72,7 @@ As a first step, we create a function, `generate-bar`, that appends the characte
 
 I flailed around for too long trying to work out the logic for appending the strings. When I took a step back and made the table below, the logic in `generate-bar` became clear. 
 
-<img src="/img/ascii-progress-table.png" width="50%"/>
+<img src="/img/ascii-progress-table.png" width="334" height = "166" alt="Table showing how many of each character type to use for a given percentage complete.">
 
 The `text` function converts the appended string to an `raart` object. The `raart` object can be drawn to a fresh buffer with `draw-here`. 
 
