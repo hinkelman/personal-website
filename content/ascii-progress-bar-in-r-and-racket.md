@@ -72,15 +72,56 @@ As a first step, we create a function, `generate-bar`, that appends the characte
 
 I flailed around for too long trying to work out the logic for appending the strings. When I took a step back and made the table below, the logic in `generate-bar` became clear. 
 
-| value 	| `=` 	| `>` 	| `-` 	|
-|:------	|:----	|:----	|:----	|
-|     0 	|   0 	|   0 	|  50 	|
-|     1 	|   0 	|   1 	|  49 	|
-|     2 	|   0 	|   1 	|  49 	|
-|    50 	|  24 	|   1 	|  25 	|
-|    98 	|  48 	|   1 	|   1 	|
-|    99 	|  48 	|   1 	|   1 	|
-|   100 	|  49 	|   1 	|   0 	|
+<table>
+    <tr>
+        <td><strong>value</strong></td>
+        <td><code>=</code></td>
+        <td><code>&gt;</code></td>
+        <td><code>-</code></td>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>50</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>0</td>
+        <td>1</td>
+        <td>49</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>0</td>
+        <td>1</td>
+        <td>49</td>
+    </tr>
+    <tr>
+        <td>50</td>
+        <td>24</td>
+        <td>1</td>
+        <td>25</td>
+    </tr>
+    <tr>
+        <td>98</td>
+        <td>48</td>
+        <td>1</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>99</td>
+        <td>48</td>
+        <td>1</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>100</td>
+        <td>49</td>
+        <td>1</td>
+        <td>0</td>
+    </tr>
+</table>
 
 The `text` function converts the appended string to an `raart` object. The `raart` object can be drawn to a fresh buffer with `draw-here`. 
 
