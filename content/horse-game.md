@@ -102,7 +102,7 @@ The probability of winning at any point in the game is the probability that a nu
 8e-04 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 8e-04 
 ```
 
-I ran 10,000 simulations of the game to determine which horses win most often. 2 or 12 each win 19% of the time, 3/11 = 9%, 4/10 = 10-11%, 5/9 = 6%, 6/7/8 = 4%. The primary driver behind that outcome is that 2 and 12 are less likely to end up in the kitty than 3 and 11 and so on. The slightly better outcome for 4/10 than 3/11 is a byproduct of how the board is discretized and is evident in `rolls_df` where the `Prob` is higher than the `StepProb` for 4/10.
+I ran 10,000 simulations of the game to determine which horses win most often. 2 or 12 each win 19% of the time, 3/11 = 9%, 4/10 = 10-11%, 5/9 = 6%, 6/7/8 = 4%. The primary driver behind that outcome is that 2 and 12 are less likely to end up as scratches than 3 and 11 and so on. The slightly better outcome for 4/10 than 3/11 is a byproduct of how the board is discretized and is evident in `rolls_df` where the `Prob` is higher than the `StepProb` for 4/10.
 
 The figure below shows the kitty distribution paneled by the winning horse for those 10,000 simulated games. The solid vertical line is the overall average kitty and the dashed vertical line is the mean for each panel. The kitty grows largest in games where 6/7/8 win because it takes the most steps for those horses to make it around the board.
 
@@ -112,4 +112,4 @@ Lastly, I thought it would be fun to record the game live and provide updates on
 
 ![](/img/horse-game-shiny.png)
 
-I suspect that I could have solved this problem more directly with math, but I had fun writing the code. My initial version performed a lot of the calculations within dataframes using `dplyr` functionality. I found that approach more intuitive, but it was much slower so I rewrote it with the vector approach shown here.
+I suspect that I could have solved this problem more directly with math, but I had fun writing the code. My initial version performed a lot of the calculations within dataframes using `dplyr` functionality. I found that approach intuitive, but it was slow so I rewrote it with the vector approach (see [repo](https://github.com/hinkelman/horse-game)).
