@@ -2,7 +2,7 @@
 title = "Reading and writing JSON files in R and Chez Scheme"
 date = 2020-03-01
 [taxonomies]
-tags = ["R", "Chez Scheme", "dataframe"]
+tags = ["R", "Chez Scheme", "dataframe", "JSON"]
 +++
 
 I have [previously written](/reading-writing-json-files-r-racket/) about how to read and write JSON files in R and Racket. In re-reading that old post, I'm struck by how it shows me tinkering without understanding. Now that I have pivoted [from learning Racket to learning Chez Scheme](/exploring-scheme-implementations/), I'm revisiting JSON as a data serialization format and actually reading about JSON instead of just playing with JSON packages. 
@@ -11,12 +11,10 @@ I have [previously written](/reading-writing-json-files-r-racket/) about how to 
 
 This [paper](https://arxiv.org/pdf/1403.2805.pdf) on the [`jsonlite` package](https://jeroen.cran.dev/jsonlite/index.html) for R was particularly helpful for improving my understanding. One short section succinctly conveys the most critical ideas.
 
-> The JSON format specifies 4 primitive types (string, number, boolean, null) and two universal structures: 
->
-> * A JSON object: an unordered collection of zero or more name/value pairs, where a name is a string and
-a value is a string, number, boolean, null, object, or array.
-> * A JSON array: an ordered sequence of zero or more values.
->
+> The JSON format specifies 4 primitive types (string, number, boolean, null) and two universal structures:   
+>> A JSON object: an unordered collection of zero or more name/value pairs, where a name is a string and a value is a string, number, boolean, null, object, or array.  
+>> A JSON array: an ordered sequence of zero or more values. 
+> 
 > Both these structures are heterogeneous; i.e. they are allowed to contain elements of different types. Therefore, the native R realization of these structures is a named list for JSON objects, and unnamed list for JSON arrays. However, in practice a list is an awkward, inefficient type to store and manipulate data in R. Most statistical applications work with (homogeneous) vectors, matrices or data frames. In order to give these data structures a JSON representation, we can define certain special cases of JSON structures which get parsed into other, more specific R types. 
 
 ### R
