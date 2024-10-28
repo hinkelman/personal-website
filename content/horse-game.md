@@ -43,10 +43,10 @@ roll <- function(n, replace = TRUE, rdf = rolls_df){
   sample(rdf$Roll, size = n, replace = replace, prob = rdf$Prob)
 }
 
-> table(roll(500000))/500000
+> round(table(roll(500000))/500000, 3)
 
-       2        3        4        5        6        7        8        9       10       11       12 
-0.028052 0.055268 0.083256 0.111574 0.138546 0.167256 0.138400 0.111164 0.083106 0.055584 0.027794 
+    2     3     4     5     6     7     8     9    10    11    12 
+0.028 0.056 0.083 0.112 0.139 0.166 0.139 0.110 0.084 0.056 0.028 
 ```
 
 With this basic setup, all horses have an equal probability of winning. The game dynamics are made more interesting by introducing scratches, i.e., horses that are not able to participate in a race. We can use our `roll` function to generate the scratches. The number of scratches is always four different horses.
