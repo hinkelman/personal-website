@@ -11,14 +11,14 @@ As a learning exercise, I decided to translate examples from the book, [From Pyt
 
 The simple example to motivate the book involves a 1D random walk. The book starts with a `for loop` example, reports a 7x speed up over the `for loop` by vectorizing the code with `itertools`, and reports a 500x improvement from `for loop` to NumPy (but, by my math, the reported timings show 1000x). On my machine, I also observe a 7x speed up from `for loop` to `itertools` but only a 80x jump from `for loop` to NumPy. The `for loop` in R has comparable peformance to the `for loop` in Python, but vectorized R was about 2x as fast as NumPy. Here are vectorized versions of the functions in Python (NumPy) and R:
 
-Python
+##### Python
 ```
 def random_walk_fastest(n=1000):
     steps = np.random.choice([-1,+1], n)
     return np.cumsum(steps)
 ```
 
-R
+##### R
 ```
 random_walk_v <- function(n = 1000) {
   steps <- sample(c(-1, 1), size = n, replace = TRUE)
@@ -46,7 +46,7 @@ Chez Scheme doesn't have the option to speed up code by vectorizing it, but Chez
 
 In the next example, the author makes the point that the best NumPy performance often comes at the expense of readability. The example involves returning the starting index for all occurrences of a sub-sequence that are found in the random walk list. The book indicates that the NumPy version was 10x faster than pure Python (7x on my machine). In trying to identify the best way to implement this in R, I found this [mailing list thread](https://stat.ethz.ch/pipermail/r-help/2012-February/303756.html) with numerous solutions that vary widely in speed. The fastest R version (of the ones that I tried) was nearly 8x faster than the next best solution. I implemented that same algorithm in Python (+ a little NumPy). It was nearly 4x as fast as the NumPy example from the book and comparably fast to the R version. Here is that algorithm in Python and R (apologies for the inconsistent naming between my R and Python files):
 
-Python
+##### Python
 ```
 def find_crossing_3(seq, sub):
     n = len(seq)
@@ -57,7 +57,7 @@ def find_crossing_3(seq, sub):
     return candidate
 ```
 
-R
+##### R
 ```
 find_crossing_2 <- function(seq, sub) {
   n <- length(seq)
