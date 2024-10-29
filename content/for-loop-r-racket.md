@@ -72,7 +72,7 @@ The Beverton-Holt function definition illustrates Racket's use of prefix operato
 (define (beverton-holt N p c)
   (/ N (+ (/ 1 p) (/ N c))))
 ```
-Lisp-family languages have the reputation of being hard to read because of all the parentheses. I don't really mind the parentheses. In fact, I tend to overuse them in my R code because I find it more readable. My R version of the Beverton-Holt function includes 8 parentheses [[2]](#2) and 2 curly braces. The Racket version has 12 parantheses.
+Lisp-family languages have the reputation of being hard to read because of all the parentheses. I don't really mind the parentheses. In fact, I tend to overuse them in my R code because I find it more readable. My R version of the Beverton-Holt function includes 8 parentheses [[2]](#2) and 2 curly braces. The Racket version has 12 parentheses.
 
 If you read through the mailing list thread, you would see that this next piece of code was the source of my problem. I was trying to make a results matrix out of a vector of vectors.  
 ```
