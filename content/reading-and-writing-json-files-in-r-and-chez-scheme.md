@@ -1,6 +1,7 @@
 +++
 title = "Reading and writing JSON files in R and Chez Scheme"
 date = 2020-03-01
+updated = 2024-10-29
 [taxonomies]
 tags = ["R", "Chez Scheme", "dataframe", "JSON"]
 +++
@@ -23,16 +24,21 @@ A JSON array is defined by square brackets with elements separated by commas. Fo
 
 ```
 > x1 <- fromJSON("[[1.1,2,3],[4,5,6],[7,8,9]]")
+
 > class(x1)
-[1] "matrix"
+[1] "matrix" "array" 
+
 > typeof(x1)
 [1] "double"
 
 > x2 <- fromJSON("[[1.1,2,3],[4,5,6],[7,8,9]]", simplifyVector = FALSE)
+
 > class(x2)
 [1] "list"
+
 > typeof(x2)
 [1] "list"
+
 > lapply(lapply(x2, "[[", 1), typeof) # apply typeof to first element of each sub-list
 [[1]]
 [1] "double"
@@ -46,6 +52,7 @@ A JSON object is defined by curly brackets containing key-value pairs separated 
 
 ```
 > fromJSON('{"ID": 1, "Species": "CHN", "Length": 43}')
+
 $ID
 [1] 1
 
@@ -55,7 +62,9 @@ $Species
 $Length
 [1] 43
 
-> fromJSON('[{"ID": 1, "Species": "CHN", "Length": 43}, {"ID": 2, "Species": "STH", "Length": 131}]')
+>> fromJSON('[{"ID": 1, "Species": "CHN", "Length": 43}, 
+           {"ID": 2, "Species": "STH", "Length": 131}]')
+
   ID Species Length
 1  1     CHN     43
 2  2     STH    131
@@ -67,20 +76,26 @@ Tabular data can be oriented by rows or columns. The default behavior of `fromJS
 
 ```
 > toJSON(data.frame(ID = c(1, 2), Species = c("CHN", "STH"), Length = c(43, 131)))
+
 [{"ID":1,"Species":"CHN","Length":43},{"ID":2,"Species":"STH","Length":131}] 
 ```
 
 Setting `dataframe = "columns"`, though, creates a column-based JSON representation. 
 
 ```
-> toJSON(data.frame(ID = c(1, 2), Species = c("CHN", "STH"), Length = c(43, 131)), dataframe = "columns")
+> toJSON(data.frame(ID = c(1, 2), Species = c("CHN", "STH"), Length = c(43, 131)), 
+         dataframe = "columns")
+
 {"ID":[1,2],"Species":["CHN","STH"],"Length":[43,131]} 
 ```
 
-`fromJSON` and `toJSON` are not perfect inverse functions. For example, a dataframe written in a columnar format is read as a named list. 
+`fromJSON` and `toJSON` are not perfect inverse functions. For example, a dataframe written in a *column-based format* is read as a named list. 
 
 ```
-> fromJSON(toJSON(data.frame(ID = c(1, 2), Species = c("CHN", "STH"), Length = c(43, 131)), dataframe = "columns"))
+> fromJSON(
+    toJSON(data.frame(ID = c(1, 2), Species = c("CHN", "STH"), Length = c(43, 131)), 
+           dataframe = "columns"))
+
 $ID
 [1] 1 2
 
@@ -93,179 +108,59 @@ $Length
 
 ### Chez Scheme
 
-For Chez Scheme, I've been exploring the [`json` library](https://guenchi.github.io/json/) for working with JSON files. The `json` library maps JSON arrays to vectors and JSON objects to association lists. `null`, `true`, and `false` are mapped as symbols rather than `'()`, `#t`, and `#f`. 
+For Chez Scheme, I've been exploring the [`json-tools` library](https://akkuscm.org/packages/json-tools/) for working with JSON files. The `json` library maps JSON arrays to lists and JSON objects to vectors. It maps strings, numbers, and booleans to their Scheme types and maps `null` to the symbol `'null`. Using `(import (json))` provides `json-read` and `json-write`.
 
 ```
-> (define x (string->json "[1.1 2 true]"))
-> x
-#(1.1 2 true)
-> (integer? (vector-ref x 0))
-#f
-> (integer? (vector-ref x 1))
-#t
-> (symbol? (vector-ref x 2))
-#t
+> (json-read (open-string-input-port "[1.1, 2, true, null]"))
+
+(1.1 2 #t null)
 ```
 
-The row-based JSON representation of tabular data is read as a vector of association lists where each association list represents one row. The column-based representation is read as an association list where each key is a column name and the values are a vector.
+The row-based JSON representation of tabular data is read as a list of vectors where each vector represents a row comprised of pairs of with the column name and row value. The column-based representation is read as a vector of lists where the first value of each list is the column name and the other values are the column values.
 
 ```
-> (string->json "[{ID: 1, Species: CHN, Length: 43}, {ID: 2, Species: STH, Length: 131}]")   ; row based
-#(((ID . 1) (Species . CHN) (Length . 43))
-  ((ID . 2) (Species . STH) (Length . 131)))
-  
-> (string->json "{ID:[1,2], Species:[CHN,STH], Length:[43,131]}")                            ; column based
-((ID . #(1 2)) (Species . #(CHN STH)) (Length . #(43 131)))
+;; row-based
+> (json-read
+   (open-string-input-port
+    "[{\"ID\":1,\"Species\":\"CHN\",\"Length\":43},
+      {\"ID\":2,\"Species\":\"STH\",\"Length\":131}]")) 
+
+(#(("ID" . 1) ("Species" . "CHN") ("Length" . 43))
+  #(("ID" . 2) ("Species" . "STH") ("Length" . 131)))
+
+;; column-based
+> (json-read
+   (open-string-input-port
+    "{\"ID\":[1,2],\"Species\":[\"CHN\",\"STH\"],\"Length\":[43,131]}"))
+
+#(("ID" 1 2) ("Species" "CHN" "STH") ("Length" 43 131))
 ```
 
-The above examples are not valid JSON, which `string->json` doesn't enforce. However, `json->string` requires a valid JSON represention, which, in this example, involves using strings not symbols.
+We can recover the same JSON input with `json-write`.
 
 ```
-> (json->string '((ID . #(1 2)) (Species . #(CHN STH)) (Length . #(43 131))))
-Exception in string-append: ID is not a string
+> (json-write
+   '(#(("ID" . 1) ("Species" . "CHN") ("Length" . 43))
+    #(("ID" . 2) ("Species" . "STH") ("Length" . 131))))
 
-> (display (json->string '(("ID" . #(1 2)) ("Species" . #("CHN" "STH")) ("Length" . #(43 131)))))
-{"ID":[1,2],"Species":["CHN","STH"],"Length":[43,131]}
+[{"ID": 1, "Species": "CHN", "Length": 43}, {"ID": 2, "Species": "STH", "Length": 131}]
+
+> (json-write '#(("ID" 1 2) ("Species" "CHN" "STH") ("Length" 43 131)))
+
+{"ID": [1, 2], "Species": ["CHN", "STH"], "Length": [43, 131]}
 ```
 
-What the `json` library lacks in parsing functionality, it makes up for in tools for working with JSON data structures. The `json` library provides example JSON data that when parsed by `string->json` creates the following object, `x`.
+However, if our Scheme object includes symbols, they will be converted to strings.
 
 ```
-#((("Number" . 1) ("Name" . "Laetetia") ("Gender" . "female") ("Age" . 16)
-    ("Father"
-      ("Number" . 2)
-      ("Name" . "Louis")
-      ("Age" . 48)
-      ("Revenue" . 1000000))
-    ("Mother"
-      ("Number" . 3)
-      ("Name" . "Lamia")
-      ("Age" . 43)
-      ("Revenue" . 800000))
-    ("Revenue" . 100000)
-    ("Score"
-      ("Math" ("School" . 8) ("Exam" . 9))
-      ("Literature" ("School" . 9) ("Exam" . 9))))
-  (("Number" . 4) ("Name" . "Tania") ("Gender" . "female") ("Age" . 17)
-    ("Father"
-      ("Number" . 5)
-      ("Name" . "Thomas")
-      ("Age" . 45)
-      ("Revenue" . 150000))
-    ("Mother"
-      ("Number" . 6)
-      ("Name" . "Jenney")
-      ("Age" . 42)
-      ("Revenue" . 180000))
-    ("Revenue" . 80000)
-    ("Score"
-      ("Math" ("School" . 7) ("Exam" . 8))
-      ("Literature" ("School" . 10) ("Exam" . 6))))
-  (("Number" . 7) ("Name" . "Anne") ("Gender" . "female") ("Age" . 18)
-    ("Father"
-      ("Number" . 8)
-      ("Name" . "Alex")
-      ("Age" . 40)
-      ("Revenue" . 200000))
-    ("Mother"
-      ("Number" . 9)
-      ("Name" . "Sicie")
-      ("Age" . 43)
-      ("Revenue" . 50000))
-    ("Revenue" . 120000)
-    ("Score"
-      ("Math" ("School" . 8) ("Exam" . 8))
-      ("Literature" ("School" . 6) ("Exam" . 8)))))
+> (json-write '#(("ID" 1 2) ("Species" CHN STH) ("Length" 43 131)))
+
+{"ID": [1, 2], "Species": ["CHN", "STH"], "Length": [43, 131]}
 ```
 
-`json-ref` provides shorthand for extracting pieces of the data structure. The 1st argument to `json-ref` is the data structure, `x`, the 2nd argument is a numeric index because we are working with a vector of association lists, and the remaining arguments are the keys listed in the order of nesting in the data structure.
+All of the examples above have involved reading JSON from strings and displaying in the REPL. The following code can be used to read and write JSON files.
 
 ```
-> (json-ref x 2 "Name")
-"Anne"
-> (json-ref x 2 "Father")
-(("Number" . 8)
-  ("Name" . "Alex")
-  ("Age" . 40)
-  ("Revenue" . 200000))
-> (json-ref x 2 "Score" "Math" "Exam")
-8
-```
-
-`json-set` allows for changing elements of the JSON representation. In this example, we rescale the scores from a scale of 0-20 to 0-100. Importantly, `json-set` is returning a new object, not modifying `x`. This example also illustrates the use of `#t` to indicate that the new values are applied to all positions at the specified depth in the data structure, e.g., first `#t` means use all elements of the vector, the next `#t` means use all of the math scores, and the final `#t` means use all of the literature scores. The procedure is then applied to all the values identified by the `#t`'s and keys.
-
-```
-> (json-set x #t "Score" #t #t (lambda (x) (* x 5)))
-#((("Number" . 1) ("Name" . "Laetetia") ("Gender" . "female") ("Age" . 16)
-    ("Father"
-      ("Number" . 2)
-      ("Name" . "Louis")
-      ("Age" . 48)
-      ("Revenue" . 1000000))
-    ("Mother"
-      ("Number" . 3)
-      ("Name" . "Lamia")
-      ("Age" . 43)
-      ("Revenue" . 800000))
-    ("Revenue" . 100000)
-    ("Score"
-      ("Math" ("School" . 40) ("Exam" . 45))
-      ("Literature" ("School" . 45) ("Exam" . 45))))
-  (("Number" . 4) ("Name" . "Tania") ("Gender" . "female") ("Age" . 17)
-    ("Father"
-      ("Number" . 5)
-      ("Name" . "Thomas")
-      ("Age" . 45)
-      ("Revenue" . 150000))
-    ("Mother"
-      ("Number" . 6)
-      ("Name" . "Jenney")
-      ("Age" . 42)
-      ("Revenue" . 180000))
-    ("Revenue" . 80000)
-    ("Score"
-      ("Math" ("School" . 35) ("Exam" . 40))
-      ("Literature" ("School" . 50) ("Exam" . 30))))
-  (("Number" . 7) ("Name" . "Anne") ("Gender" . "female") ("Age" . 18)
-    ("Father"
-      ("Number" . 8)
-      ("Name" . "Alex")
-      ("Age" . 40)
-      ("Revenue" . 200000))
-    ("Mother"
-      ("Number" . 9)
-      ("Name" . "Sicie")
-      ("Age" . 43)
-      ("Revenue" . 50000))
-    ("Revenue" . 120000)
-    ("Score"
-      ("Math" ("School" . 40) ("Exam" . 40))
-      ("Literature" ("School" . 30) ("Exam" . 40)))))
-```
-
-The `json` library also includes the following procedures for working with JSON data: `json-drop`, `json-push`, and `json-reduce`. See the [documentation](https://guenchi.github.io/json/) for more information on these procedures.
-
-All of the examples have involved reading JSON from strings and displaying JSON in the REPL. The following procedures can be used to read and write JSON files.
-
-```
-;; modified from http://rosettacode.org/wiki/Read_entire_file#Scheme
-(define (file->string path)
-  (with-input-from-file path
-    (lambda ()
-      (let loop ((char (read-char))
-                 (result '()))
-        (cond [(eof-object? char)
-               (list->string (reverse result))]
-              [(member char (list #\newline #\return))
-               (loop (read-char) result)]
-              [else
-               (loop (read-char) (cons char result))])))))
-
-(define (read-json path)
-  (string->json (file->string path)))
-  
-(define (write-json obj path)
-  (call-with-output-file path
-    (lambda (output-port)
-      (display (json->string obj) output-port))))
+(define scheme-object (call-with-input-file "example.json" json-read))
+(call-with-output-file "example-out.json" (lambda (p) (json-write scheme-object p)))
 ```
