@@ -105,10 +105,11 @@ Again, following the original blog post (with a slight modification), we benchma
 > rseq <- seq(1.1, 2.2, length.out = 10)
 > microbenchmark(
     Rcpp = lapply(rseq, function(x) logmodc(t, yinit, x, k, thetasd)),
-    Fortran = lapply(rseq, function(x) .Fortran("logmodf", t, yinit, x, k, thetasd, vector("numeric", t))),
+    Fortran = lapply(rseq, function(x){
+      .Fortran("logmodf", t, yinit, x, k, thetasd, vector("numeric", t))}),
     R = lapply(rseq, function(x) logmodr(t, yinit, x, k, thetasd)),
-    times = 500L
-  )
+    times = 500L)
+
 Unit: microseconds
     expr     min       lq     mean   median       uq      max neval
     Rcpp 159.578 166.4295 214.4782 198.2240 202.9475 8265.555   500
