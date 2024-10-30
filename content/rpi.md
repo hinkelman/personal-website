@@ -88,11 +88,15 @@ All of the calculations involve filtering the dataset to the focal `team` and po
 
 # Python Polars
 def filter_team(game_data, team):
-  return pl.DataFrame.filter(game_data, (pl.col("winner") == team) | (pl.col("loser") == team))
+    return pl.DataFrame.filter(
+        game_data, 
+        (pl.col("winner") == team) | (pl.col("loser") == team))
+
 
 def filter_team_opp(game_data, team, opp):
-  return pl.DataFrame.filter(filter_team(game_data, team), 
-                             (pl.col("winner") != opp) & (pl.col("loser") != opp))
+    return pl.DataFrame.filter(
+        filter_team(game_data, team),
+        (pl.col("winner") != opp) & (pl.col("loser") != opp))
 
 # Elixir Explorer
 def filter_team(game_data, team) do
@@ -167,23 +171,26 @@ I was also interested in point differential (PD) as a metric, but it became clea
 
 # Python Polars
 def calc_pd(game_data, team):
-  pd = pl.DataFrame.with_columns(filter_team(game_data, team), 
-                                 pl.when(pl.col("winner") == team)
-                                 .then(pl.col("winner_score") - pl.col("loser_score"))
-                                 .otherwise(pl.col("loser_score") - pl.col("winner_score"))
-                                 .alias("pd"))
-  return pl.Series.sum(pd["pd"])
+    pd = pl.DataFrame.with_columns(
+        filter_team(game_data, team),
+        pl.when(pl.col("winner") == team)
+        .then(pl.col("winner_score") - pl.col("loser_score"))
+        .otherwise(pl.col("loser_score") - pl.col("winner_score"))
+        .alias("pd"))
+    return pl.Series.sum(pd["pd"])
 
 # Elixir Explorer
-def calc_pd(game_data, team) do
-  game_data
-  |> filter_team(team)
-  |> DF.mutate(
-    pd: if(winner == ^team, do: winner_score - loser_score, else: loser_score - winner_score)
-  )
-  |> DF.pull("pd")
-  |> Series.sum()
-end
+  def calc_pd(game_data, team) do
+    game_data
+    |> filter_team(team)
+    |> DF.mutate(
+      pd: if(winner == ^team, 
+        do: winner_score - loser_score, 
+        else: loser_score - winner_score)
+    )
+    |> DF.pull("pd")
+    |> Series.sum()
+  end
 ```
 
 In calculating the opponents' winning percentage, we need to exclude games played against the focal team with `filter-team-opp`. The way the parameters are named is potentially confusing. In `(map (lambda (x) (calc-wp-owp game-data x team)) opps)`, we are iterating through all opponents of `team` and calculating their WP against everybody except `team` and then calculating the mean of all opponents' WP. The function for `calc-oowp` is is nearly the same as `calc-owp` so is not shown here.
@@ -204,13 +211,15 @@ In calculating the opponents' winning percentage, we need to exclude games playe
 
 # Python Polars
 def calc_owp(game_data, team):
-  opp_games = pl.DataFrame.filter(game_data, (pl.col("winner") == team) | (pl.col("loser") == team))
-  opp = pl.DataFrame.with_columns(opp_games,
-                                  pl.when(pl.col("winner") == team)
-                                  .then(pl.col("loser"))
-                                  .otherwise(pl.col("winner"))
-                                  .alias("opp"))
-  return stats.mean([calc_wp_owp(game_data, x, team) for x in opp["opp"]])
+    opp_games = pl.DataFrame.filter(
+        game_data, (pl.col("winner") == team) | (pl.col("loser") == team))
+    opp = pl.DataFrame.with_columns(
+        opp_games,
+        pl.when(pl.col("winner") == team)
+        .then(pl.col("loser"))
+        .otherwise(pl.col("winner"))
+        .alias("opp"))
+    return stats.mean([calc_wp_owp(game_data, x, team) for x in opp["opp"]])
 
 def calc_wp_owp(game_data, team, opp):
   games_played = filter_team_opp(game_data, team, opp)
@@ -289,16 +298,17 @@ I made no effort to write performant code because the dataset is so small, but t
 
 ```
 ;; Scheme dataframe
-(-> (make-dataframe (list (make-series 'Team teams)
-                          (make-series 'Win (map (lambda (x) (calc-wl df x 'winner)) teams))
-                          (make-series 'Loss (map (lambda (x) (calc-wl df x 'loser)) teams))
-                          (make-series 'WP (map (lambda (x) (calc-wp df x)) teams))
-                          (make-series 'PD (map (lambda (x) (calc-pd df x)) teams))
-                          (make-series 'SOS (map (lambda (x) (calc-sos df x)) teams))
-                          (make-series 'RPI (map (lambda (x) (calc-rpi df x)) teams))))
+(-> (make-dataframe
+     (list (make-series 'Team teams)
+           (make-series 'Win (map (lambda (x) (calc-wl df x 'winner)) teams))
+           (make-series 'Loss (map (lambda (x) (calc-wl df x 'loser)) teams))
+           (make-series 'WP (map (lambda (x) (calc-wp df x)) teams))
+           (make-series 'PD (map (lambda (x) (calc-pd df x)) teams))
+           (make-series 'SOS (map (lambda (x) (calc-sos df x)) teams))
+           (make-series 'RPI (map (lambda (x) (calc-rpi df x)) teams))))
     (dataframe-sort* (> RPI))
     (dataframe-display (length teams)))
-
+    
 # Python Polars
 pl.Config.set_tbl_rows(len(teams))
 pl.DataFrame(
