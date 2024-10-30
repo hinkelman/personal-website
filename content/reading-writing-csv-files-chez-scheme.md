@@ -32,7 +32,8 @@ That problem was easily solved thanks to a helpful [StackOverflow](https://stack
 Now that we can read a file line by line, we need a procedure to parse each line (represented as a string) into a list. For parsing, I'm using a [`parse-line` procedure](https://github.com/alex-hhh/data-frame/blob/master/private/csv.rkt) written by [Alex Harsanyi](https://alex-hhh.github.io/About.html) for Racket as part of his [data-frame package](https://docs.racket-lang.org/data-frame/index.html). 
 
 ```
-> (parse-line (read-line (open-input-string "One,2,C,867-5309\r\nTwo,3,D,555-2439\r\n")))
+> (parse-line
+   (read-line (open-input-string "One,2,C,867-5309\r\nTwo,3,D,555-2439\r\n")))
 ("One" "2" "C" "867-5309")
 ```
 
@@ -60,7 +61,7 @@ We can write a file line by line with the `put-string` procedure provided by Che
                  ;; don't add double-quote character to string
                  ;; when it is at start or end of string
                  (loop (read-char in) (string-append result "") (add1 ctr))]
-                ;; 2x double-quotes for double-quotes inside string (not at start or end)
+                ;; 2x double-quotes for double-quotes inside string (not start/end)
                 [(char=? c #\")
                  (loop (read-char in) (string-append result "\"\"") (add1 ctr))]
                 [else
