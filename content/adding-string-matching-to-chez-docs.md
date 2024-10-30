@@ -113,9 +113,12 @@ This is the first time that I've used `do` loops in Scheme. In the example below
 ```
 (define find-proc
   (case-lambda
-    [(search-string) (find-proc-helper search-string 'exact 10)]
-    [(search-string search-type) (find-proc-helper search-string search-type 10)]
-    [(search-string search-type max-results) (find-proc-helper search-string search-type max-results)]))
+    [(search-string)
+      (find-proc-helper search-string 'exact 10)]
+    [(search-string search-type)
+      (find-proc-helper search-string search-type 10)]
+    [(search-string search-type max-results)
+      (find-proc-helper search-string search-type max-results)]))
 ```
 
 `find-proc-helper` maps either `lev` or `string-match` to the full list of procedures, `proc-list`, and then sorts or filters the results, respectively.
@@ -125,22 +128,31 @@ This is the first time that I've used `do` loops in Scheme. In the example below
   (unless (string? search-string)
     (assertion-violation "(find-proc search-string)" "search-string is not a string"))
   (cond [(symbol=? search-type 'fuzzy)
-         (let* ([dist-list (map (lambda (x) (lev search-string x)) proc-list)]
-                [dist-proc (map (lambda (dist proc) (cons dist proc)) dist-list proc-list)]
-                [dist-proc-sort (sort (lambda (x y) (< (car x) (car y))) dist-proc)])
-           (prepare-results dist-proc-sort max-results))]
+        (let* ([dist-list (map (lambda (x) (lev search-string x))
+                                proc-list)]
+                [dist-proc (map (lambda (dist proc) (cons dist proc))
+                                dist-list proc-list)]
+                [dist-proc-sort (sort (lambda (x y) (< (car x) (car y)))
+                                      dist-proc)])
+          (prepare-results dist-proc-sort search-type max-results))]
         [(symbol=? search-type 'exact)
-         (let* ([bool-list (map (lambda (x) (string-match search-string x)) proc-list)]
-                [bool-proc (map (lambda (bool proc) (cons bool proc)) bool-list proc-list)]
+        (let* ([bool-list (map (lambda (x) (string-match search-string x))
+                                proc-list)]
+                [bool-proc (map (lambda (bool proc) (cons bool proc))
+                                bool-list proc-list)]
                 [bool-proc-filter (filter (lambda (x) (car x)) bool-proc)])
-           (prepare-results bool-proc-filter max-results))]
+          (prepare-results bool-proc-filter search-type max-results))]
         [else
-         (assertion-violation "(find-proc search-string search-type)"
+        (assertion-violation "(find-proc search-string search-type)"
                               "search-type must be either 'exact or 'fuzzy")]))
 
-(define (prepare-results ls max-results)
+(define (prepare-results ls search-type max-results)
   (let* ([len (length ls)]
-         [max-n (if (> max-results len) len max-results)])
+          [max-n (if (> max-results len) len max-results)])
+    (when (and (symbol=? search-type 'exact) (> len max-results))
+      (display (string-append "Returning " (number->string max-results)
+                              " of " (number->string len)
+                              " results\n")))
     (map cdr (list-head ls max-n))))
 ```
 
@@ -181,9 +193,16 @@ The `^` indicates that only search strings found at the start of the procedure s
 ("file-access-time" "file-buffer-size" "file-change-time")
 
 > (find-proc "let" 'exact 5)
-("delete-directory" "delete-file" "eq-hashtable-delete!" "fluid-let" "fluid-let-syntax")
+Returning 5 of 20 results
+("delete-directory"
+  "delete-file"
+  "eq-hashtable-delete!"
+  "fluid-let"
+  "fluid-let-syntax")
+
 > (find-proc "^let" 'exact)
-("let*" "let*-values" "let-syntax" "let-values" "letrec" "letrec*" "letrec-syntax")
+("let" "let*" "let*-values" "let-syntax" "let-values"
+  "letrec" "letrec*" "letrec-syntax")
 ```
 
 Under fuzzy matching, the `^` is included as part of the Levenshtein distance calculation and, thus, should not be included in search strings when using fuzzy matching.
