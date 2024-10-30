@@ -156,12 +156,15 @@ purchases |>
 
 ;; Version 2
 (-> purchases
-    (dataframe-split 'country)
-    (->> (map (lambda (dfx)
-                (dataframe-filter* dfx (amount) (<= amount (* 10 (median ($ dfx 'amount))))))))
+    (dataframe-split* 'country)
+    (->> (map
+          (lambda (dfx)
+            (dataframe-filter*
+             dfx (amount) (<= amount (* 10 (median ($ dfx 'amount))))))))
     (dataframe-bind-all)
     (dataframe-modify* (diff (amount discount) (- amount discount)))
-    (dataframe-aggregate* (country) (total (diff) (sum diff))))
+    (dataframe-aggregate* (country) (total (diff) (sum diff)))
+    (dataframe-display))
 ```
 
 ## Conclusion
