@@ -44,11 +44,14 @@ fn main() {
     const R: f64 = 1.4;                                  // maximum population growth rate
     const K: f64 = 20.0;                                 // carrying capacity
     const THETASD: f64 = 0.1;                            // std dev to add noise
-    
+
     // 0th element of args is program name
     let args: Vec<String> = std::env::args().collect();
-    let reps = args[1].parse::<usize>().unwrap();           
-    let num_years = args[2].parse::<usize>().unwrap();   // number of years of growth to simulate
+    
+    let reps = args[1].parse::<usize>().unwrap();
+        
+    // number of years of growth to simulate       
+    let num_years = args[2].parse::<usize>().unwrap();  
     
     let mut results = Vec::with_capacity(reps);
     for _ in 0..reps {
@@ -62,8 +65,9 @@ fn logmod(yinit: f64, r: f64, k: f64, thetasd: f64, t: usize) -> Vec<f64> {
     ys.push(yinit);
     for i in 1..t {
         let normal = Normal::new(0.0, thetasd).unwrap();
-        let normal_draw = normal.sample(&mut rand::thread_rng()).exp();
-        let ys_i = ys.get(i-1).unwrap() * (r - r * (ys.get(i-1).unwrap() / k)) * normal_draw;
+        let normal_draw = normal.sample(&mut rand::thread_rng());
+        let ys_i = ys.get(i-1).unwrap() * 
+        (r - r * (ys.get(i-1).unwrap() / k)) * normal_draw.exp();
         ys.push((ys_i * 100.0).round() / 100.0);
     }
     ys
@@ -91,8 +95,11 @@ The next part of the program handles arguments. We collect the arguments into a 
 ```
 // 0th element of args is program name
 let args: Vec<String> = std::env::args().collect();
-let reps = args[1].parse::<usize>().unwrap();           
-let num_years = args[2].parse::<usize>().unwrap();   // number of years of growth to simulate
+
+let reps = args[1].parse::<usize>().unwrap();
+    
+// number of years of growth to simulate       
+let num_years = args[2].parse::<usize>().unwrap();  
 ```
 
 In the last part of `main`, we have a simple loop to repeat the `logmod` function `reps` times. I initially used an array to collect results, but the size of the array needs to be known at compile time, which means that you can't initialize an array with command line arguments. Later, I [read](https://doc.rust-lang.org/std/collections/index.html) that "you should probably just use Vec or HashMap. These two collections cover most use cases for generic data storage and processing." Because data structures are immutable by default in Rust, we have to declare that `results` is mutable with `mut`. The exclamation point in `println!` indicates that it is a macro. 
@@ -114,7 +121,8 @@ fn logmod(yinit: f64, r: f64, k: f64, thetasd: f64, t: usize) -> Vec<f64> {
     for i in 1..t {
         let normal = Normal::new(0.0, thetasd).unwrap();
         let normal_draw = normal.sample(&mut rand::thread_rng());
-        let ys_i = ys.get(i-1).unwrap() * (r - r * (ys.get(i-1).unwrap() / k)) * normal_draw.exp();
+        let ys_i = ys.get(i-1).unwrap() * 
+        (r - r * (ys.get(i-1).unwrap() / k)) * normal_draw.exp();
         ys.push((ys_i * 100.0).round() / 100.0);
     }
     ys
