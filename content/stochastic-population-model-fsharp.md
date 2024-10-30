@@ -36,11 +36,11 @@ open MathNet.Numerics.Distributions
 
 [<EntryPoint>]
 let main argv =
-    let yinit = 1.0            // initial population size
-    let r = 1.4                // maximum population growth rate
-    let k = 20.0               // carrying capacity
-    let thetasd = 0.1          // standard deviation for adding noise to the population
-    let t = 4                  // number of years of growth to simulate
+    let yinit = 1.0           // initial population size
+    let r = 1.4               // maximum population growth rate
+    let k = 20.0              // carrying capacity
+    let thetasd = 0.1         // standard deviation for adding noise to the population
+    let t = 4                 // number of years of growth to simulate
 ```
 
 The first version of the function, `logmodFor`, follows the R example by using a `for` loop to fill an array. In F#, we draw random numbers by initializing a distribution and then sampling from the distribution. The `theta` variable is the stochastic part of the model. In this version, we initialize a 1D array with random draws from a normal distribution (following the R example). Alternatively, we could have drawn one value every time through the `for` loop. `Array.init` illustrates the syntax for anonymous functions in F#, e.g., (fun x -> x + 1). F# infers types from context. In the case of `Array.zeroCreate`, though, we need to specify the type (`float`) of the zeros in the array. We initialize the 0th element of the output array `ys` to the initial population value `y` and fill the rest of the array each time through the loop.
@@ -99,12 +99,12 @@ The arguments provided to the program are collected in a string list `argv`. We 
 ```
 [<EntryPoint>]
 let main argv =
-    let yinit = 1.0            // initial population size
-    let r = 1.4                // maximum population growth rate
-    let k = 20.0               // carrying capacity
-    let thetasd = 0.1          // standard deviation for adding noise to the population
-    let t = int argv.[0]       // number of years of growth to simulate
-    let seedType = argv.[1]    // "fixed" or "random" for setting deterministic behavior
+    let yinit = 1.0          // initial population size
+    let r = 1.4              // maximum population growth rate
+    let k = 20.0             // carrying capacity
+    let thetasd = 0.1        // standard deviation for adding noise to the population
+    let t = int argv.[0]     // number of years of growth to simulate
+    let seedType = argv.[1]  // "fixed" or "random" for setting deterministic behavior
 ```
  
  The second `argv` allows for specifying fixed or random behavior. To use `seedType`, I added two new lines to each function and changed the `Normal` function to use the `RandomSource` parameter. 
