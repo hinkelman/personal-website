@@ -54,7 +54,7 @@ The `dataframe` library includes some handling of missing values, represented as
 
 ```
 ;; this version is more readable, but requires two passes through the dataframe
-;; i.e., first with dataframe-remove-na and then with dataframe-filter
+;;  i.e., first with dataframe-remove-na and then with dataframe-filter
 (-> dat
     (dataframe-remove-na 'body_mass_g 'sex)
     (dataframe-filter*
@@ -63,7 +63,8 @@ The `dataframe` library includes some handling of missing values, represented as
           (string=? sex "female")))
     (dataframe-display))
 
-;; this version is more awkward to read (and write), but does all the filtering in one pass
+;; this version is more awkward to read (and write)
+;;  but does all the filtering in one pass
 (-> dat
     (dataframe-filter*
      (body_mass_g sex)
@@ -134,7 +135,7 @@ It takes considerably more code to replicate `slice_min` and `slice_max` from `d
     (dataframe-display))
 
 ;; previous version only works with filter as the first step in the pipe
-;; this version works with filter step anywhere in the pipe
+;;  this version works with filter step anywhere in the pipe
 (-> dat
     (dataframe-remove-na 'body_mass_g)
     (->>
@@ -344,7 +345,9 @@ Again, we have to explicitly handle `'na` values because `/` and `<` don't handl
 (dataframe-display
  (dataframe-modify*
   dat
-  (body_mass_kg (body_mass_g) (if (na? body_mass_g) 'na (inexact (/ body_mass_g 1000))))))
+  (body_mass_kg
+   (body_mass_g)
+   (if (na? body_mass_g) 'na (inexact (/ body_mass_g 1000))))))
 
  dim: 344 rows x 5 cols
   species  body_mass_g     sex    year  body_mass_kg 
