@@ -35,11 +35,13 @@ for (i in 1:(nrow(results) - 1)){
     # spawning
     if (fec_age_j > 0){
       spawn_age_j = N * prop_female
-      results[i+1, 1] = results[i+1, 1] + beverton_holt(spawn_age_j, fec_age_j * egg_surv, capacity[1] - results[i+1, 1])
+      results[i+1, 1] = results[i+1, 1] + 
+        beverton_holt(spawn_age_j, fec_age_j * egg_surv, capacity[1] - results[i+1, 1])
     }
     # survival
     if (surv_age_j > 0){
-      results[i+1, j+1] = results[i+1, j+1] + beverton_holt(N, surv_age_j, capacity[j+1] - results[i+1, j+1])
+      results[i+1, j+1] = results[i+1, j+1] + 
+        beverton_holt(N, surv_age_j, capacity[j+1] - results[i+1, j+1])
     }
   }
 }
