@@ -12,35 +12,35 @@ When gathering with family, we like to play yard, card, and board games. On a re
 The game involves dealing a deck of cards (with Kings and Aces removed) to any number of players (well, up to 44 players where each player would be dealt one card). The cards in a player's hand represent wagers on the winning horse where horses are numbered 2-12 and the jack and queen cards represent 11 and 12, respectively. Two dice are rolled and the total of the dice determines which horse moves around the board. The number of steps for a horse to win is scaled roughly in proportion to the probability of that number being rolled. Below we enumerate all of the possible rolls with `expand.grid`, calculate the probability of each roll, and compare those probabilities to the probabilities based on the number of steps included on the game board.
 
 ```
-rolls_df = expand.grid(Dice1 = 1:6, Dice2 = 1:6) |> 
-  mutate(Roll = Dice1 + Dice2)  |> 
-  count(Roll) |> 
-  mutate(Roll = as.factor(Roll),
-         Prob = n/sum(n),
-         Steps = c(3, 6, 8, 11, 14, 16, 14, 11, 8, 6, 3),
-         StepsProb = Steps/sum(Steps))
+rolls_df = expand.grid(dice1 = 1:6, dice2 = 1:6) |> 
+  dplyr::mutate(roll = dice1 + dice2)  |> 
+  dplyr::count(roll) |> 
+  dplyr::mutate(roll = as.factor(roll),
+                steps = c(3, 6, 8, 11, 14, 16, 14, 11, 8, 6, 3),
+                prob = n/sum(n),
+                prob_steps = steps/sum(steps))
 
 > rolls_df
 
-   Roll n       Prob Steps StepsProb
-1     2 1 0.02777778     3      0.03
-2     3 2 0.05555556     6      0.06
-3     4 3 0.08333333     8      0.08
-4     5 4 0.11111111    11      0.11
-5     6 5 0.13888889    14      0.14
-6     7 6 0.16666667    16      0.16
-7     8 5 0.13888889    14      0.14
-8     9 4 0.11111111    11      0.11
-9    10 3 0.08333333     8      0.08
-10   11 2 0.05555556     6      0.06
-11   12 1 0.02777778     3      0.03
+   roll n steps       prob prob_steps
+1     2 1     3 0.02777778       0.03
+2     3 2     6 0.05555556       0.06
+3     4 3     8 0.08333333       0.08
+4     5 4    11 0.11111111       0.11
+5     6 5    14 0.13888889       0.14
+6     7 6    16 0.16666667       0.16
+7     8 5    14 0.13888889       0.14
+8     9 4    11 0.11111111       0.11
+9    10 3     8 0.08333333       0.08
+10   11 2     6 0.05555556       0.06
+11   12 1     3 0.02777778       0.03
 ```
 
 We can use the `sample` function to simulate rolling the dice.
 
 ```
 roll <- function(n, replace = TRUE, rdf = rolls_df){
-  sample(rdf$Roll, size = n, replace = replace, prob = rdf$Prob)
+  sample(rdf$roll, size = n, replace = replace, prob = rdf$prob)
 }
 
 > round(table(roll(500000))/500000, 3)
@@ -86,23 +86,23 @@ get_kitty <- function(base_value, scratches, rolls = NULL){
 The probability of winning at any point in the game is the probability that a number is rolled raised to the number of steps remaining for that horse to win. That captures the basic logic of the calculations, but all of the code is available through [GitHub](https://github.com/hinkelman/horse-game).
 
 ```
-> rolls_df$Steps
+> rolls_df$steps
  [1]  3  6  8 11 14 16 14 11  8  6  3
 
 > table(rolls)
  2  3  4  5  6  7  8  9 10 11 12 
  1  0  0  0  1  2  8  1  1  0  1 
 
-> rolls_df$Steps - table(rolls)
+> rolls_df$steps - table(rolls)
  2  3  4  5  6  7  8  9 10 11 12 
  2  6  8 11 13 14  6 10  7  6  2 
 
-> round(rolls_df$Prob^(rolls_df$Steps - table(rolls)), 4)
+> round(rolls_df$prob^(rolls_df$steps - table(rolls)), 4)
     2     3     4     5     6     7     8     9    10    11    12 
 8e-04 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 8e-04 
 ```
 
-I ran 10,000 simulations of the game to determine which horses win most often. 2 or 12 each win 19% of the time, 3/11 = 9%, 4/10 = 10-11%, 5/9 = 6%, 6/7/8 = 4%. The primary driver behind that outcome is that 2 and 12 are less likely to end up as scratches than 3 and 11 and so on. The slightly better outcome for 4/10 than 3/11 is a byproduct of how the board is discretized and is evident in `rolls_df` where the `Prob` is higher than the `StepProb` for 4/10.
+I ran 10,000 simulations of the game to determine which horses win most often. 2 or 12 each win 19% of the time, 3/11 = 9%, 4/10 = 10-11%, 5/9 = 6%, 6/7/8 = 4%. The primary driver behind that outcome is that 2 and 12 are less likely to end up as scratches than 3 and 11 and so on. The slightly better outcome for 4/10 than 3/11 is a byproduct of how the board is discretized and is evident in `rolls_df` where the `prob` is higher than the `prob_steps` for 4/10.
 
 The figure below shows the kitty distribution paneled by the winning horse for those 10,000 simulated games. The solid vertical line is the overall average kitty and the dashed vertical line is the mean for each panel. The kitty grows largest in games where 6/7/8 win because it takes the most steps for those horses to make it around the board.
 
