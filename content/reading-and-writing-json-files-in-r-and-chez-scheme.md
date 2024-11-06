@@ -116,7 +116,7 @@ For Chez Scheme, I've been exploring the [`json-tools` library](https://akkuscm.
 (1.1 2 #t null)
 ```
 
-The row-based JSON representation of tabular data is read as a list of vectors where each vector represents a row comprised of pairs of with the column name and row value. The column-based representation is read as a vector of lists where the first value of each list is the column name and the other values are the column values.
+The row-based JSON representation of tabular data is read as a list of vectors where each vector represents a row comprised of pairs with the column name and row value. The column-based representation is read as a vector of lists where the first value of each list is the column name and the other values are the column values.
 
 ```
 ;; row-based
