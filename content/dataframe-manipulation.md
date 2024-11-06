@@ -12,7 +12,7 @@ This is yet another post where I try out my [`dataframe`](https://github.com/hin
 
 ## Library and Data
 
-First, we import the `dataframe` library and the `shuffle` procedure from [`chez-stats`](https://github.com/hinkelman/dataframe/). The original post uses the [Palmer Penguins](https://github.com/allisonhorst/palmerpenguins) dataset, which I wrote to a csv file from R. We read the data from file and select only the columns used in this post. `dataframe-display` is similar to `head` in R and `dataframe-glimpse` is similar to `str`, but `dataframe` currently provides no functionality comparable to `summary` in R.
+First, we import the `dataframe` library and the `shuffle` procedure from [`chez-stats`](https://github.com/hinkelman/dataframe/). The original post uses the [Palmer Penguins](https://github.com/allisonhorst/palmerpenguins) dataset, which I wrote to a [csv file](/data/penguins.csv) from R. We read the data from file and select only the columns used in this post. `dataframe-display` is similar to `head` in R and `dataframe-glimpse` is similar to `str`, but `dataframe` currently provides no functionality comparable to `summary` in R.
 
 ```
 (import (dataframe)
