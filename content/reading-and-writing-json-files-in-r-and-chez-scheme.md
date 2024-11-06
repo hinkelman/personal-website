@@ -70,7 +70,7 @@ $Length
 2  2     STH    131
 ```
 
-Tabular data can be oriented by rows or columns. The default behavior of `fromJSON` uses row-based storage.
+Tabular data can be oriented by rows or columns. The default behavior of `toJSON` uses row-based storage.
 
 >However, unfortunately R is an exception in its preference for column-based storage: most languages, systems, databases, APIs, etc, are optimized for record based operations. For this reason, the conventional way to store and communicate tabular data in JSON seems to almost exclusively row based. 
 
