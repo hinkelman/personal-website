@@ -30,8 +30,8 @@ highlight_themes_css = [
 # opengraph = { image = "" }
 # disqus_id = ""
 # cusdis_id = ""
-social =  { url = "https://bsky.app/profile/thinkelman.bsky.social", display = "@thinkelman.bsky.social" }
+social =  { url = "https://bsky.app/profile/travishinkelman.com", display = "@travishinkelman.com" }
 # timezone = "America/New_York"
 
-# [extra.feather.analytics]
+[extra.feather.analytics]
 goatcounter_id = "thinkelman"
