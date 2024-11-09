@@ -9,7 +9,7 @@ In a [previous post](/reading-and-writing-json-files-in-r-and-chez-scheme/), I w
 
 <!-- more -->
 
-First, let's use the [`jsonlite` package](https://jeroen.cran.dev/jsonlite/index.html) for R to write the [`palmerpenguins` dataset](https://allisonhorst.github.io/palmerpenguins/) to JSON. `toJSON` provides the option to convert to row- or column-based JSON formats. These JSON files are avalable [here](/data/penguins-row.json) and [here](/data/penguins-col.json).
+First, let's use the [`jsonlite` package](https://jeroen.cran.dev/jsonlite/index.html) for R to write the [`palmerpenguins` dataset](https://allisonhorst.github.io/palmerpenguins/) to JSON. `toJSON` provides the option to convert to row- or column-based JSON formats. [The JSON files created with the R code below are avalable [here](/data/penguins-row.json) and [here](/data/penguins-col.json).]
 
 ```
 library(jsonlite)
@@ -53,6 +53,7 @@ Given that, let's start with `json-row`. `json-read` converts the row-based form
 
 ```
 > (list-ref json-row 3)
+
 #(("species" . "Adelie") ("island" . "Torgersen")
   ("year" . 2007))
 ```
@@ -120,7 +121,7 @@ We transpose the values into a list of columns that is the same length as our co
  year               <num>   2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, ... 
 ```
 
-`json-read` converts the column-based format into a vector of lists where the first item of each list is the column name and the other values are the column values. 
+Let's switch gears to working with the column-based case and the `json-col` object that we created earlier. `json-read` converts the column-based format into a vector of lists where the first item of each list is the column name and the other values are the column values. 
 
 ```
 > (list-head (list-ref (vector->list json-col) 5) 10)
