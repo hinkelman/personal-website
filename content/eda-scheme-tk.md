@@ -290,4 +290,4 @@ This nicely illustrates the translation between Tk and `chez-tk` where the Schem
 
 ## Conclusions
 
-I have enjoyed learning the basics of making GUIs with Tk in Scheme and R. I don't mind the outdated look of the widgets and I like the compactness of the interface (compared to a Shiny app). I think it would be fun to make a `chez-tk` version of my shiny Scorekeeper app (or even a `tcltk` version in R). I'm also interested in the possibility of packaging `chez-tk` and `tcltk` apps into standalone executables.
+I have enjoyed learning the basics of making GUIs with Tk in Scheme and R. I don't mind the outdated look of the widgets and I like the compactness of the interface (compared to a Shiny app). I think it would be fun to make a `chez-tk` version of my [Shiny-Scorekeeper app](https://github.com/hinkelman/Shiny-Scorekeeper) (or even a `tcltk` version in R). I'm also interested in the possibility of packaging `chez-tk` and `tcltk` apps into standalone executables.
