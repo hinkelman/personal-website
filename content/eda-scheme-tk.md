@@ -181,10 +181,10 @@ When `'exportselection:` is set to `#t`, clicking outside of the listbox deselec
 (define frame (tk 'create-widget 'frame 'padding: '(10 10 10 10)))
 (define months-lb
   (frame 'create-widget 'listbox 'listvariable: (tk-var 'months-tk)
-	     'height: 5 'exportselection: #f 'selectmode: 'extended))
+	 'height: 5 'exportselection: #f 'selectmode: 'extended))
 (define cities-lb
   (frame 'create-widget 'listbox 'listvariable: (tk-var 'cities-tk)
-	     'height: 10 'exportselection: #f 'selectmode: 'extended))
+	 'height: 10 'exportselection: #f 'selectmode: 'extended))
 (define vars-cb
   (frame 'create-widget 'combobox 'values: vars-labs 'state: 'readonly))
 ```
@@ -196,33 +196,33 @@ We are using the grid geometry manager with a simple layout of three columns and
 ```
 (tk/grid frame)
 (tk/grid (frame 'create-widget 'label 'text: "Years")
-	     'column: 0 'row: 0 'sticky: 'w 'pady: 5)
+	 'column: 0 'row: 0 'sticky: 'w 'pady: 5)
 (tk/grid (frame 'create-widget 'spinbox 'from: min-yr 'to: max-yr
-		        'textvariable: (tk-var 'min-yr-tk) 'width: 5)
-	     'column: 1 'row: 0 'sticky: 'w)
+		'textvariable: (tk-var 'min-yr-tk) 'width: 5)
+	 'column: 1 'row: 0 'sticky: 'w)
 (tk/grid (frame 'create-widget 'spinbox 'from: min-yr 'to: max-yr
-		        'textvariable: (tk-var 'max-yr-tk) 'width: 5)
-	     'column: 2  'row: 0 'sticky: 'w)
+		'textvariable: (tk-var 'max-yr-tk) 'width: 5)
+	 'column: 2  'row: 0 'sticky: 'w)
 
 (tk/grid (frame 'create-widget 'label 'text: "Months")
-	     'column: 0 'row: 1 'sticky: 'w)
+	 'column: 0 'row: 1 'sticky: 'w)
 (tk/grid months-lb 'column: 0 'row: 2 'columnspan: 3 'sticky: 'we 'pady: 5)
 
 (tk/grid (frame 'create-widget 'label 'text: "Cities")
-	     'column: 0 'row: 3 'sticky: 'w)
+	 'column: 0 'row: 3 'sticky: 'w)
 (tk/grid cities-lb 'column: 0 'row: 4 'columnspan: 3 'sticky: 'we 'pady: 5)
 
 (tk/grid (frame 'create-widget 'label 'text: "X Variable")
-	     'column: 0 'row: 5 'sticky: 'w 'pady: 5)
+	 'column: 0 'row: 5 'sticky: 'w 'pady: 5)
 (tk/grid (frame 'create-widget 'radiobutton 'text: "Year" 'value: "Year"
-	            'variable: (tk-var 'xvar-tk))
-	     'column: 1 'row: 5 'sticky: 'e)
+	        'variable: (tk-var 'xvar-tk))
+	 'column: 1 'row: 5 'sticky: 'e)
 (tk/grid (frame 'create-widget 'radiobutton 'text: "Month" 'value: "Month"
-	            'variable: (tk-var 'xvar-tk))
-	     'column: 2 'row: 5 'sticky: 'e)
+	        'variable: (tk-var 'xvar-tk))
+	 'column: 2 'row: 5 'sticky: 'e)
 
 (tk/grid (frame 'create-widget 'label 'text: "Response Variable")
-	     'column: 0 'row: 6 'columnspan: 3 'sticky: 'w)
+	 'column: 0 'row: 6 'columnspan: 3 'sticky: 'w)
 (tk/grid vars-cb 'column: 0 'row: 7 'columnspan: 3 'sticky: 'we)
 ```
 
@@ -257,7 +257,7 @@ If the filtering and aggregating steps produce an empty dataframe, then clicking
         (plot-data (agg-data df-sub xvar rv) xvar 'mean-rv xvar-str rv-str)))))
 
 (tk/grid (frame 'create-widget 'button 'text: "Plot" 'command: plot-cmd)
-	     'column: 0 'row: 8 'columnspan: 3 'sticky: 'we 'pady: 5)
+	 'column: 0 'row: 8 'columnspan: 3 'sticky: 'we 'pady: 5)
 ```
 
 ### Initial Values
@@ -281,11 +281,11 @@ This nicely illustrates the translation between Tk and `chez-tk` where the Schem
 (define (get-idx lst lst-sub)
   ;; get indices of lst-sub from lst
   (let* ([idx (iota (length lst))]
-	     [lst-idx (map (lambda (x i) (cons x i)) lst idx)])
+	 [lst-idx (map (lambda (x i) (cons x i)) lst idx)])
     (map (lambda (y) (cdr (assoc y lst-idx))) lst-sub)))
 
 (for-each (lambda (x) (cities-lb 'selection 'set x))
-	      (get-idx cities '("Austin" "Dallas" "El Paso" "Houston" "Lubbock" "San Antonio")))
+	  (get-idx cities '("Austin" "Dallas" "El Paso" "Houston" "Lubbock" "San Antonio")))
 ```
 
 ## Conclusions
