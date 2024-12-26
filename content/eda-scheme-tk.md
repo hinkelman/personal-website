@@ -118,9 +118,9 @@ We create a small wrapper procedure around a standard `dataframe-filter*`. The `
         (dataframe-filter*
          (city year month)
          (and (>= year min-yr)
-	          (<= year max-yr)
-	          (member month months-sel)
-	          (member city cities-sel))))))
+	      (<= year max-yr)
+	      (member month months-sel)
+	      (member city cities-sel))))))
 ```
 
 ### Aggregate
@@ -285,7 +285,8 @@ This nicely illustrates the translation between Tk and `chez-tk` where the Schem
     (map (lambda (y) (cdr (assoc y lst-idx))) lst-sub)))
 
 (for-each (lambda (x) (cities-lb 'selection 'set x))
-	  (get-idx cities '("Austin" "Dallas" "El Paso" "Houston" "Lubbock" "San Antonio")))
+	  (get-idx cities '("Austin" "Dallas" "El Paso" "Houston"
+                            "Lubbock" "San Antonio")))
 ```
 
 ## Conclusions
