@@ -94,13 +94,13 @@ We get the list of cities from the dataframe and remove duplicates. For some rea
 (define max-yr (apply max ($ df 'year)))
 
 (define months '(Jan Feb Mar Apr May Jun
-		         Jul Aug Sep Oct Nov Dec))
+		     Jul Aug Sep Oct Nov Dec))
 
 (define vars '(("Median Sale Price" median)
-	           ("Sales" sales)
-	           ("Volume" volume)
-	           ("Listings" listings)
-	           ("Inventory" inventory)))
+	       ("Sales" sales)
+	       ("Volume" volume)
+	       ("Listings" listings)
+	       ("Inventory" inventory)))
 
 (define vars-labs "\"Median Sale Price\" Sales Volume Listings Inventory")
 ```
