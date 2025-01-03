@@ -334,7 +334,6 @@ section {
 // inline code
 code {
     white-space: pre;
-    white-space: pre-wrap;
     background: var(--background);
     border-radius: 3px;
     padding: 1px 1px;
@@ -350,11 +349,8 @@ pre {
     font-size: 0.85em;
     line-height: 1.4;
     white-space: pre;
-    white-space: pre-wrap;
-    word-break: break-all;
-    word-wrap: break-word;
+    overflow-x: auto;
     position: relative;
-    z-index: -100;
     background-color: var(--background-weak) !important;
 
     @media (max-width: $break-small) {
@@ -370,15 +366,6 @@ pre {
 }
 
 article {
-    > pre,
-    > .filename {
-        box-sizing: border-box;
-        @media (min-width: 1024px) {
-            width: 114%;
-            right: 7%;
-            font-size: 1rem;
-        }
-    }
     blockquote {
         box-sizing: border-box;
         padding-left: 1em;
