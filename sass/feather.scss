@@ -536,7 +536,7 @@ sup.footnote-reference {
 
 //////
 .flex {
-    display: flex;
+    display: inline-block;
 
     &.column {
         flex-direction: column;
