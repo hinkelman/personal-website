@@ -108,8 +108,6 @@ The figure below shows the kitty distribution paneled by the winning horse for t
 
 ![](/img/kitty-hist.png)
 
-Lastly, I thought it would be fun to record the game live and provide updates on which horse was most likely to win as the game progressed. I was initially doing that within my original R script, but I decided to make a [Shiny app](https://hinkelman.shinyapps.io/horse-game/) to facilitate that process. The app layout is not great (e.g., buttons are too big) and it is missing some useful functionality (e.g., roll history not displayed and not able to undo if wrong button was clicked). The image below shows the app after I not so randomly clicked buttons to show example plots.
-
-![](/img/horse-game-shiny.png)
+Lastly, I thought it would be fun to record the game live and provide updates on which horse was most likely to win as the game progressed. I was initially doing that within my original R script, but I decided to make a [Shiny app](https://hinkelman.shinyapps.io/horse-game/) to facilitate that process. The app layout is not great and it is missing some useful functionality (e.g., roll history not displayed and not able to undo if wrong button was clicked).
 
 I suspect that I could have solved this problem more directly with math, but I had fun writing the code. My initial version performed a lot of the calculations within dataframes using `dplyr` functionality. I found that approach intuitive, but it was slow so I rewrote it with the vector approach (see [repo](https://github.com/hinkelman/horse-game)).
