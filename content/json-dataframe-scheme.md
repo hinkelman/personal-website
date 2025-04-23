@@ -80,13 +80,12 @@ The row-based JSON values are extracted into a row-based list of lists with `get
 
 ```
 (define (get-vals json-row names-str)
-  (let ([names (get-names-str json-row)])
-    (map (lambda (vec)
-	   (map (lambda (nm)
-		  (let ([pair (assoc nm (vector->list vec))])
-		    (if pair (cdr pair) 'na)))
-		names-str))
-	 json-row)))
+  (map (lambda (vec)
+	 (map (lambda (nm)
+		(let ([pair (assoc nm (vector->list vec))])
+		  (if pair (cdr pair) 'na)))
+	      names-str))
+       json-row))
 
 > (car (get-vals json-row (get-names-str json-row)))
 
