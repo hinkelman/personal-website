@@ -5,7 +5,7 @@ date = 2024-12-26
 tags = ["Scheme", "Chez Scheme", "dataframe", "gnuplot-pipe", "chez-tk"]
 +++
 
-In my [second post on this blog](/programming-horizons/), I expressed an interest in learning how to build desktop applications. I have yet to pursue that interest. Instead, I've primarily continued developing [Shiny](https://shiny.posit.co) apps deployed on the web (but see [Shiny-Scorekeeper](https://github.com/hinkelman/Shiny-Scorekeeper)). Recently, though, I've spent some time learning about the [Tk GUI toolkit](https://www.tcl.tk) for developing desktop applications. In this post, I revisit an old [post](/eda-scheme/) using the [`dataframe`](https://github.com/hinkelman/dataframe/) and [`gnuplot-pipe`](https://github.com/hinkelman/gnuplot-pipe) libraries for Scheme to conduct simple exploratory data analysis (EDA) and add an interface with [`chez-tk`](https://github.com/hinkelman/chez-tk/).
+In my [second post on this blog](/programming-horizons/), I expressed an interest in learning how to build desktop applications. I have yet to pursue that interest. Instead, I've primarily continued developing [Shiny](https://shiny.posit.co) apps deployed on the web (but see [Shiny Scorekeeper](https://github.com/hinkelman/Shiny-Scorekeeper)). Recently, though, I've spent some time learning about the [Tk GUI toolkit](https://www.tcl.tk) for developing desktop applications. In this post, I revisit an old [post](/eda-scheme/) using the [`dataframe`](https://github.com/hinkelman/dataframe/) and [`gnuplot-pipe`](https://github.com/hinkelman/gnuplot-pipe) libraries for Scheme to conduct simple exploratory data analysis (EDA) and add an interface with [`chez-tk`](https://github.com/hinkelman/chez-tk/).
 
 <!-- more -->
 
