@@ -53,7 +53,7 @@ A button to delete a row in the teams table is conditionally enabled when a row 
 ```
 observe({
   req(nrow(rv[["teams"]]) > 0)
-  state = if (is.null(input$teamsTable_rows_selected)) TRUE else FALSE
+  state = is.null(input$teamsTable_rows_selected)
   updateActionButton(session, "delete_teams_row", disabled = state)
 })
 ```
