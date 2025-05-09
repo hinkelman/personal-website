@@ -37,8 +37,4 @@ For the new version, I have hierarchical inputs to filter down to the desired ga
 
 ![image of new version of stats viewer](/img/stats-new.png)
 
-I also replaced the `DT` game stats table with a [`reactable`](https://glin.github.io/reactable/) version. `DT` tables have been my go-to option for Shiny apps for many years, but I recently read that the [`DT` author thinks `reactable` is generally better than `DT`](https://bookdown.org/yihui/rmarkdown-cookbook/table-other.html). I would have used `reactable` for all tables in Shiny Scorekeeper, but `reactable` tables are not editable so I needed to stick with `DT` tables for the roster section. I also think it is nice that the game stats table has a different look to reinforce that it is not editable. My only gripe with the `reactable` table is that I didn't like the default behavior for setting column widths so I had to write extra code to handle that. 
-
-
-
-
+I also replaced the `DT` game stats table with a [`reactable`](https://glin.github.io/reactable/) version. `DT` tables have been my go-to option for Shiny apps for many years, but I recently read that the [`DT` author thinks `reactable` is generally better than `DT`](https://bookdown.org/yihui/rmarkdown-cookbook/table-other.html). I would have used `reactable` for all tables in Shiny Scorekeeper, but `reactable` tables are not editable so I needed to stick with `DT` tables for the roster section. I also think it is nice that the game stats table has a different look to reinforce that it is not editable.
