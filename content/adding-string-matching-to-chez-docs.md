@@ -189,7 +189,11 @@ The `^` indicates that only search strings found at the start of the procedure s
 ("map")
 
 > (find-proc "file" 'exact 3)
-("&i/o-file-already-exists" "&i/o-file-does-not-exist" "&i/o-file-is-read-only")
+Returning 3 of 78 results
+("&i/o-file-already-exists"
+  "&i/o-file-does-not-exist"
+  "&i/o-file-is-read-only")
+  
 > (find-proc "^file" 'exact 3)
 ("file-access-time" "file-buffer-size" "file-change-time")
 
