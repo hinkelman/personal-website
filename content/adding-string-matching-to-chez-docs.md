@@ -1,6 +1,7 @@
 +++
 title = "Adding string matching to chez-docs"
 date = 2020-01-05
+updated = 2025-05-08
 [taxonomies]
 tags = ["chez-docs", "Chez Scheme"]
 +++
@@ -212,6 +213,32 @@ Under fuzzy matching, the `^` is included as part of the Levenshtein distance ca
 ("map" "max" "*" "+" "-")
 > (find-proc "^map" 'fuzzy 5)
 ("map" "max" "car" "exp" "memp")
+```
+
+UPDATE (2025-05-08): I realized recently that one of my favorite little elements of `chez-docs` is that, if `doc` can't find match, it returns a guess powered by `find-proc` and fuzzy matching. 
+
+```
+> (doc "ifelse")
+Exception in (doc proc): ifelse not found in csug or tspl
+Did you mean 'else'?
+```
+
+Searching for `ifelse` (from R) and turning up `else` isn't the most direct route to understanding, but it will lead you to `cond` and get you to a little closer to where you want to go.
+
+
+It took me about three years to realize that it would be an easy addition (basically 3 lines of code added in July 2023) and another two years to realize that I should mention it somewhere.
+
+```
+(define (guess-proc proc)
+  (string-append "Did you mean '" (car (find-proc proc 'fuzzy)) "'?"))
+```
+
+It has the same limitations of fuzzy matching as described above, but it is helpful if you simply introduced a typo or a misplaced dash in your call to `doc`. 
+
+```
+> (doc "make-byte-vector")
+Exception in (doc proc): make-byte-vector not found in csug or tspl
+Did you mean 'make-bytevector'?
 ```
 
 ***
