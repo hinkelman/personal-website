@@ -119,7 +119,7 @@ Because R doesn't allow multiple return values, you would partition a dataframe 
 6   b   y   4  11
 ```
 
-As mentioned in the [previous post](/split-bind-append-dataframes-scheme/), `dataframe-partition*` allows for partitioning a dataframe based on the `expr`. 
+As mentioned in the [previous post](/posts/split-bind-append-dataframes-scheme/), `dataframe-partition*` allows for partitioning a dataframe based on the `expr`. 
 
 ``` scheme
 > (define-values (keep drop)
