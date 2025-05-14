@@ -5,7 +5,7 @@ date-modified: 2024-03-11
 categories: ["Scheme", "dataframe", "R", "dplyr"]
 ---
 
-This post is part of a [series](/categories/dataframe/) on the [dataframe library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for modifying and aggregating dataframes.
+This post is part of a series on the [dataframe library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for modifying and aggregating dataframes.
 
 ### Set up
 
@@ -135,7 +135,7 @@ The following are equivalent
  (lambda () '(2 4 6 8 10)))
 ```
 
-In [previous posts](/categories/dataframe/) on macros used in filtering and sorting dataframes, I've acknowledged that the `dataframe-filter*` and `dataframe-sort*` macros don't provide a very compelling simplification. In this case, though, the `dataframe-modify*` macro is helpful both for reducing the number of characters and keeping the pieces of the expression together.
+In previous posts on macros used in filtering and sorting dataframes, I've acknowledged that the `dataframe-filter*` and `dataframe-sort*` macros don't provide a very compelling simplification. In this case, though, the `dataframe-modify*` macro is helpful both for reducing the number of characters and keeping the pieces of the expression together.
 
 ### Aggregate
 
