@@ -9,11 +9,6 @@ package = "@quarto/netlify-plugin-quarto"
   force = true
 
 [[redirects]]
-  from = "/:splat"
-  to = "/posts/:splat"
-  force = true
-
-[[redirects]]
   from = "/posts/dsm2-viz-tool/"
   to = "/posts/deploy-shiny-electron/"
   
