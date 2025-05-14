@@ -5,7 +5,7 @@ date-modified: 2024-03-26
 categories: ["Scheme", "dataframe"]
 ---
 
-I learned a lot about Scheme (R6RS) by writing a few libraries and I expect that there is more to learn by trying to use those libraries (e.g., [EDA in Scheme](/eda-scheme/)). A [blog post](http://varianceexplained.org/r/spam-simulation/) about a stochastic simulation of spam comments in R caught my eye as an interesting example to test my [`dataframe`](https://github.com/hinkelman/dataframe/) library.
+I learned a lot about Scheme (R6RS) by writing a few libraries and I expect that there is more to learn by trying to use those libraries (e.g., [EDA in Scheme](/posts/eda-scheme/)). A [blog post](http://varianceexplained.org/r/spam-simulation/) about a stochastic simulation of spam comments in R caught my eye as an interesting example to test my [`dataframe`](https://github.com/hinkelman/dataframe/) library.
 
 I was drawn to the spam simulation post because it describes using the `crossing` function from the [`tidyr` package](https://tidyr.tidyverse.org/) as a convenient way to examine the parameter space of a simulation under the familar framework of a dataframe, which is an approach that I've used in my own work. One of the challenges for me in learning new programming languages is that my R experience has led me to primarily think in terms of dataframes. 
 
