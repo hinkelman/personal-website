@@ -1,5 +1,5 @@
 ---
-title: "About"
+title: "Travis Hinkelman"
 image: TravisHinkelman_circle.png
 about:
   template: jolla
