@@ -24,6 +24,10 @@ format:
       - flatly
       - brand
     css: styles.css
+    include-in-header: 
+      - text: |
+          <script data-goatcounter="https://thinkelman.goatcounter.com/count" 
+          async src="//gc.zgo.at/count.js"></script>
 
 editor: source
 
