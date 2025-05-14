@@ -1,0 +1,14 @@
+---
+listing:
+  contents: posts
+  feed: true
+  sort: "date desc"
+  type: table
+  fields: [date, title, reading-time]
+  categories: cloud
+  sort-ui: false
+  filter-ui: false
+  date-format: iso
+page-layout: full
+title-block-banner: false
+---

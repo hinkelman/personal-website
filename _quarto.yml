@@ -1,0 +1,28 @@
+project:
+  type: website
+
+website:
+  title: "Travis Hinkelman"
+  site-url: "https://www.travishinkelman.com"
+  description: "Personal website for Travis Hinkelman"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/hinkelman
+      - icon: envelope
+        href: "mailto:thinkelman@pm.me"
+      - icon: linkedin
+        href: https://www.linkedin.com/in/travis-hinkelman-36604955/
+      - icon: rss
+        href: index.xml
+
+format:
+  html:
+    theme:
+      - flatly
+      - brand
+    css: styles.css
+
+editor: source
+

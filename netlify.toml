@@ -1,3 +1,6 @@
+[[plugins]]
+package = "@quarto/netlify-plugin-quarto"
+
 # Redirect rules
   
 [[redirects]]
@@ -6,72 +9,55 @@
   force = true
 
 [[redirects]]
-  from = "/posts/*"
-  to = "/:splat"
+  from = "/:splat"
+  to = "/posts/:splat"
   force = true
 
 [[redirects]]
-  from = "/dsm2-viz-tool/"
-  to = "/deploy-shiny-electron/"
+  from = "/posts/dsm2-viz-tool/"
+  to = "/posts/deploy-shiny-electron/"
   
 [[redirects]]
-  from = "/shiny-scorekeeper-datatable-crud/"
-  to = "/dt-datatable-crud/"
+  from = "/posts/shiny-scorekeeper-datatable-crud/"
+  to = "/posts/dt-datatable-crud/"
   
 [[redirects]]
-  from = "/generate-random-numbers-r-racket/"
-  to = "/generating-random-numbers-r-racket/"
+  from = "/posts/generate-random-numbers-r-racket/"
+  to = "/posts/generating-random-numbers-r-racket/"
 
 [[redirects]]
-  from = "/writing-chez-scheme-library/"
-  to = "/writing-a-chez-scheme-library/"
+  from = "/posts/writing-chez-scheme-library/"
+  to = "/posts/writing-a-chez-scheme-library/"
   
 [[redirects]]
-  from = "/selecting-dropping-renaming-dataframe-columns-chez-scheme/"
-  to = "/select-drop-rename-dataframe-columns-chez-scheme/"
+  from = "/posts/selecting-dropping-renaming-dataframe-columns-chez-scheme/"
+  to = "/posts/select-drop-rename-dataframe-columns-chez-scheme/"
 
 [[redirects]]
-  from = "/dataframe-record-type-for-chez-scheme/"
-  to = "/dataframe-record-type-for-scheme/"
+  from = "/posts/dataframe-record-type-for-chez-scheme/"
+  to = "/posts/dataframe-record-type-for-scheme/"
 
 [[redirects]]
-  from = "/select-drop-rename-dataframe-columns-chez-scheme/"
-  to = "/select-drop-rename-dataframe-columns-scheme/"
+  from = "/posts/select-drop-rename-dataframe-columns-chez-scheme/"
+  to = "/posts/select-drop-rename-dataframe-columns-scheme/"
 
 [[redirects]]
-  from = "/split-bind-append-dataframes-chez-scheme/"
-  to = "/split-bind-append-dataframes-scheme/"
+  from = "/posts/split-bind-append-dataframes-chez-scheme/"
+  to = "/posts/split-bind-append-dataframes-scheme/"
 
 [[redirects]]
-  from = "/filter-partition-and-sort-dataframes-in-chez-scheme/"
-  to = "/filter-partition-and-sort-dataframes-in-scheme/"
+  from = "/posts/filter-partition-and-sort-dataframes-in-chez-scheme/"
+  to = "/posts/filter-partition-and-sort-dataframes-in-scheme/"
   
 [[redirects]]
-  from = "/modify-aggregate-dataframes-chez-scheme/"
-  to = "/modify-aggregate-dataframes-scheme/"
+  from = "/posts/modify-aggregate-dataframes-chez-scheme/"
+  to = "/posts/modify-aggregate-dataframes-scheme/"
 
 [[redirects]]
-  from = "/spam-simulation-chez-scheme/"
-  to = "/spam-simulation-scheme/"
+  from = "/posts/spam-simulation-chez-scheme/"
+  to = "/posts/spam-simulation-scheme/"
 
 [[redirects]]
-  from = "/eda-chez-scheme/"
-  to = "/eda-scheme/"
+  from = "/posts/eda-chez-scheme/"
+  to = "/posts/eda-scheme/"
 
-[build]
-# This assumes that the Zola site is in a docs folder. If it isn't, you don't need
-# to have a `base` variable but you do need the `publish` and `command` variables.
-publish = "public"
-command = "zola build"
-
-[build.environment]
-# Set the version name that you want to use and Netlify will automatically use it.
-ZOLA_VERSION = "0.19.2"
-
-# The magic for deploying previews of branches.
-# We need to override the base url with whatever url Netlify assigns to our
-# preview site.  We do this using the Netlify environment variable
-# `$DEPLOY_PRIME_URL`.
-
-[context.deploy-preview]
-command = "zola build --base-url $DEPLOY_PRIME_URL"

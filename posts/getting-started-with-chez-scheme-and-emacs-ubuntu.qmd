@@ -1,0 +1,157 @@
+---
+title: "Getting started with Chez Scheme and Emacs on Ubuntu"
+date: 2020-02-08
+date-modified: 2024-10-23
+categories: ["Scheme", "Emacs", "geiser"]
+---
+
+I've been an enthusiastic Mac user for about 12 years, but hardware problems with a recent MacBook Pro and friction surrounding the Catalina upgrade pushed me to evaluate other Unix-like systems. I pulled out an old ASUS laptop that originally had Windows 7(?) installed, but was most recently running [CloudReady](https://www.neverware.com/freedownload). I first tried installing [FreeBSD](https://www.freebsd.org) because it seemed like an intriguing alternative, but the installation failed on the old hardware. I then tried [Debian](https://www.debian.org), but also failed. Finally, I reached for [Ubuntu](https://ubuntu.com) and, true to its reputation as being beginner friendly, was able to successfully complete the installation.^[During installation Ubuntu identified the apparent problem as related to numerous partitions from previous operating systems and provided the option to completely erase the old operating systems before installing Ubuntu. I'm sure that would also have been possible with FreeBSD and Debian, but Ubuntu made it easier to diagnose and address.]
+
+I have been [learning Chez Scheme](/categories/chez-scheme/) over the past six months and had previously written about [getting started with Chez Scheme and Emacs on macOS and Windows](/post/getting-started-with-chez-scheme-and-emacs/). For this post, I've copied the text of the previous post and updated only the components that needed to be changed to work with Ubuntu. 
+
+## Chez Scheme
+
+### Installation
+
+I installed Chez with [APT](https://en.wikipedia.org/wiki/APT_(software)).
+
+``` bash
+$ sudo apt install chezscheme
+```
+
+Alternatively, you can build it from source with the following commands:
+
+``` bash
+$ curl -L -O https://github.com/cisco/ChezScheme/releases/download/v10.0.0/csv10.0.0.tar.gz
+$ tar -xf csv10.0.0.tar.gz
+$ cd csv10.0.0/
+$ ./configure
+$ make
+$ sudo make install
+```
+
+### REPL
+
+To launch the Chez [REPL](https://en.wikipedia.org/wiki/Read–eval–print_loop), open Terminal and type `scheme`. [You can also type `petite` to launch Petite Chez Scheme. See [here](https://cisco.github.io/ChezScheme/csug9.5/use.html) for more information on the differences between Chez Scheme and Petite Chez Scheme.]{.aside}
+
+Test the REPL with simple expression.
+
+``` scheme
+> (+ 100 10 1)
+111
+```
+
+The REPL has several nice features including:
+
+* Navigate through previous expressions with the up and down arrow keys.
+* Autocomplete functions and paths with <kbd>TAB</kbd>.
+* Write and edit multi-line expressions.
+
+``` scheme
+> (define (example x y z)
+    (if (> x 0)
+        (+ y z)
+        (- y z)))
+> (example 1 2 3)
+5
+```
+When navigating through previous expressions, only the first line of a multi-line expression is shown. To see (and edit) all lines, type <kbd>CTRL</kbd>+<kbd>L</kbd>. In the middle of an expression, <kbd>RET</kbd> creates a new line; to execute an expression from the middle of an expression, use <kbd>CTRL</kbd>+<kbd>J</kbd>.
+
+### Library Directory
+
+Chez does not come with a package manager, but there are 3rd-party options, e.g., [Akku](https://akkuscm.org). In this post, though, I will describe manual package management. 
+
+`library-directories` returns the directories where Chez looks for libraries. 
+
+``` scheme
+> (library-directories)
+(("." . "."))
+```
+
+The `"."` indicates that Chez is looking in the current directory.[You can find the current directory with `current-directory`.]{.aside} If you are using a project-based workflow, then you could include your dependencies in the current directory, perhaps in a `lib` folder. For a 'global' approach, I created a library directory at `/home/username/chez-lib`.
+
+Before we go over where to stash that directory information, let's cover library extensions.
+
+``` scheme
+> (library-extensions)
+((".chezscheme.sls" . ".chezscheme.so") (".ss" . ".so")
+  (".sls" . ".so") (".scm" . ".so") (".sch" . ".so"))
+```
+
+These are the file extensions that Chez uses when searching the library directories.
+
+I edited `.bashrc` to add information on library directories and extensions. From a Terminal window, open `.bashrc` with the [gedit text editor](https://help.ubuntu.com/community/gedit). 
+
+``` bash
+$ gedit ~/.bashrc
+```
+
+These lines add a new directory to `library-directories` and a new extension to `library-extensions`.
+
+``` bash
+export CHEZSCHEMELIBDIRS="/home/username/chez-lib:"
+export CHEZSCHEMELIBEXTS=".sc::.so:"
+```
+
+The `:` at the end is used to indicate that the new entries should be appended to the existing entries. Remove the `:` to replace the default values with the new entries. After saving `.bashrc`, you need to logout from your user account and login again [to make the changes to `.bashrc` permanent](https://stackoverflow.com/questions/2518127/how-do-i-reload-bashrc-without-logging-out-and-back-in). For your current session, though, you can source `.bashrc`.
+
+``` bash
+$ source ~/.bashrc
+```
+
+Now, from a Chez REPL, we can see the effect of our changes.
+
+``` scheme
+> (library-directories)
+(("/home/username/chez-lib" . "/home/username/chez-lib")
+  ("." . "."))
+> (library-extensions)
+((".sc" . ".so") (".chezscheme.sls" . ".chezscheme.so") (".ss" . ".so")
+  (".sls" . ".so") (".scm" . ".so") (".sch" . ".so"))
+```
+
+If we have a library at `home/username/chez-lib/srfi/s1/lists.sls`, then we import the library with `(import (srfi s1 lists))`, i.e., you pass the components of the path to import. If you can't import the library, look at the `library` call at the top of `lists.sls`, for example, because that will give you a clue of where the library expects to be placed in `library-directories`. 
+
+## Emacs
+
+[Emacs](https://www.gnu.org/software/emacs/emacs.html) is a versatile text editor and the default choice for Scheme programming.
+
+### Installation
+
+Emacs is available through the Ubuntu Software Manager. You can also install it through the Terminal with
+
+``` bash
+sudo apt install emacs-gtk
+```
+
+### Basic Usage
+
+The power of Emacs is in the keyboard shortcuts and customization. When you are browsing info on Emacs, you will see shorthand for referring to keyboard combinations, e.g., `C-x` `C-f` corresponds to <kbd>CTRL</kbd>+<kbd>X</kbd> followed by <kbd>CTRL</kbd>+<kbd>F</kbd>. The other important key is the meta key with `M` as the shorthand. The default meta key is <kbd>ALT</kbd>. Similar to `.bashrc`, Emacs can be customized through commands saved in the `.emacs` file.
+
+### Geiser
+
+[Geiser](https://www.nongnu.org/geiser/) is a package that provides the ability to run several different Scheme implementations from within Emacs. We can install Geiser through [MELPA](https://melpa.org/#/). 
+
+Open Emacs, enter `C-x` `C-f` to find a file, and type `.emacs` at the prompt and add the following to the top of the `.emacs` file. 
+
+``` lisp
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+```
+
+Save `.emacs` and restart Emacs. Then type `M-x` followed by `package-refresh-contents`. If that is successful, you will see the message `Package refresh done` in the [minibuffer](https://www.gnu.org/software/emacs/manual/html_node/emacs/Minibuffer.html). To install Geiser, type `M-x` and then `package-install`. In response to the `Install package: ` prompt, type `geiser-chez` and hit return. You also need to add `(require 'geiser-chez)` to the `.emacs` file. 
+  
+The Chez REPL is launched through Emacs with `M-x` followed by `geiser-chez`. You can navigate through the previous expressions with <kbd>ESC</kbd>+<kbd>P</kbd> and <kbd>ESC</kbd>+<kbd>N</kbd>. Multi-line expressions, autocomplete, and syntax highlighting are also supported. 
+
+### Miscellaneous
+
+In Emacs, there is an option to highlight matching parantheses, which I find very helpful. Select `Options/Highlight Matching Parantheses` and then `Options/Save Options`. I've also started using [company-mode](http://company-mode.github.io) for text completion. I was also pleased to discover that reindenting lines in Emacs is as simple as selecting the section to indent and pressing <kbd>TAB</kbd>.
+
+Add the following lines to your `.emacs` file for `scheme-mode` to recognize the `.sls` file extension that is used with scheme code.
+
+``` lisp
+(add-to-list 'auto-mode-alist '("\\.sls\\'" . scheme-mode))
+```
+
+In addition to using <kbd>TAB</kbd> to reindent lines in Emacs, my other most used keyboard shortcuts are for executing, commenting, and selecting code. To execute the code in an s-expression, place your cursor at the end of the s-expression and type `C-x` `C-e`. If the executed code displays any output, it will be shown in the minibuffer and not the REPL. [If you want the output of the code displayed in the REPL, you will have to copy and paste it to the REPL.]{.aside} To evaluate several s-expressions, highlight the region and type `C-c` `C-r`. To select an s-expression, place your cursor at the beginning of the s-expression and type `M-C-space` (where space is the space bar). I've done a lot of fumbling around trying to select s-expressions by dragging the cursor with the mouse so I was excited to discover this last one.

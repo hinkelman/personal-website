@@ -1,0 +1,195 @@
+---
+title: "Spam simulation in Scheme"
+date: 2020-12-12
+date-modified: 2024-03-26
+categories: ["Scheme", "dataframe"]
+---
+
+I learned a lot about Scheme (R6RS) by writing a few libraries and I expect that there is more to learn by trying to use those libraries (e.g., [EDA in Scheme](/eda-scheme/)). A [blog post](http://varianceexplained.org/r/spam-simulation/) about a stochastic simulation of spam comments in R caught my eye as an interesting example to test my [`dataframe`](https://github.com/hinkelman/dataframe/) library.
+
+I was drawn to the spam simulation post because it describes using the `crossing` function from the [`tidyr` package](https://tidyr.tidyverse.org/) as a convenient way to examine the parameter space of a simulation under the familar framework of a dataframe, which is an approach that I've used in my own work. One of the challenges for me in learning new programming languages is that my R experience has led me to primarily think in terms of dataframes. 
+
+The takeaway from implementing the spam simulation in Scheme is that my `dataframe` library is not well suited to this task. That is not entirely surprising. `dataframe` was written for ease of implementation, not performance. More importantly, for a simple simulation like this, plain Scheme code provides a more straightforward solution than the `dataframe` approach.
+
+In this post, I will focus on explaining the Scheme code rather than describing the simulation. In short, the idea is that you can build up your intuition about a problem with simulations, which might eventually lead you to a more concise mathematical solution to the problem. The objective is to determine the number of spam comments after three days given that spammers follow a Poisson process. 
+
+### Dataframe approach
+
+First, let's import the `dataframe` library and a couple of procedures from the [`chez-stats`](https://github.com/hinkelman/chez-stats/) library (after following installation instructions at the library repos). We import only the specific procedures from `chez-stats` because there are name conflicts between `chez-stats` and `dataframe`. The conflicting procedures (e.g., `mean`, `median`, `sum`, etc.) in `dataframe` provide handling of missing values.
+
+``` scheme
+(import (dataframe)
+        (only (chez-stats)
+              random-exponential
+              repeat))
+```
+
+`dataframe-crossing` takes either dataframes or series and returns the cartesian product of the objects. The original post used 25,000 trials. We are only using 100 trials because the [performance of dataframe-split (see below) is poor with large numbers of groups](https://github.com/hinkelman/dataframe/issues/5). We are using the `->` operator to build up a chain of operations in a more readable way.
+
+``` scheme
+(define sim-waiting
+  (-> (dataframe-crossing (make-series 'trial (map add1 (iota 100)))
+                          (make-series 'observation (map add1 (iota 300))))))
+
+> (dataframe-display sim-waiting)
+
+ dim: 30000 rows x 2 cols
+   trial  observation 
+   <num>        <num> 
+      1.           1. 
+      1.           2. 
+      1.           3. 
+      1.           4. 
+      1.           5. 
+      1.           6. 
+      1.           7. 
+      1.           8. 
+      1.           9. 
+      1.          10. 
+```
+
+We continue to build up the `sim-waiting` dataframe by adding a column with waiting times by drawing from an exponential distribution with the observation as the rate parameter (used by `rexp` in R). However, `random-exponential` from `chez-stats` takes the mean of the distribution as the parameter, which is equal to `1/rate`.  
+
+``` scheme
+(define sim-waiting
+  (-> (dataframe-crossing (make-series 'trial (map add1 (iota 100)))
+                          (make-series 'observation (map add1 (iota 300))))
+      (dataframe-modify*
+       (waiting (observation) (random-exponential (/ 1 observation))))))
+
+> (dataframe-display sim-waiting)
+
+ dim: 30000 rows x 3 cols
+   trial  observation  waiting 
+   <num>        <num>    <num> 
+      1.           1.   1.4662 
+      1.           2.   0.0535 
+      1.           3.   0.3442 
+      1.           4.   0.3174 
+      1.           5.   0.8945 
+      1.           6.   0.1303 
+      1.           7.   0.0622 
+      1.           8.   0.1867 
+      1.           9.   0.1254 
+      1.          10.   0.0213 
+```
+
+The next step uses the `split-apply-combine` strategy to return the cumulative sum of the `waiting` column for each `trial`. `->` pipes into the first argument of the next procedure whereas `->>` pipes into the last. In the apply step, we add a new column for each dataframe that came out of `dataframe-split` with `(cumulative () (cumulative-sum ($ df 'waiting)))`. If a `dataframe-modify*` contains a list of the same length as the number of rows in the dataframe, then it is added to the dataframe as a column with the specified name, which is `cumulative` in this example.
+
+``` scheme
+(define sim-waiting
+  (-> (dataframe-crossing (make-series 'trial (map add1 (iota 100)))
+                          (make-series 'observation (map add1 (iota 300))))
+      (dataframe-modify*
+       (waiting (observation) (random-exponential (/ 1 observation))))
+      (dataframe-split 'trial)
+      (->> (map (lambda (df)
+	          (dataframe-modify*
+	           df
+		   (cumulative () (cumulative-sum ($ df 'waiting)))))))
+      (dataframe-bind-all)))
+
+> (dataframe-display sim-waiting)
+
+ dim: 30000 rows x 4 cols
+   trial  observation  waiting  cumulative 
+   <num>        <num>    <num>       <num> 
+      1.           1.   0.8186      0.8186 
+      1.           2.   0.5609      1.3795 
+      1.           3.   0.2155      1.5950 
+      1.           4.   0.1990      1.7940 
+      1.           5.   0.2132      2.0072 
+      1.           6.   0.0494      2.0566 
+      1.           7.   0.1209      2.1775 
+      1.           8.   0.0454      2.2230 
+      1.           9.   0.0384      2.2614 
+      1.          10.   0.0183      2.2797 
+```
+
+We cross `sim-waiting` with a new `time` column to find the number of spam comments within each `trial` and `time` combination. The `cumulative` column gives the total time that has elapsed. We are counting the number of rows where `cumulative` is less than `time` to determine the number of comments received in a specified `time`. The last step is to calculate the average number of spam comments for each time across all trials.
+
+``` scheme
+(define average-over-time
+  (-> sim-waiting
+      (dataframe-crossing (cons 'time (map (lambda (x) (* x 0.25)) (iota 13))))
+      (dataframe-modify*
+       (comment (cumulative time) (< cumulative time)))
+      (dataframe-aggregate*
+       (trial time)
+       (num-comments (comment) (sum comment)))
+      (dataframe-aggregate*
+       (time)
+       (average (num-comments) (exact->inexact (mean num-comments))))))
+
+> (dataframe-display average-over-time 13)
+
+ dim: 13 rows x 2 cols
+    time  average 
+   <num>    <num> 
+  0.0000   0.0000 
+  0.2500   0.1400 
+  0.5000   0.3900 
+  0.7500   0.8100 
+  1.0000   1.3000 
+  1.2500   2.1100 
+  1.5000   2.9000 
+  1.7500   3.8700 
+  2.0000   5.4000 
+  2.2500   7.3600 
+  2.5000   9.5500 
+  2.7500  12.1200 
+  3.0000  16.0000 
+```
+
+### Idiomatic Scheme approach
+
+As I mentioned above, the `dataframe` approach is inefficient and more verbose than an idiomatic Scheme approach. One source of inefficiency [The bigger inefficiency is the `dataframe` library, particularly `dataframe-split`.]{.aside} is generating 300 observations per trial when the average for three days is only 19. This inefficiency is not expensive in R because it is well optimized for these types of vectorized operations. However, in Scheme, we can write a simple recursive function that doesn't bother to build up a list of all of the waiting times and stops as soon as the number of comments exceeding the waiting time is known.
+
+``` scheme
+> (define (get-num-events max-obs max-time)
+    (let loop ([obs 1]
+               [time 0]
+               [events 0])
+      (if (or (> obs max-obs) (> time max-time))
+          (sub1 events) ;; sub1 to find num events less than max-time threshold
+          (let ([exp-draw (random-exponential (/ 1 obs))])
+            (loop (add1 obs) (+ time exp-draw) (add1 events))))))
+
+> (get-num-events 300 3)
+16
+> (get-num-events 300 3)
+1
+> (get-num-events 300 3)
+24
+> (get-num-events 300 3)
+28
+```
+
+The `repeat` procedure from `chez-stats` uses recursion to repeat a thunk `n` times, which allows us to build up a set of replications. 
+
+``` scheme
+> (define sim (repeat 1e5 (lambda () (get-num-events 300 3))))
+> (inexact (mean sim))
+19.03991
+```
+
+The last step is to vary the times used in the simulation.
+
+``` scheme
+> (define max-times (map (lambda (x) (* x 0.25)) (iota 13)))
+
+> (define sim-times
+   (map (lambda (mt)
+          (repeat 1e5 (lambda () (get-num-events 300 mt))))
+        max-times))
+
+> (define sim-times-mean (map (lambda (x) (inexact (mean x))) sim-times))
+
+> max-times
+(0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0)
+> sim-times-mean
+(0.0 0.28459 0.64931 1.11663 1.71885 2.48855 3.47136 4.74836
+     6.38984 8.48071 11.13153 14.64021 19.07148)
+```
+
+This approach uses 100,000 trials and is effectively instantaneous whereas only 50 trials in the `dataframe` approach took several seconds and hundreds of trials was likely to freeze Emacs. The `dataframe` library is not capable of working with hundreds of thousands of row. Fortunately, many data analysis projects involve datasets much smaller than that. More importantly, idiomatic Scheme code is well suited for simulations like this spam comments problem.

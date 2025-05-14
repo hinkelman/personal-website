@@ -1,0 +1,211 @@
+---
+title: "A dataframe record type for Scheme"
+date: 2020-03-27
+date-modified: 2024-03-12
+categories: ["Scheme", "dataframe"]
+---
+
+As an exercise in my Scheme (R6RS) learning journey, I have implemented a [dataframe record type](https://github.com/hinkelman/dataframe/) and procedures to work with the dataframe record type. Dataframes are column-oriented, tabular data structures useful for data analysis found in several languages including [R](https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html), [Python](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html), [Julia](https://juliadata.github.io/DataFrames.jl/stable/), and [Go](https://github.com/rocketlaunchr/dataframe-go). In this post, I will introduce the dataframe record type and basic procedures for working with dataframes. In subsequent posts, I will describe other dataframe procedures, e.g., filter, sort, aggregate, etc.
+
+### Series record type
+
+A dataframe is based on the series record type. A series record is a list where every element is the same type (one of bool, chr, str, sym, num, or other). The series record type includes the series `name`, source list (`src`), converted list (`lst`), list `type`, and list `length`. Only `name` and `src` are required to create a series; `lst`, `type`, and `length` are derived from `src`. Failed type conversions produce `'na` values.
+
+`define-record-type` creates a predicate, `series?`, constructor procedure, `make-series`, and accessor procedures for each field: `series-name`, `series-lst`, `series-type`, and `series-length`. [`series-src` is also created, but not exported to the dataframe namespace.] `make-series*` is macro to provide alternative syntax for making a series.
+
+``` scheme
+(define-record-type series
+  (fields name src lst type length)
+  (protocol
+    (lambda (new)
+      (lambda (name src)
+        (check-series name src "(make-series name src)")
+        (let* ([type (guess-type src 1000)]
+               [lst (convert-type src type)])
+          (new name src lst type (length lst)))))))
+
+> (define s1 (make-series 'a '(1 2 3)))
+> (define s2 (make-series* (a 1 2 3)))
+
+> (series-equal? s1 s2)
+#t
+
+> (series? s1)
+#t
+
+> (series-name s1)
+a
+
+> (series-lst s1)
+(1 2 3)
+
+> (series-length s1)
+3
+```
+
+### Dataframe record type
+
+The dataframe record type is based on a list of series (`slist`). The `names` and `dim` are derived from the `slist`. 
+
+``` scheme
+(define-record-type dataframe
+  (fields slist names dim)
+  (protocol
+    (lambda (new)
+      (lambda (slist)
+        (check-slist slist "(make-dataframe slist)")
+        (let* ([names (map series-name slist)]
+               [rows (series-length (car slist))]
+               [cols (length names)])
+          (new slist names (cons rows cols)))))))
+```
+
+A key component of the record definition is `check-slist`, which confirms that all elements of `slist` are series with the same length and unique names. `define-record-type` creates a predicate, `dataframe?`, constructor procedure, `make-dataframe`, and accessor procedures for each field: `dataframe-slist`, `dataframe-names`, and `dataframe-dim`. `make-df*` is macro to provide alternative syntax for making a dataframe.
+
+``` scheme
+> (define df (make-df* (a 1 2 3) (b 4 5 6)))
+
+> df
+#[#{dataframe f4aik6efdmw9tjrhx8ell3b2e-58} 
+  (#[#{series f4aik6efdmw9tjrhx8ell3b2e-59} a (1 2 3) (1 2 3) num 3] 
+    #[#{series f4aik6efdmw9tjrhx8ell3b2e-59} b (4 5 6) (4 5 6) num 3]) 
+  (a b) (3 . 2)]
+
+> (dataframe? df)
+#t
+
+> (dataframe-slist df)  
+(#[#{series f4aik6efdmw9tjrhx8ell3b2e-59} a (1 2 3) (1 2 3) num 3]
+  #[#{series f4aik6efdmw9tjrhx8ell3b2e-59} b (4 5 6) (4 5 6) num 3])
+
+> (dataframe-names df)
+(a b)
+
+> (dataframe-dim df)
+(3 . 2)                  ; (rows . columns)
+
+> (make-df* (a 1 2 3) (a 4 5 6))
+Exception in (make-dataframe slist): names not unique
+
+> (dataframe-display df)
+
+ dim: 3 rows x 2 cols
+       a       b 
+   <num>   <num> 
+      1.      4. 
+      2.      5. 
+      3.      6. 
+```
+
+### Head and tail
+
+In R, I frequently use `head` to preview the first few rows of a dataframe and, less frequently, use `tail` to view the last few rows. Scheme provides `list-head` and `list-tail` with similar functionality. However, `tail` in R returns the last `n` rows of the dataframe whereas `list-tail` in Scheme returns the rest of the list starting at a given index. My first instinct was to write `dataframe-tail` to use the R behavior, but eventually decided that `dataframe-tail` should follow the behavior established by `list-tail`. I was trying to think in terms of the [principle of least surprise](https://en.wikipedia.org/wiki/Principle_of_least_astonishment), but the degree of surprise depends on the potential users. Am I targeting R or Scheme programmers? The most realistic scenario is that future me is the only potential user and I want that guy to think in terms of typical Scheme patterns.
+
+``` scheme
+> (define df (make-df* (a 1 2 3 1 2 3) (b 4 5 6 4 5 6) (c 7 8 9 -999 -999 -999)))
+
+> (dataframe-display (dataframe-head df 3))
+
+ dim: 3 rows x 3 cols
+       a       b       c 
+   <num>   <num>   <num> 
+      1.      4.      7. 
+      2.      5.      8. 
+      3.      6.      9. 
+
+> (dataframe-display df 3)
+
+ dim: 5 rows x 4 cols
+     grp     trt   adult     juv 
+   <str>   <str>   <num>   <num> 
+       a       a      1.     10. 
+       a       b      2.     20. 
+       b       a      3.     30. 
+
+> (dataframe-display (dataframe-tail df 2))
+
+ dim: 4 rows x 3 cols
+       a       b       c 
+   <num>   <num>   <num> 
+      3.      6.      9. 
+      1.      4.   -999. 
+      2.      5.   -999. 
+      3.      6.   -999. 
+```
+
+### Read and write
+
+If you are working exclusively with dataframes in Scheme, you can read and write them directly with `dataframe-read` and `dataframe-write`. These procedures are straightforward because they are simply reading and writing the dataframe with `read` and `write`. 
+
+``` scheme
+(define dataframe-write
+  (case-lambda
+    [(df path) (dataframe-write df path #t)]
+    [(df path overwrite)
+      (when (and (file-exists? path) (not overwrite))
+        (assertion-violation path "file already exists"))
+      (when (file-exists? path)
+        (delete-file path))
+      (with-output-to-file path
+        (lambda () (write df)))]))
+
+(define (dataframe-read path)
+  (with-input-from-file path read))
+```
+
+### Extract values
+
+`dataframe-values` returns all the values in a column as a list. Following R, I've included `$` as an alias for `dataframe-values`. This procedure is particularly useful when modifying and aggregating dataframes (as I will show in a future blog post).
+
+``` scheme
+> (define df (make-df* (a 100 200 300) (b 4 5 6) (c 700 800 900)))
+
+> (dataframe-values df 'b)
+(4 5 6)
+
+> ($ df 'b)                 
+(4 5 6)
+
+> (map (lambda (name) ($ df name)) '(c a))
+((700 800 900) (100 200 300))
+
+> (define df1 (make-df* (x 'b 'a 'b) (y 'd 'e 'c)))
+
+> (remove-duplicates ($ df1 'x))
+(b a)
+
+> (remove-duplicates ($ df1 'y))
+(d e c)
+```
+
+`dataframe-ref` returns a dataframe based on a list of row indices and, optionally, the selected column names. I did not follow the principle of least surprise here because `dataframe-ref` takes a list of indices rather than a single value as in `list-ref`. For dataframes, the scenario of referencing a single row seemed less likely than a range of rows and I wanted to provide the option to simultaneously select the columns returned. 
+
+``` scheme
+> (define df 
+    (make-df* 
+      (grp "a" "a" "b" "b" "b")
+      (trt "a" "b" "a" "b" "b")
+      (adult 1 2 3 4 5)
+      (juv 10 20 30 40 50)))
+
+> (dataframe-display df)
+
+ dim: 5 rows x 4 cols
+     grp     trt   adult     juv 
+   <str>   <str>   <num>   <num> 
+       a       a      1.     10. 
+       a       b      2.     20. 
+       b       a      3.     30. 
+       b       b      4.     40. 
+       b       b      5.     50. 
+
+> (dataframe-display (dataframe-ref df '(0 2 4) 'adult 'juv))
+
+ dim: 3 rows x 2 cols
+   adult     juv 
+   <num>   <num> 
+      1.     10. 
+      3.     30. 
+      5.     50. 
+```
+

@@ -1,0 +1,188 @@
+---
+title: "Getting started with Akku package manager for Scheme"
+date: 2020-05-16
+date-modified: 2024-10-24
+categories: ["Scheme", "Akku"]
+---
+
+[Akku](https://akkuscm.org) is a package manager for Scheme that currently supports numerous R6RS and R7RS Scheme implementations.^[Chez Scheme, Chibi Scheme, GNU Guile, Gauche Scheme, Ikarus Scheme, IronScheme, Larceny Scheme, Loko Scheme, Mosh Scheme, Racket (plt-r6rs), Sagittarius Scheme, Vicare Scheme, Ypsilon Scheme] I was slow to embrace Akku because I encountered some initial friction with installation and setup. Moreover, coming from R, I was more familiar with a global package management model than Akku's project-based workflow. In the meantime, I was content to manually manage the few libraries that I had downloaded from different repos and placed in a directory found by Chez's `(library-directories)`.
+
+Recently, though, I spent part of a weekend playing with [Janet](https://janet-lang.org) and was seriously considering shifting my attention from Chez to Janet. At the end of the weekend, when I was taking stock of why I found Janet so appealing, it boiled down to lisp-like syntax with modern affordances and a built-in package manager. I decided that convenient syntax didn't trump Chez's solidity and stability, which left the package manager as the primary attraction. I came away from that experience with a renewed appreciation for Chez Scheme and resolved to push past my previous pain points and get up and running with Akku. The friction was related to trying to install on Windows and macOS and my unfamiliarity with GnuPG keys. I subsequently switched to using Akku exclusively on Linux where it works seamlessly. In 2024, I revisited installing on macOS and updated this post to reflect my experience.
+
+In this post, I will walk through the basics of installing Akku and setting up projects (Linux and macOS) and publishing packages (Linux only).
+
+### Installing Akku
+
+There are several installation options, but I recommend first trying the pre-built options available [here](https://gitlab.com/akkuscm/akku/-/releases). Download `akku-1.1.0.amd64-linux.tar.xz` for GNU/Linux amd64 and `akku-1.1.0.src.tar.xz` for other architectures. After downloading, extract and install with the following commands.
+
+``` bash
+$ tar -xf akku-1.1.0.src.tar.xz
+$ cd akku-1.1.0.src
+$ ./install.sh
+```
+
+This approach installs to `~/.local`. If `~/.local/bin` is not already on your path (check with `echo $PATH`), then add the following line to `.zshrc` (or wherever you keep your shell configuration commands). Make sure to replace `username` with the your actual username and replace `home` with `Users` on macOS.
+
+``` bash
+export PATH="/home/username/.local/bin:$PATH"
+```
+
+If the pre-built versions don't work for you, then the next step is to try the release tarball (`akku-1.1.0.tar.gz`), which requires [Guile](https://www.gnu.org/software/guile/).
+
+``` bash
+$ tar -xf akku-1.1.0.tar.gz
+$ cd akku-1.1.0
+$ ./configure
+$ make
+$ sudo make install
+```
+
+If you receive errors about not being able to find Scheme libraries, and you previously added a line to export `CHEZSCHEMELIBDIRS` in `.zshrc`, then you can replace that line with the following conditional logic (which is also necessary for using Akku after installation). Akku sets a local library directory that will be overridden by the export in `.zshrc` without adding this condition.
+
+``` bash
+if [[ -v AKKU_ENV ]]; then
+    echo "AKKU_ENV is set"
+else
+    export CHEZSCHEMELIBDIRS="/home/username/scheme/lib:"
+fi
+```
+
+On macOS, if you use Homebrew, you could first try installing with `brew install akku`, but that didn't work for me. I resorted to cloning the repository and building from there.
+
+``` bash
+$ git clone https://gitlab.com/akkuscm/akku.git
+$ cd akku
+$ ./configure
+$ make
+$ sudo make install
+```
+
+This approach installs to `/usr/local/bin`, which should generally already be on your path. In hindsight, I'm not sure if I had Xcode installed when I tried the first installation option listed above, which might explain why it failed, but I didn't want to mess with my working Akku installation to test that explanation.
+
+### Setting up a project
+
+If you are starting a new project, the command `akku init` will initialize "a new project with a simple template that demonstrates a program, a library and a test."
+
+``` bash
+$ akku init example-project
+```
+
+You should manually update the version, synopsis, authors, and license in `Akku.manifest`. If you are using Akku to install packages, then you will not need to manually update the depends field. However, Akku provides the option to [include direct dependencies](https://gitlab.com/akkuscm/akku/-/wikis/Direct-dependencies) from Git repositories, local directories, and URLs, which does require manually updating the depends field. If you using direct dependencies, be advised... 
+
+> Packages with direct dependencies will not be accepted into the Akku.scm archive. The archive is a self-sufficient set of packages.
+
+It is not necessary to first use `akku init`. You can start using Akku in an existing project. Let's pretend we have an existing project.
+
+``` bash
+$ mkdir existing-project
+$ cd existing-project
+$ akku update
+$ akku install
+```
+
+`akku update` updates the local package index. It is a global command, not specific to a project. If you are having trouble installing a package, this is the first thing to try. `akku install` creates the hidden `.akku` directory. [To toggle the visibility of files on macOS, use the keyboard shortcut `shift+command+period`. On Linux, use `control+H`.]{.aside} When you install packages with `akku install pkgname`, the library files are placed in `.akku/lib` and the full source code is installed in `.akku/src`.
+
+Let's install my `chez-stats` library.
+
+``` bash
+$ akku install chez-stats
+```
+
+Now, if you take in a peak in `.akku/lib`, you will find `chez-stats` and the `srfi` library. `chez-stats` only has a dependency on `srfi` for testing.^[You can run the tests for `chez-stats` from the Terminal by first running `.akku/env` and then `scheme .akku/src/chez-stats/tests/test-chez-stats.sps`.]
+
+Installing `chez-stats` creates the following `Akku.manifest` file, which indicates a dependency on the current version of `chez-stats`.
+
+``` scheme
+#!r6rs ; -*- mode: scheme; coding: utf-8 -*-
+(import (akku format manifest))
+
+(akku-package ("existing-project" "0.0.0-alpha.0")
+  (synopsis "I did not edit Akku.manifest")
+  (authors "Guy Q. Schemer")
+  (license "NOASSERTION")
+  (depends ("chez-stats" "^0.1.6"))
+)
+```
+
+To upgrade the version of a dependency, I run `akku update`, edit `Akku.manifest` with the new version number, delete `Akku.lock`, delete hidden `.akku` folder, and run `akku install`, which creates a new `Akku.lock` file and `.akku` folder. Presumably, the intended workflow is instead to remove the package that you are upgrading with `akku uninstall pkgname`, `akku update`, and `akku install pkgname`. 
+
+Let's now illustrate how `.akku/env` sets the environment to find the installed libraries. If we launch Chez (with `scheme` or `chez`) from the `existing-project` directory, and try to load `chez-stats`, we will be out of luck.
+
+``` scheme
+> (import (chez-stats))
+Exception: library (chez-stats) not found
+```
+
+Calling `library-directories` illustrates the problem. [`/home/username/scheme/lib` is where I put libraries that I want to make globally available.]{.aside}
+
+``` scheme
+> (library-directories)
+(("/home/username/scheme/lib"
+    .
+    "/home/username/scheme/lib")
+  ("." . "."))
+```
+
+If we load the Akku environment before launching Chez, [If `.akku/env` is not loading the environment, try `eval $(.akku/env -s)`. ]{.aside} 
+
+``` bash 
+$ .akku/env
+$ scheme
+```
+
+then Chez knows where to look for the libraries used in this project.
+
+``` scheme
+> (library-directories)
+(("/home/username/existing-project/.akku/lib"
+   .
+   "/home/username/existing-project/.akku/libobj"))
+   
+> (import (chez-stats))
+> (mean (random-sample 1e6 'normal))
+0.003722857359421433
+```
+
+So far all of the examples assume that you are working from the Terminal, but Akku also provides examples of `.chez-geiser` files that allow for [integration with Emacs and Geiser](https://gitlab.com/akkuscm/akku/-/wikis/Integration-with-Emacs-and-Geiser). If Geiser is not picking up the `.chez-geiser` file, then you might need to update Geiser. 
+
+### Publishing a package
+
+In preparation for publishing a package, we need to prepare and publish a GnuPG key (if you don't already have one).
+
+``` bash
+$ sudo apt install gnupg
+```
+
+Generate a key and answer the subsequent prompts.
+
+``` bash
+$ gpg --generate-key
+```
+
+Publish your key to a public key server with the following command (where `keyid` is replaced with your new public key, a long string of numbers and letters).
+
+``` bash
+$ gpg --keyserver pgp.mit.edu --send-keys keyid
+```
+
+When you tag your repo, it will prompt you for your GnuPG credentials. I'm not sure if the message is necessary, but the first time I tried to tag the repo (on macOS), git automatically opened `vi`. Including a message with `-m` will spare you from that fate.
+
+``` bash
+$ git tag -s v0.1.0 -m "initial release"
+```
+
+Next you need to push the tagged release.
+
+``` bash
+$ git push --tags
+```
+
+Because I use two-factor authentication for GitHub, I needed to set up a [personal access token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) to use as the password when pushing the tags. Alternatively, you could set up git to [authenticate with an ssh key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh).
+
+The last step is to publish with Akku.
+
+``` bash
+$ akku publish
+```
+
+In my experience, published packages appear in the Akku package list within 24-48 hours after submission.

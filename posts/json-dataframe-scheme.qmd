@@ -1,0 +1,186 @@
+---
+title: "Reading JSON files as Scheme dataframes"
+date: "2024-11-06"
+categories: ["Scheme", "json-tools", "dataframe", "R", "jsonlite", "JSON"]
+---
+
+In a [previous post](/reading-and-writing-json-files-in-r-and-chez-scheme/), I wrote about reading and writing JSON files in R and Chez Scheme. After updating that post, I was curious about how much code it would take to convert a Scheme object read from a JSON file into a [dataframe](https://akkuscm.org/packages/dataframe/). It is arguably a rare circumstance that a dataframe is the best data representation for JSON. In this post, we will tackle the limited case of reading JSON files that were created by writing R dataframes to JSON.
+
+First, let's use the [`jsonlite` package](https://jeroen.cran.dev/jsonlite/index.html) for R to write the [`palmerpenguins` dataset](https://allisonhorst.github.io/palmerpenguins/) to JSON. `toJSON` provides the option to convert to row- or column-based JSON formats. \[The JSON files created with the R code below are avalable [here](/data/penguins-row.json) and [here](/data/penguins-col.json).\]
+
+``` r
+library(jsonlite)
+library(palmerpenguins)
+
+writeLines(toJSON(penguins, dataframe = "rows"), 
+           "penguins-row.json")
+writeLines(toJSON(penguins, dataframe = "columns"), 
+           "penguins-col.json")
+```
+
+Next, let's import our Scheme libraries and read the data. We are using the [`json-tools` library](https://akkuscm.org/packages/json-tools/) for reading JSON.
+
+``` scheme
+(import (json)
+        (dataframe))
+
+(define json-row
+  (call-with-input-file "penguins-row.json" json-read))
+
+(define json-col
+  (call-with-input-file "penguins-col.json" json-read))
+```
+
+Tabular data in JSON can be oriented by rows or columns.
+
+> However, unfortunately R is an exception in its preference for column-based storage: most languages, systems, databases, APIs, etc, are optimized for record based operations. For this reason, the conventional way to store and communicate tabular data in JSON seems to almost exclusively row based.
+
+Given that, let's start with `json-row`. `json-read` converts the row-based format into a list of vectors where each vector represents a row comprised of pairs with the column name and row value.
+
+``` scheme
+> (car json-row)
+
+#(("species" . "Adelie") ("island" . "Torgersen")
+  ("bill_length_mm" . 39.1) ("bill_depth_mm" . 18.7)
+  ("flipper_length_mm" . 181) ("body_mass_g" . 3750)
+  ("sex" . "male") ("year" . 2007))
+```
+
+`toJSON` handles missing values in the row-based format by not including the name-value pair.
+
+``` scheme
+> (list-ref json-row 3)
+
+#(("species" . "Adelie") ("island" . "Torgersen")
+  ("year" . 2007))
+```
+
+To convert to a dataframe, we need the column names, but we can't just use `(car json-row)` because it might not include all of the column names. The following procedure gets the length of each row `n` and finds the number of columns `n-max`. We `cons` the `n` values onto an index `ind` because we use `list-ref` to get one of the rows from `json-row` that includes all columns. From there, we extract the column names from that row. Of course, if you know, for example, that the first row contains all columns, then you can just use `(map car (vector->list (car json-row)))`.
+
+``` scheme
+(define (get-names-str json-row)
+  (let* ([ind (iota (length json-row))]
+         [n (map vector-length json-row)]
+         [n-max (apply max n)]
+         [n-sub (filter (lambda (pair)
+                          (= (car pair) n-max))
+                        (map cons n ind))])
+    (map car (vector->list (list-ref json-row (cdr (car n-sub)))))))
+
+> (get-names-str json-row)
+
+("species" "island" "bill_length_mm" "bill_depth_mm"
+  "flipper_length_mm" "body_mass_g" "sex" "year")
+```
+
+The row-based JSON values are extracted into a row-based list of lists with `get-vals`. We use nested maps to map over all rows and all column names. If a column name is not found (via `assoc`), then we return 'na (symbol used for missing values in the `dataframe` library) to create sub-lists that all have the same length.
+
+``` scheme
+(define (get-vals json-row names-str)
+  (map (lambda (vec)
+         (map (lambda (nm)
+                (let ([pair (assoc nm (vector->list vec))])
+                  (if pair (cdr pair) 'na)))
+              names-str))
+       json-row))
+
+> (car (get-vals json-row (get-names-str json-row)))
+
+("Adelie" "Torgersen" 39.1 18.7 181 3750 "male" 2007)
+
+> (list-ref (get-vals json-row (get-names-str json-row)) 3)
+
+("Adelie" "Torgersen" na na na na na 2007)
+```
+
+We transpose the values into a list of columns that is the same length as our column names. A dataframe in Scheme is comprised of a list of series that are all the same length. `make-series` takes a name as symbol and a list of values to make a new series. `transpose` is provided by the dataframe library.
+
+``` scheme
+(define row-df
+  (let ([names-str (get-names-str json-row)])
+    (make-dataframe
+     (map (lambda (nm lst)
+            (make-series nm lst))
+          (map string->symbol names-str)
+          (transpose (get-vals json-row names-str))))))
+
+> (dataframe-glimpse row-df)
+
+ dim: 344 rows x 8 cols
+ species            <str>   Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, ... 
+ island             <str>   Torgersen, Torgersen, Torgersen, Torgersen, ...     
+ bill_length_mm     <num>   39.1, 39.5, 40.3, na, 36.7, 39.3, 38.9, 39.2, ...   
+ bill_depth_mm      <num>   18.7, 17.4, 18, na, 19.3, 20.6, 17.8, 19.6, ...     
+ flipper_length_mm  <num>   181, 186, 195, na, 193, 190, 181, 195, 193, ...     
+ body_mass_g        <num>   3750, 3800, 3250, na, 3450, 3650, 3625, 4675, ...   
+ sex                <str>   male, female, female, na, female, male, female, ... 
+ year               <num>   2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, ... 
+```
+
+Let's switch gears to working with the column-based case and the `json-col` object that we created earlier. `json-read` converts the column-based format into a vector of lists where the first item of each list is the column name and the other values are the column values.
+
+``` scheme
+> (list-head (list-ref (vector->list json-col) 5) 10)
+
+("body_mass_g" 3750 3800 3250 "NA" 3450 3650 3625 4675 3475)
+
+> (list-head (list-ref (vector->list json-col) 6) 10)
+
+("sex" "male" "female" "female" null "female" "male"
+  "female" "male" null)
+```
+
+Because the column-based format is similar to the structure of a dataframe, the code to convert `json-col` to a dataframe is simpler.
+
+``` scheme
+(define col-df
+  (make-dataframe
+   (map (lambda (col)
+          (make-series
+           (string->symbol (car col))
+           (cdr col)))
+        (vector->list json-col))))
+
+> (dataframe-glimpse col-df)
+
+ dim: 344 rows x 8 cols
+ species            <str>   Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, ... 
+ island             <str>   Torgersen, Torgersen, Torgersen, Torgersen, ...     
+ bill_length_mm     <num>   39.1, 39.5, 40.3, na, 36.7, 39.3, 38.9, 39.2, ...   
+ bill_depth_mm      <num>   18.7, 17.4, 18, na, 19.3, 20.6, 17.8, 19.6, ...     
+ flipper_length_mm  <num>   181, 186, 195, na, 193, 190, 181, 195, 193, ...     
+ body_mass_g        <num>   3750, 3800, 3250, na, 3450, 3650, 3625, 4675, ...   
+ sex                <str>   male, female, female, null, female, male, ...       
+ year               <num>   2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, ... 
+```
+
+For missing values in the column-based format, `toJSON` uses `NA` for numbers and `null` for strings. `json-read` leaves the `NA` as is and converts the `null` to `'null`, but `make-dataframe` automatically converts `NA` to `'na` (missing value representation) and `'null` to `"null"` (because of implicit conversion to maintain same type throughout the column). It isn't strictly necessary to convert `"null"` to `'na`, but we will do that below. If you already know that only the `sex` column has `null` values, then you can modify just that column. Alternatively, we can identify the names of the string columns with some mapping and filtering and apply the same procedure to all string columns.
+
+``` scheme
+(define col-df2
+  (dataframe-modify*
+   col-df
+   (sex (sex) (if (string=? sex "null") 'na sex))))
+
+(define col-df3
+  (let* ([name-type (map (lambda (series)
+                           (cons (series-type series)
+                                 (series-name series)))
+                         (dataframe-slist col-df))]
+         [str-names (map cdr (filter
+                              (lambda (pair)
+                                (symbol=? (car pair) 'str))
+                              name-type))])
+    (apply
+     dataframe-modify-at
+     col-df
+     (lambda (x) (if (string=? x "null") 'na x))
+     str-names)))
+
+> (dataframe-equal? row-df col-df)
+#f
+> (dataframe-equal? row-df col-df2 col-df3)
+#t
+```
+
+I thought about adding this functionality to the `dataframe` library, but I don't think it is a common enough use case to warrant the additional code maintenance and dependency on `json-tools`.

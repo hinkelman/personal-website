@@ -1,0 +1,16 @@
+---
+title: "Free drawing distributions with shinysense"
+date: 2019-06-07
+categories: ["R", "Shiny"]
+---
+
+One of the [areas of expertise at Cramer Fish Sciences](https://www.fishsciences.net/expertise/) is watershed and habitat restoration. In the context of that work, we are often faced with estimating how much rearing habitat is needed to support a specified number of juvenile salmonids (or how many juvenile salmonids are supported by a specified amount of rearing habitat). Our typical approach for generating these estimates is to use the territory size-fork length relationship from [Grant and Kramer (1990)](https://doi.org/10.1139/f90-197). To simplify that calculation, we often assume that all the fish are the same size. 
+
+However, I recently learned about an R package, [shinysense](https://github.com/nstrayer/shinysense), that allows the user to draw a line on a plot with their mouse in a [Shiny](https://shiny.rstudio.com/) app. Using this approach, I built a little shiny app (embedded below but better when viewed in separate browser window)^[The Shiny app is hosted on [shinyapps.io](https://fishsciences.shinyapps.io/juvenile-salmonid-habitat-calculator/) and the code is available through [GitHub](https://github.com/fishsciences/juvenile-salmonid-habitat-calculator).] that allows the user to draw an empirical fork length distribution and then calculates habitat need or habitat capacity based on the drawn fork length distribution. [Here is an [example](https://nstrayer.shinyapps.io/drawadist/) of fitting a theoretical distribution to a drawing.]{.aside}
+
+It is remarkably straightforward to use shinysense to free draw a distribution. The basic idea is that a set of x-axis values and the limits of the y-axis are specified. When a line is drawn, the y-axis values are mapped to the specified x-axis values and available on the server side of the Shiny app. In the Juvenile Salmonid Habitat Calculator, the y-axis values are arbitrary and re-scaled to sum to one. A histogram and table of the distribution give the user feedback on their drawing. 
+
+The big picture idea for the Juvenile Salmonid Habitat Calculator has been bouncing around in the back of my mind for several months, but I wasn't sure how to implement the fork length distribution part of the app (based on my existing Shiny knowledge). When I found shinysense, I wasn't searching for it, but I was thrilled to realize that it would allow me to easily implement my idea for the Juvenile Salmonid Habitat Calculator.
+
+<iframe width="725" height="800" scrolling="yes" frameborder="no" src="https://fishsciences.shinyapps.io/juvenile-salmonid-habitat-calculator/"> </iframe>
+
