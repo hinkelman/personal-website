@@ -4,13 +4,13 @@ date: 2020-11-08
 categories: ["F#"]
 ---
 
-In [three](/programming-horizons/) [previous](/exploring-scheme-implementations/) [posts](/programming-horizons-revisited/), I wrote about different programming languages that I have considered learning. I mentioned about 15 different languages in those posts. [F#](https://fsharp.org/) was not on the list. Because my background is in R, I thought I was better off sticking to learning dynamically typed languages at this point. Moreover, I hold a longstanding bias against Microsoft and Windows and that bias was easy to transfer to F#. 
+In [three](/posts/programming-horizons/) [previous](/posts/exploring-scheme-implementations/) [posts](/posts/programming-horizons-revisited/), I wrote about different programming languages that I have considered learning. I mentioned about 15 different languages in those posts. [F#](https://fsharp.org/) was not on the list. Because my background is in R, I thought I was better off sticking to learning dynamically typed languages at this point. Moreover, I hold a longstanding bias against Microsoft and Windows and that bias was easy to transfer to F#. 
 
 A few months ago, I started a new job. My work primarily involves R, but there is a software developer at the new company who primarily uses C#. Because I'm interested in eventually shifting my role to involve more software development, I thought it might be worthwhile to invest some time in learning C#. But, after a little more reading about C# and .NET, I found myself more drawn to F# as a functional-first language with strengths in data science (relative to C#).
 
-Around the time that I started following the F# community, I saw a call for applications to the [F# Mentorship Program](https://fsharp.org/mentorship/). I decided to apply and was assigned a mentor. I've thoroughly enjoyed the mentorship program and, although I still know very little F#, I can see my appreciation of F# growing to the level of R and Scheme.   
+Around the time that I started following the F# community, I saw a call for applications to the F# Mentorship Program. I decided to apply and was assigned a mentor. I've thoroughly enjoyed the mentorship program and, although I still know very little F#, I can see my appreciation of F# growing to the level of R and Scheme.   
 
-I had [previously written](/stochastic-population-model-r-racket/) about implementing a stochastic population model in Racket based on an R example found in [this blog post](https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html). As a first exercise in F#, I've translated the stochastic population model into a few F# versions.
+I had [previously written](/posts/stochastic-population-model-r-racket/) about implementing a stochastic population model in Racket based on an R example found in [this blog post](https://www.seascapemodels.org/rstats/2017/02/26/speeding-up-sims.html). As a first exercise in F#, I've translated the stochastic population model into a few F# versions.
 
 I'm working with F# in Visual Studio Code with [Ionide](https://ionide.io/) on Linux (Ubuntu), but I think that the code shared in this post will work on other platforms. We can initialize a new console app with the following line.
 

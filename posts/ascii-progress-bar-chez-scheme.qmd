@@ -35,7 +35,7 @@ The first step is to write a procedure that will generate the text for a single 
      "%")))
 ```
 
-`generate-bar` simply draws the inputs without doing any calculations. `total-width` is measured in the number of characters. A `tick` is a single character to indicate completion.[I've chosen `=` as the completion character following the style of R's [`progress` package](https://github.com/r-lib/progress).]{.aside} The `places-string` keeps the percent completed number at 3 characters so that the total length of the bar doesn't change and distract from the intended animation effect.
+`generate-bar` simply draws the inputs without doing any calculations. `total-width` is measured in the number of characters. A `tick` is a single character to indicate completion.[I've chosen `=` as the completion character following the style of R's [`progress` package](https://r-lib.github.io/progress/).]{.aside} The `places-string` keeps the percent completed number at 3 characters so that the total length of the bar doesn't change and distract from the intended animation effect.
 
 ``` scheme
 > (display (generate-bar 8 20 40))

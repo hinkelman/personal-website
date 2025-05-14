@@ -6,7 +6,7 @@ categories: ["Scheme", "json-tools", "dataframe", "R", "jsonlite", "JSON"]
 
 In a [previous post](/reading-and-writing-json-files-in-r-and-chez-scheme/), I wrote about reading and writing JSON files in R and Chez Scheme. After updating that post, I was curious about how much code it would take to convert a Scheme object read from a JSON file into a [dataframe](https://akkuscm.org/packages/dataframe/). It is arguably a rare circumstance that a dataframe is the best data representation for JSON. In this post, we will tackle the limited case of reading JSON files that were created by writing R dataframes to JSON.
 
-First, let's use the [`jsonlite` package](https://jeroen.cran.dev/jsonlite/index.html) for R to write the [`palmerpenguins` dataset](https://allisonhorst.github.io/palmerpenguins/) to JSON. `toJSON` provides the option to convert to row- or column-based JSON formats. \[The JSON files created with the R code below are avalable [here](/data/penguins-row.json) and [here](/data/penguins-col.json).\]
+First, let's use the [`jsonlite` package](https://jeroen.cran.dev/jsonlite/) for R to write the [`palmerpenguins` dataset](https://allisonhorst.github.io/palmerpenguins/) to JSON. `toJSON` provides the option to convert to row- or column-based JSON formats. \[The JSON files created with the R code below are available [here](/data/penguins-row.json) and [here](/data/penguins-col.json).\]
 
 ``` r
 library(jsonlite)

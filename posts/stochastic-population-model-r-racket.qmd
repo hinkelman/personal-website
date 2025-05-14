@@ -41,11 +41,11 @@ In the spirit of learning, I wanted to try to write the Racket version of the `l
         (cons y (loop (calc y) (add1 i)))))
   (loop y 1))
 ```
-[Throughout this post, we are using `flnormal-sample` to draw random numbers. I wrote about generating random numbers in this [post](/post/generating-random-numbers-r-racket/).]{.aside}
+[Throughout this post, we are using `flnormal-sample` to draw random numbers. I wrote about generating random numbers in this [post](/posts/generating-random-numbers-r-racket/).]{.aside}
 
 My clunky version had calc and loop as separate functions and I struggled to figure out how to pass the extra function arguments (i.e., `r`, `k`, and `thetasd`) to the standalone loop function. Several solutions were suggested on the mailing list. I gravitated to the nested functions approach shown above, but, as I write this, I'm having trouble articulating why I liked that option the best. Check out the thread on the mailing list and decide for yourself.
 
-I also wrote a version, `logmod-vec`, that is a direct translation of the R code in the `logmodr` function. This version was easy to write because I had already invested time in [learning about `for` loops in Racket.](/post/for-loop-r-racket/).
+I also wrote a version, `logmod-vec`, that is a direct translation of the R code in the `logmodr` function. This version was easy to write because I had already invested time in [learning about `for` loops in Racket.](/posts/for-loop-r-racket/).
 
 ``` racket
 (define (logmod-vec t y r k thetasd)

@@ -5,7 +5,7 @@ date-modified: 2024-03-12
 categories: ["Scheme", "dataframe"]
 ---
 
-This post is the third in a [series](/categories/dataframe/) on the [`dataframe` library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for splitting, binding, and appending dataframes.
+This post is the third in a series on the [`dataframe` library](https://github.com/hinkelman/dataframe/) for Scheme (R6RS). In this post, I will contrast the `dataframe` library with functions from base R and the [`dplyr` package](https://dplyr.tidyverse.org) for splitting, binding, and appending dataframes.
 
 ### Set up
 
@@ -232,4 +232,4 @@ Because Scheme doesn't have explicit missing values, `dataframe` uses `'na` to i
 
 ### Final thoughts
 
-With the exception of `dataframe-split`, all of the procedures described in the first three posts in the [dataframe series](/categories/dataframe/) involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `dataframe-partition*`) and familiarity/consistency with Scheme's standard library. In the next [post](/filter-partition-and-sort-dataframes-in-scheme/), I will describe how to filter, partition, and sort dataframes in Scheme. 
+With the exception of `dataframe-split`, all of the procedures described in the first three posts in the dataframe series involve straightforward composition of Scheme's fundamental procedures (e.g., `map`, `apply`, `append`, `cons`, `car`, `cdr`, etc.) on Scheme's core data structure, i.e., lists. The next couple of posts involve procedures that forced me to wrestle with tradeoffs between convenient syntax via macros (e.g., `dataframe-partition*`) and familiarity/consistency with Scheme's standard library. In the next [post](/posts/filter-partition-and-sort-dataframes-in-scheme/), I will describe how to filter, partition, and sort dataframes in Scheme. 

@@ -5,11 +5,11 @@ date-modified: 2024-03-26
 categories: ["Scheme", "dataframe", "R", "Shiny"]
 ---
 
-As a learning exercise, I wrote a [`dataframe`](https://github.com/hinkelman/dataframe/) library for Scheme (R6RS). Because I was learning Scheme while I wrote `dataframe`, I did not prioritize performance. However, as I've tried to use the `dataframe` library ([exploratory data analysis](/eda-scheme), [spam simulation](/spam-simulation-scheme/), [gapminder](/gapminder-base-r-scheme/)), I've encountered performance pitfalls that make `dataframe` largely unusable for datasets with more than a few thousand rows. I have a rough idea of where the bottlenecks are, but I thought it would be a useful to take a step back and visualize the `dataframe` procedures as a network graph. 
+As a learning exercise, I wrote a [`dataframe`](https://github.com/hinkelman/dataframe/) library for Scheme (R6RS). Because I was learning Scheme while I wrote `dataframe`, I did not prioritize performance. However, as I've tried to use the `dataframe` library ([exploratory data analysis](/posts/eda-scheme), [spam simulation](/posts/spam-simulation-scheme/), [gapminder](/posts/gapminder-base-r-scheme/)), I've encountered performance pitfalls that make `dataframe` largely unusable for datasets with more than a few thousand rows. I have a rough idea of where the bottlenecks are, but I thought it would be a useful to take a step back and visualize the `dataframe` procedures as a network graph. 
 
 UPDATE: I improved `dataframe` such that performance is reasonable on datasets up to roughly one hundred thousand rows. 
 
-I had some experience with the R package, [`pkgnet`](https://uptake.github.io/pkgnet/), which allows for exploring the structure of a package by building a graph representation. I had also spent a little time using the package, [`visNetwork`](https://datastorm-open.github.io/visNetwork/), that `pkgnet` uses to build the function graph. Moreover, because code is data in Scheme, it is relatively straightforward to analyze Scheme code and I had briefly experimented with that in a [previous blog post](/viewing-source-code-r-chez-scheme). 
+I had some experience with the R package, [`pkgnet`](https://uptake.github.io/pkgnet/), which allows for exploring the structure of a package by building a graph representation. I had also spent a little time using the package, [`visNetwork`](https://datastorm-open.github.io/visNetwork/), that `pkgnet` uses to build the function graph. Moreover, because code is data in Scheme, it is relatively straightforward to analyze Scheme code and I had briefly experimented with that in a [previous blog post](/posts/viewing-source-code-r-chez-scheme). 
 
 ## Prepare Data
 
