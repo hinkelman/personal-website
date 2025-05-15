@@ -20,6 +20,7 @@ website:
 
 format:
   html:
+    toc: true
     theme:
       - flatly
       - brand
