@@ -4,7 +4,7 @@ date: "2025-05-18"
 categories: ["NetLogo"]
 ---
 
-[NetLogo](https://ccl.northwestern.edu/netlogo/) played a key role in my professional life. In this post, I briefly reflect on my experiences with NetLogo.
+In this post, I briefly reflect on my experiences with [NetLogo](https://ccl.northwestern.edu/netlogo/), which played a key role in my professional life.
 
 My meandering graduate school research experiences were all broadly related to predator-prey interactions, foraging behavior, and animal movement. [During my PhD (the 2nd try)](https://digitalcommons.unl.edu/dissertations/AAI3523971/), I was studying the movement behavior of ladybug larvae after they consumed low-quality, potentially toxic, prey. I was interested in modeling their movement with the potential of eventually exploring how high-quality prey could benefit from the association with low-quality prey.
 
