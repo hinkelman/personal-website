@@ -1,12 +1,13 @@
 ---
 title: "Exploratory data analysis in Elixir"
 date: 2023-07-08
+date-modified: 2025-08-01
 categories: ["Elixir", "Explorer"]
 ---
 
 I have been tinkering with lots of different programming languages (see [here](/posts/programming-horizons/) and [here](/posts/programming-horizons-revisited/)) over the last few years. Scheme is the only language so far that I have enjoyed enough to write a decent amount of code. [Elixir](https://elixir-lang.org/) first caught my eye back in April 2020, but I've only recently tried to write more than 'hello world' with it. So far, I think it is great and I'm excited to learn more. I haven't previously been a fan of code notebooks, but I think [Livebook](https://livebook.dev/) is amazing.
 
-I'm using Elixir on Ubuntu. There are lots of different ways to install Elixir on Linux. I opted to first install Erlang with `sudo apt install erlang`. Then I installed the [Elixir precompiled package](https://elixir-lang.org/install.html#precompiled-package) for the version of Erlang that I just installed (get Erlang/OTP version by running `erl -s halt`). I moved the unzipped folder to my home directory and added the following line to `.zshrc`: `export PATH="$PATH:/home/username/elixir-otp-25/bin"`.
+I'm using Elixir on Ubuntu. There are lots of different ways to install Elixir on Linux. I opted to first install Erlang with `sudo apt install erlang`. Then I installed the [Elixir precompiled package](https://elixir-lang.org/install.html#precompiled-package) for the version of Erlang that I just installed (get Erlang/OTP version by running `erl -s erlang halt`). I moved the unzipped folder to my home directory and added the following line to `.zshrc`: `export PATH="$PATH:/home/username/elixir-otp-25/bin"`.
 
 I installed Livebook by running `mix escript.install hex livebook` in the terminal and added the following line to `.zshrc`: `export PATH="$PATH:/home/username/.mix/escripts"`. After running `source .zshrc`, I was able to launch Livebook with `livebook server`. 
 
@@ -16,10 +17,10 @@ One of the great features of Livebook is that the user-friendly GUI elements cre
 
 ``` elixir
 Mix.install([
-  {:kino, "~> 0.9.4"},
-  {:kino_explorer, "~> 0.1.8"},
-  {:kino_vega_lite, "~> 0.1.8"},
-  {:req, "~> 0.3.10"}
+  {:kino, "~> 0.16.1"},
+  {:kino_explorer, "~> 0.1.24"},
+  {:kino_vega_lite, "~> 0.1.13"},
+  {:req, "~> 0.5.15"}
 ])
 ```
 
@@ -37,7 +38,7 @@ In R, `read.csv` allows for reading directly from a URL. This Elixir code compos
 ``` elixir
 txhousing =
   Req.get!("https://www.travishinkelman.com/data/txhousing.csv").body
-  |> DF.load_csv!()
+  |> DF.load_csv!(nil_values: ["", "NA"])
 ```
 
 This block of code is almost exactly the same as what you would write in `dplyr`. I love that Elixir has a pipe operator (and it even uses the same characters as the pipe operator in base R!). It looks a little weird that pipe operators are placed at the beginning of lines after many years of using pipes in R.
@@ -64,7 +65,7 @@ df_agg_month =
     avg_volume: mean(volume),
     avg_median: mean(median)
   )
-  |> DF.arrange(month)
+  |> DF.sort_by(month)
 ```
 
 One of the convenient features of `dplyr::mutate` is that expressions can perform calculations on columns that were created within that `mutate`. Here we need to move that last expression to its own `DF.mutate`.
