@@ -8,7 +8,7 @@ In my [second post on this blog](/posts/programming-horizons/), I expressed an i
 
 ## Tcl/Tk
 
-A few months ago I saw on [Hacker News](https://news.ycombinator.com/item?id=41661906) that Tcl/Tk accounced a major release. My interest was piqued by the generally favorable comments and comparisons to Lisp. I also like the generality that comes from the large number of languages that provide bindings to Tk. One of those languages is my primary programming language, R. It seems that the GUI options for R have largely collapsed to only Shiny and [`tcltk`](https://r-universe.dev/manuals/tcltk.html). To satisfy my curiousity, I tackled a little [project](https://github.com/hinkelman/ZoopSynth-tcltk) to learn more about the `tcltk` package in R.
+A few months ago I saw on [Hacker News](https://news.ycombinator.com/item?id=41661906) that Tcl/Tk accounced a major release. My interest was piqued by the generally favorable comments and comparisons to Lisp. I also like the generality that comes from the large number of languages that provide bindings to Tk. One of those languages is my primary programming language, R. It seems that the GUI options for R have largely collapsed to only Shiny and [`tcltk`](https://r-universe.dev/manuals/tcltk.html). To satisfy my curiousity, I tackled a little [project](/pdf/ZoopSynth-tcltk.pdf) to learn more about the `tcltk` package in R.
 
 I was also interested in available bindings to Tk for my favorite programming language, Scheme, and found [PS/Tk](https://snow-fort.org/s/peterlane.info/peter/rebottled/pstk/1.7.0/index.html).
 
