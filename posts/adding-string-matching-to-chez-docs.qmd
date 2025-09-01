@@ -228,7 +228,7 @@ Searching for `ifelse` (from R) and turning up `else` isn't the most direct rout
 
 It took me about three years to realize that it would be an easy addition (basically 3 lines of code added in July 2023) and another two years to realize that I should mention it somewhere.
 
-```` scheme        
+``` scheme        
 (define (guess-proc proc)
   (string-append "Did you mean '" (car (find-proc proc 'fuzzy)) "'?"))
 ```
