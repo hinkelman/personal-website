@@ -177,7 +177,7 @@ purchases |>
 
 ;; Version 2
 (-> purchases
-    (dataframe-split* 'country)
+    (dataframe-split 'country)
     (->> (map
           (lambda (dfx)
             (dataframe-filter*
