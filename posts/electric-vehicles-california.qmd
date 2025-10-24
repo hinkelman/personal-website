@@ -1,0 +1,363 @@
+---
+title: "Electric vehicles in California"
+date: 2025-10-23
+categories: ["Scheme", "dataframe", "EV"]
+---
+
+I bought my first elective vehicle (EV) about a month ago and I thought it would be useful to capture my decision making around this purchase and initial impressions of driving an EV. I also thought it would be fun to use my Scheme [`dataframe`](https://github.com/hinkelman/dataframe/) library to explore data on EVs in California. 
+
+The decision to buy an EV was relatively abrupt. I wanted to replace the 2012 Honda Civic that my son was driving and considered buying an e-bike to fill our transportation needs by sharing my 2017 Toyota Prius, biking, and using public transportation. Our brief experiment with sharing one car left me feeling inconvenienced, though, and I wasn't convinced that an e-bike would alleviate those feelings. 
+
+I had heard that used EVs were reasonably affordable right now and was persuaded by arguments about the practical advantages of used EVs (e.g., [this video](https://youtu.be/wbmCIQHYUCs?si=OUbwxarL1VTi0agj)). My initial thinking was that I would take my chances on a relatively cheap used EV ($12-14k), but the caliber of the cars in that price range made me too nervous about battery health. In the $15-18k price range, some of the most commonly available EVs included the 2016-2018 BMW i3 and 2022-2024 Nissan LEAF. It's easy to find highly favorable reviews of used BMW i3s and my affinity for small cars had me leaning in that direction. Ultimately, though, I couldn't pass up on the peace of mind associated with buying a newer LEAF with lower specs but more remaining battery warranty. So I bought a 2024 Nissan LEAF S from Carvana for about $17k. 
+
+The 1st and 2nd generation LEAFs (which takes you through the 2025 model year) have two fatal flaws. [These flaws are not actually fatal if you can charge at home, don't live in a hot climate, and are not planning to use the LEAF for road trips.]{.aside} One is that it uses a DC fast-charging standard (CHAdeMO) that is being phased out in North America. The other is that there is no active battery thermal management. The lack of battery conditioning means that when you operate the car outside of the optimal range for the battery you lose driving range and potentially increase the rate of battery degradation.
+
+I have struggled a bit with the perceived limitations of driving a relatively short-range EV like the LEAF even though it arguably covers >90% of my usage needs. First of all, I was in the habit of refueling my gas tank when it approached 1/4 tank even though that likely equated to 100+ miles of range in the fuel efficient cars that I've been driving over the past 10+ years. With my LEAF, 100 miles of range is approaching the max that I would be willing to travel before charging. That requires a big shift in my thinking. Plus, the road trip limitations carry a general sense of a loss of freedom (which would not be a concern with a longer range EV).
+
+I recently took my LEAF on a short road trip to gauge the experience. The trip was just under 200 miles each way. My car has a 40 kWh battery with 92% state of health. On the trip, I averaged 4 kWh/mi. Those numbers mean that with a fully charged battery I can get 147 miles of range [40 * 0.92 * 4]. But at 10% battery remaining the car starts warning you to charge, triggering the same irrational anxiety that had me filling my gas car at 1/4 tank, so we can knock another 14.7 miles off the practical range taking us down to 132 miles. Because fast charging rates decrease as the battery fills up, it is not recommended to top off the battery when DC fast charging. If I charge to 80%, I can expect to get about 103 miles of range [40 * 0.92 * 4 * (0.8 - 0.1)]. Put all of this together and I consider trips up to 235 miles to be a reasonable option in my LEAF. Of course, this assumes that there is a *working* DC fast charger at the right place along the route, that I will have access to destination charging at my lodging, and that temperatures are mild (even better if the terrain is flat and the winds are light). 
+
+Enough with the downsides. Let's talk about why this car makes sense for me. The biggest factors are that I have a NEMA 14-50 outlet in my garage giving me access to level 2 charging at home and that I work from home with infrequent, short trips to the office. Moreover, I live in Sacramento with mild winters where I don't expect cold weather to dramatically reduce my range. [On the flip side, the hot summers might hasten my battery degradation.]{.aside} The extra planning required for EV ownership doesn't feel particularly onerous to me and, in fact, I quite enjoy thinking about how to drive more efficiently and optimize charging. I love the experience of charging at home and the satisfying sound of plugging in my car. I thoroughly enjoy the EV driving experience, including one-pedal driving and the quiet but relatively powerful engine. 
+
+This LEAF is the lowest mileage car that I have ever purchased (~6000 miles). The exterior and interior are in great shape and I'm quite enjoying having such a pristine car (while it lasts). The main feature upgrade in this car over my 2017 Toyota Prius is Apple CarPlay, but, because my LEAF is the S trim, it is also missing features that are present in my old Prius, e.g., adaptive cruise control, forward parking sensors, and more. 
+
+It is easy to imagine driving this LEAF for many years, but one unexpected side effect of becoming a first-time EV owner is how much more interested I've become in other EV models. I've never been a car guy so this newfound, and presumably short-lived, interest in cars is unusual. From where I sit right now, though, I think I'm most likely to replace my current LEAF with a newer LEAF because beginning with the 2026 model year they have fixed the fatal flaws of the previous generations of the LEAF. Of course, EV technology is evolving so rapdily that it is hard to predict which model will most appeal to me in 5+ years. I would like to be able to say that this experience has made me resolved to never buy a gas car again, but I loved my 2017 Toyota Prius so much that if my driving needs were to dramatically change I could see myself going back to a hybrid. However, I think I can say with some confidence that I will never buy a plug-in hybrid because it seems to me that they offer the worst of both worlds. 
+
+Now, let's move on to the data. I had previously worked with data provided by the California Energy Commission on the light-duty vehicle population to make a [Shiny app](https://esassoc.shinyapps.io/light-duty-vehicle-population/) that overlaps heavily with the CEC's own [dashboard](https://www.energy.ca.gov/data-reports/energy-almanac/zero-emission-vehicle-and-infrastructure-statistics-collection/light). In this post, I'm just presenting tabular summaries, but you can also plot the results with the [`gnuplot-pipe`](https://github.com/hinkelman/gnuplot-pipe) library (see [this post](/posts/eda-scheme)).
+
+I've copied the county-level data provided by the CEC to a CSV file and made it available for download [here](/data/light-duty.csv). First, let's import the `dataframe` library, read the data, and do some preliminary processing.
+
+``` scheme
+(import (dataframe))
+
+(define df
+  (-> (csv->dataframe "light-duty.csv")
+      (dataframe-drop* Fuel-Type)
+      (dataframe-rename* (Data-Year Year)
+                         (Dashboard-Fuel-Type-Group Fuel-Type)
+                         (Number-of-Vehicles Count))))
+
+(dataframe-display df)
+
+ dim: 40877 rows x 6 cols
+    Year   County               Fuel-Type    Make     Model    Count 
+   <num>    <str>                   <str>   <str>     <str>    <num> 
+   2010.  Alameda  Battery Electric (BEV)    Ford    Ranger       3. 
+   2010.  Alameda  Battery Electric (BEV)   Tesla  Roadster      17. 
+   2010.  Alameda                  Diesel      na        na   10939. 
+   2010.  Alameda                Gasoline      na        na   10974. 
+   2010.  Alameda                Gasoline      na        na  840577. 
+   2010.  Alameda         Gasoline Hybrid      na        na   22720. 
+   2010.  Alameda                   Other      na        na     173. 
+   2010.  Alameda                   Other      na        na      19. 
+   2010.   Alpine                  Diesel      na        na      73. 
+   2010.   Alpine                Gasoline      na        na      16. 
+```
+
+The shiny app that I made doesn't include any of the data on make and model so I will focus on make and model in this post. Make and model is provided for all zero-emission vehicles in the county-level dataset, but here I will work only with the BEVs. 
+
+``` scheme
+(define df-bev
+  (-> df
+      (dataframe-filter*
+       (Fuel-Type)
+       (string=? Fuel-Type "Battery Electric (BEV)"))
+      (dataframe-drop* Fuel-Type)))
+```
+
+As a starting point, let's sum across counties and models to create `year-make` and then find the 10 makes with the highest average annual EV population. This average only includes years with non-zero counts for each make because the `mean` procedure provided by the `dataframe` library drops `'na` by default.
+
+``` scheme
+(define year-make
+  (dataframe-aggregate*
+   df-bev
+   (Year Make)
+   (Count (Count) (sum Count))))
+
+(define top-makes
+  (-> year-make
+      (dataframe-aggregate*
+       (Make)
+       (Avg (Count) (round (inexact (mean Count)))))
+      (dataframe-sort* (> Avg))
+      (dataframe-head 10)))
+ 
+(dataframe-display top-makes)
+
+ dim: 10 rows x 2 cols
+        Make      Avg 
+       <str>    <num> 
+       Tesla  224091. 
+   Chevrolet   28379. 
+      Nissan   26785. 
+     Hyundai   15330. 
+  Volkswagen   13816. 
+        Audi   11981. 
+      Rivian   11654. 
+        FIAT    9582. 
+        Ford    9397. 
+         Kia    8344. 
+```
+
+Now, let's see how the population of those makes has changed over time. Nissan led the pack from 2011-2015 before the Tesla takeover. As of 2024, Nissan had fallen into 5th place for the number of EVs registered in California.
+
+``` scheme
+(-> year-make
+    (dataframe-filter* (Make) (member Make ($ top-makes 'Make)))
+    (dataframe-spread 'Make 'Count)
+    (dataframe-display 15 90))
+
+ dim: 15 rows x 11 cols
+    Year    Ford    Tesla  Nissan  Chevrolet    FIAT     Kia  Volkswagen  Hyundai    Audi  Rivian 
+   <num>   <num>    <num>   <num>      <num>   <num>   <num>       <num>    <num>   <num>   <num> 
+   2010.     51.     431.      na         na      na      na          na       na      na      na 
+   2011.     45.     557.    3638         na      na      na          na       na      na      na 
+   2012.    214.     673.    5899         na      na      na          na       na      na      na 
+   2013.   1112.    7859.   12845        239     317      na          na       na      na      na 
+   2014.   2095.   13673.   21623       1311    5868      30          na       na      na      na 
+   2015.   3192.   23498.   28351       3087   12152     770        2158       na      na      na 
+   2016.   3463.   39591.   31694       5425   16002    1617        5905       na      na      na 
+   2017.   3726.   61747.   32853      17818   18748    2521        9745      342      na      na 
+   2018.   3412.  129300.   32638      26570   15023    2653        8971      762      na      na 
+   2019.   2817.  197453.   31600      33202   11322    3369       10081     3125    1449      na 
+   2020.   1953.  261018.   30113      33065    8017    4169        8586     4540    4010      na 
+   2021.   8297.  378014.   32841      39277    7430    6957       13461     8181    7152     265 
+   2022.  20004.  550093.   34503      46680    7034   13791       17771    17693   11983    4817 
+   2023.  36936.  761556.   36653      60958    6629   21534       29180    33672   19557   14940 
+   2024.  53642.  935895.   39733      72921    6441   34371       32306    54326   27737   26592 
+```
+
+Let's look at the same data as proportions. Unlike R's `dplyr` where you can pair `group_by` with `mutate` for grouped operations, in `dataframe` we need to explicitly split, apply, and combine. `->` and `->>` are the thread first and last operators, respectively. We use `->>` to pass a list as the last argument to `map`. In this call to `dataframe-modify*`, we calculate a scalar value for each row of the dataframe and that scalar is automatically repeated for all rows in `dfx`.
+
+``` scheme
+(define (round-any x places)
+  (let ([factor (expt 10 places)])
+    (/ (round (* x factor)) factor)))
+
+(-> year-make
+    (dataframe-filter* (Make) (member Make ($ top-makes 'Make)))
+    (dataframe-split 'Year)
+    (->> (map
+          (lambda (dfx)
+            (dataframe-modify*
+             dfx (Total () (sum ($ dfx 'Count)))))))
+    (dataframe-bind-all)
+    (dataframe-modify*
+     (Prop (Count Total) (round-any (inexact (/ Count Total)) 3)))
+    (dataframe-drop* Count Total)
+    (dataframe-spread 'Make 'Prop)
+    (dataframe-display 15 90))
+
+
+ dim: 15 rows x 11 cols
+    Year    Ford   Tesla  Nissan  Chevrolet    FIAT     Kia  Volkswagen  Hyundai    Audi  Rivian 
+   <num>   <num>   <num>   <num>      <num>   <num>   <num>       <num>    <num>   <num>   <num> 
+   2010.  0.1060  0.8940      na         na      na      na          na       na      na      na 
+   2011.  0.0110  0.1310   0.858         na      na      na          na       na      na      na 
+   2012.  0.0320  0.0990   0.869         na      na      na          na       na      na      na 
+   2013.  0.0500  0.3510   0.574      0.011   0.014      na          na       na      na      na 
+   2014.  0.0470  0.3070   0.485      0.029   0.132   0.001          na       na      na      na 
+   2015.  0.0440  0.3210   0.387      0.042   0.166   0.011       0.029       na      na      na 
+   2016.  0.0330  0.3820   0.306      0.052   0.154   0.016       0.057       na      na      na 
+   2017.  0.0250  0.4190   0.223      0.121   0.127   0.017       0.066    0.002      na      na 
+   2018.  0.0160  0.5900   0.149      0.121   0.068   0.012       0.041    0.003      na      na 
+   2019.  0.0100  0.6710   0.107      0.113   0.038   0.011       0.034    0.011   0.005      na 
+   2020.  0.0050  0.7340   0.085      0.093   0.023   0.012       0.024    0.013   0.011      na 
+   2021.  0.0170  0.7530   0.065      0.078   0.015   0.014       0.027    0.016   0.014   0.001 
+   2022.  0.0280  0.7590   0.048      0.064    0.01   0.019       0.025    0.024   0.017   0.007 
+   2023.  0.0360  0.7450   0.036       0.06   0.006   0.021       0.029    0.033   0.019   0.015 
+   2024.  0.0420  0.7290   0.031      0.057   0.005   0.027       0.025    0.042   0.022   0.021 
+```
+
+I'm not generally one to care about the uniqueness of my car, but let's see how common the few models that I considered were in my county in recent years. I was primarily choosing between the Nissan LEAF and the BMW i3, but I included a couple of others here. I would have considered the Hyundai IONIQ Electric more seriously, but they weren't as easy to find. I never strongly considered the Chevy Bolt because of a battery recall related to battery fires, but the LEAF and the Bolt have dominated the affordable EV market. 
+
+``` scheme
+(-> df-bev
+    (dataframe-filter*
+     (Year County Model)
+     (and (member Year '(2022 2023 2024))
+          (string=? County "Sacramento")
+          (member Model '("LEAF" "i3" "IONIQ Electric" "Bolt EV"))))
+    (dataframe-drop* County)
+    (dataframe-sort* (string>? Make) (< Year))
+    (dataframe-display 12))
+
+ dim: 12 rows x 4 cols
+    Year       Make           Model   Count 
+   <num>      <str>           <str>   <num> 
+   2022.     Nissan            LEAF   1713. 
+   2023.     Nissan            LEAF   1752. 
+   2024.     Nissan            LEAF   1755. 
+   2022.    Hyundai  IONIQ Electric     79. 
+   2023.    Hyundai  IONIQ Electric     69. 
+   2024.    Hyundai  IONIQ Electric     66. 
+   2022.  Chevrolet         Bolt EV   1376. 
+   2023.  Chevrolet         Bolt EV   1355. 
+   2024.  Chevrolet         Bolt EV   1472. 
+   2022.        BMW              i3     91. 
+   2023.        BMW              i3     93. 
+   2024.        BMW              i3     89. 
+```
+
+Let's look at the relative popularity over time of the different models offered by a few key manufacturers. Nissan is notable for not offering many options and my understanding is that Nissan will stop selling the ARIYA in North America after the introduction of the 3rd generation LEAF in 2026. I was disappointed to see that there are more Cybertrucks than IONIQ 6's on California roads in 2024. The IONIQ 6 is a bigger car than I usually prefer, but I appreciate the emphasis on efficiency via the sleek shape. 
+
+``` scheme
+(define (count-models df make)
+  (-> df
+      (dataframe-filter* (Make) (string=? Make make))
+      (dataframe-aggregate*
+       (Year Model)
+       (Count (Count) (sum Count)))
+      (dataframe-spread 'Model 'Count)))
+
+(dataframe-display (count-models df-bev "Nissan") 15)
+
+ dim: 14 rows x 3 cols
+    Year    LEAF   ARIYA 
+   <num>   <num>   <num> 
+   2011.   3638.      na 
+   2012.   5899.      na 
+   2013.  12845.      na 
+   2014.  21623.      na 
+   2015.  28351.      na 
+   2016.  31694.      na 
+   2017.  32853.      na 
+   2018.  32638.      na 
+   2019.  31600.      na 
+   2020.  30113.      na 
+   2021.  32841.      na 
+   2022.  34503.      na 
+   2023.  33742.    2911 
+   2024.  32501.    7232 
+
+(dataframe-display (count-models df-bev "Tesla") 15)
+
+ dim: 15 rows x 7 cols
+    Year  Roadster  Model S  Model X  Model 3  Model Y  Cybertruck 
+   <num>     <num>    <num>    <num>    <num>    <num>       <num> 
+   2010.      431.       na       na       na       na          na 
+   2011.      557.       na       na       na       na          na 
+   2012.      575.       98       na       na       na          na 
+   2013.      568.     7291       na       na       na          na 
+   2014.      559.    13114       na       na       na          na 
+   2015.      562.    22936       na       na       na          na 
+   2016.      568.    34343     4680       na       na          na 
+   2017.      554.    47580    12737      876       na          na 
+   2018.      541.    55816    20993    51950       na          na 
+   2019.      517.    59798    27347   109791       na          na 
+   2020.      460.    60869    33528   144311    21850          na 
+   2021.      450.    65118    33483   197125    81838          na 
+   2022.      417.    71617    43858   266246   167955          na 
+   2023.      399.    74295    53424   338329   295097          12 
+   2024.      379.    74678    60377   376489   414659        9313 
+
+(dataframe-display (count-models df-bev "Hyundai") 15)
+
+ dim: 8 rows x 5 cols
+    Year  IONIQ Electric  KONA EV  IONIQ 5  IONIQ 6 
+   <num>           <num>    <num>    <num>    <num> 
+   2017.            342.       na       na       na 
+   2018.            762.       na       na       na 
+   2019.           1428.     1697       na       na 
+   2020.           1419.     3121       na       na 
+   2021.           2031.     6150       na       na 
+   2022.           1932.     7975     7786       na 
+   2023.           1778.    10751    17069     4074 
+   2024.           1611.    11209    33580     7926 
+
+(dataframe-display (count-models df-bev "Chevrolet") 15)
+
+ dim: 12 rows x 8 cols
+    Year  Spark EV  Bolt EV  Bolt EUV    S-10  Blazer EV  Silverado EV  Equinox EV 
+   <num>     <num>    <num>     <num>   <num>      <num>         <num>       <num> 
+   2013.      239.       na        na      na         na            na          na 
+   2014.     1311.       na        na      na         na            na          na 
+   2015.     3087.       na        na      na         na            na          na 
+   2016.     5425.       na        na      na         na            na          na 
+   2017.     5273.    12545        na      na         na            na          na 
+   2018.     4260.    22310        na      na         na            na          na 
+   2019.     2762.    30440        na      na         na            na          na 
+   2020.     2464.    30601        na      na         na            na          na 
+   2021.     2356.    35870      1014      37         na            na          na 
+   2022.     2207.    35094      9343      36         na            na          na 
+   2023.     2051.    38280     20469      37         48            73          na 
+   2024.     1864.    37837     21898      37       4217          1987        5081 
+```
+
+The last tables made me curious about which models have had the biggest percent change from one year to the next. We use a split-apply-combine strategy again here to create a new column with the count for the next year. Lots of list reversing to create the `Count-Next` column. When displaying the results, I decided to constrain the output to only include models that had a count of at least 500 in the previous year. This approach eliminates examples like the Cybertruck which increased by 77508% from 2023 to 2024.
+
+The Honda Clarity Electric is interesting for appearing on the list of biggest increases and then repeatedly appearing on the list of biggest decreases. The Tesla Model 3 made a huge splash when it went from less than 1000 cars in 2017 to over 50,000 in 2018. 
+
+``` scheme
+(define df-bev-change
+  (-> df-bev
+      (dataframe-aggregate*
+       (Year Make Model)
+       (Count (Count) (sum Count)))
+      (dataframe-split 'Make 'Model)
+      (->> (map
+            (lambda (dfx)
+              (dataframe-modify*
+               dfx (Count-Next () (reverse (cons 'na (reverse (cdr ($ dfx 'Count))))))))))
+      (dataframe-bind-all)
+      (dataframe-remove-na 'Count-Next)
+      (dataframe-modify*
+       (Change% (Count Count-Next) (inexact (* 100 (/ (- Count-Next Count) Count)))))))
+               
+(-> df-bev-change
+    (dataframe-filter* (Count) (> Count 500))
+    (dataframe-sort* (< Change%))
+    (dataframe-display 20))
+
+ dim: 253 rows x 6 cols
+    Year           Make                  Model   Count  Count-Next   Change% 
+   <num>          <str>                  <str>   <num>       <num>     <num> 
+   2013.            BMW                ActiveE    515.        251.  -51.2621 
+   2022.          Honda       Clarity Electric    702.        425.  -39.4587 
+   2017.  Mercedes-Benz                B-Class   2701.       1722.  -36.2458 
+   2016.          Smart  Fortwo Electric Drive   3026.       1954.  -35.4263 
+   2018.      Chevrolet               Spark EV   4260.       2762.  -35.1643 
+   2020.          Honda       Clarity Electric   1613.       1050.  -34.9039 
+   2021.          Honda       Clarity Electric   1050.        702.  -33.1429 
+   2019.          Honda       Clarity Electric   2398.       1613.  -32.7356 
+   2023.         Cruise              Cruise AV    930.        632.  -32.0430 
+   2019.           Ford                  Focus   2745.       1913.  -30.3097 
+   2019.           FIAT                   500e  11322.       8017.  -29.1910 
+   2018.  Mercedes-Benz                B-Class   1722.       1230.  -28.5714 
+   2017.          Honda                 Fit EV    667.        494.  -25.9370 
+   2018.           FIAT                   500e  15023.      11322.  -24.6356 
+   2019.  Mercedes-Benz                B-Class   1230.        939.  -23.6585 
+   2019.            Kia                Soul EV   2221.       1712.  -22.9176 
+   2016.         Toyota                RAV4 EV   2156.       1724.  -20.0371 
+   2017.           FIAT                   500e  18748.      15023.  -19.8688 
+   2017.      Chevrolet               Spark EV   5273.       4260.  -19.2111 
+   2018.           Ford                  Focus   3328.       2745.  -17.5180 
+
+(-> df-bev-change
+    (dataframe-filter* (Count) (> Count 500))
+    (dataframe-sort* (> Change%))
+    (dataframe-display 20))
+
+ dim: 253 rows x 6 cols
+    Year           Make                  Model   Count  Count-Next    Change% 
+   <num>          <str>                  <str>   <num>       <num>      <num> 
+   2017.          Tesla                Model 3    876.      51950.  5830.3653 
+   2022.         Rivian                    R1S    579.       7659.  1222.7979 
+   2021.      Chevrolet               Bolt EUV   1014.       9343.   821.4004 
+   2022.           Audi              Q4 e-tron    645.       3593.   457.0543 
+   2023.       Cadillac                  LYRIQ   1443.       6620.   358.7665 
+   2022.            BMW                     iX   1510.       6281.   315.9603 
+   2020.          Tesla                Model Y  21850.      81838.   274.5446 
+   2022.            BMW                     i4   3207.      11647.   263.1743 
+   2020.        Porsche                 Taycan   1047.       3710.   254.3457 
+   2021.       Polestar                      2   1269.       4155.   227.4232 
+   2022.          Lucid                    Air   1043.       3258.   212.3682 
+   2022.  Mercedes-Benz                    EQS   3463.      10134.   192.6364 
+   2013.          Smart  Fortwo Electric Drive    654.       1842.   181.6514 
+   2019.           Audi                 e-tron   1449.       4010.   176.7426 
+   2022.           Ford        F-150 Lightning   2331.       6383.   173.8310 
+   2015.     Volkswagen                 e-Golf   2158.       5905.   173.6330 
+   2016.          Tesla                Model X   4680.      12737.   172.1581 
+   2017.          Honda       Clarity Electric    727.       1844.   153.6451 
+   2023.         Nissan                  ARIYA   2911.       7232.   148.4370 
+   2021.           Ford         Mustang Mach-E   6367.      15817.   148.4215 
+```
