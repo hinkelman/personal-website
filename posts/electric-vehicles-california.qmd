@@ -4,7 +4,7 @@ date: 2025-10-23
 categories: ["Scheme", "dataframe", "EV"]
 ---
 
-I bought my first elective vehicle (EV) about a month ago and I thought it would be useful to capture my decision making around this purchase and initial impressions of driving an EV. I also thought it would be fun to use my Scheme [`dataframe`](https://github.com/hinkelman/dataframe/) library to explore data on EVs in California. 
+I bought my first electric vehicle (EV) about a month ago and I thought it would be useful to capture my decision making around this purchase and initial impressions of driving an EV. I also thought it would be fun to use my Scheme [`dataframe`](https://github.com/hinkelman/dataframe/) library to explore data on EVs in California. 
 
 The decision to buy an EV was relatively abrupt. I wanted to replace the 2012 Honda Civic that my son was driving and considered buying an e-bike to fill our transportation needs by sharing my 2017 Toyota Prius, biking, and using public transportation. Our brief experiment with sharing one car left me feeling inconvenienced, though, and I wasn't convinced that an e-bike would alleviate those feelings. 
 
