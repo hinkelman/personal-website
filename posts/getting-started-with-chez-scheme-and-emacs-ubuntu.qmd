@@ -1,7 +1,7 @@
 ---
 title: "Getting started with Chez Scheme and Emacs on Ubuntu"
 date: 2020-02-08
-date-modified: 2024-10-23
+date-modified: 2025-11-11
 categories: ["Scheme", "Emacs", "geiser"]
 ---
 
@@ -22,13 +22,15 @@ $ sudo apt install chezscheme
 Alternatively, you can build it from source with the following commands:
 
 ``` bash
-$ curl -L -O https://github.com/cisco/ChezScheme/releases/download/v10.0.0/csv10.0.0.tar.gz
-$ tar -xf csv10.0.0.tar.gz
-$ cd csv10.0.0/
-$ ./configure
-$ make
-$ sudo make install
+curl -L -O https://github.com/cisco/ChezScheme/releases/download/v10.3.0/csv10.3.0.tar.gz
+tar -xf csv10.3.0.tar.gz
+cd csv10.3.0/
+./configure
+make
+sudo make install
 ```
+
+You may need to install `libncurses-dev` with `sudo apt install libncurses-dev` before building from source.
 
 ### REPL
 
