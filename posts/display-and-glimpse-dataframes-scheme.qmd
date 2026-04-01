@@ -1,0 +1,237 @@
+---
+title: "Display and glimpse dataframes in Scheme"
+date: 2026-04-01
+categories: ["Scheme", "dataframe", "R", "dplyr"]
+---
+
+This post is part of a series on the [dataframe library](https://hinkelman.github.io/dataframe/) for Scheme (R6RS). In this post, I will describe `dataframe-display` and `dataframe-glimpse`, which are inspired by the default print format for [tibbles](https://tibble.tidyverse.org) in R and the [`dplyr::glimpse`](https://dplyr.tidyverse.org/reference/glimpse.html) function. Both procedures rely heavily on Chez Scheme's `format` procedure, so I will first give an overview of the format directives used in the `dataframe` library before showing how `dataframe-display` and `dataframe-glimpse` work.
+
+### Format directives
+
+Chez Scheme's `format` procedure is modeled on Common Lisp's `format` and supports a rich set of directives for controlling output. The first argument to `format` is the destination: `#t` sends output to the current output port (i.e., prints to screen), `#f` returns the result as a string, and a port sends output to that port.
+
+The general form is:
+
+``` scheme
+(format destination format-string arg ...)
+```
+
+Directives are embedded in the format string as `~` followed by a character, with optional numeric parameters before the character. Here are the directives used in `dataframe-display` and `dataframe-glimpse`.
+
+**`~d`** prints an integer in decimal notation.
+
+``` scheme
+> (format #t "~d rows x ~d cols" 10 3)
+10 rows x 3 cols
+```
+
+**`~a`** prints a value in human-readable form, e.g., strings without quotes, characters without the `#\` prefix.
+
+``` scheme
+> (format #t "~a" "hello")
+hello
+
+> (format #t "~a" #\x)
+x
+```
+
+**`~Na`** adds a minimum field width of `N`, padding on the right (left-aligning the value). **`~N@a`** pads on the left instead, right-aligning the value in a field of width `N`. The `@` modifier means "use left padding", which produces right-alignment. This is used throughout `dataframe-display` to align columns.
+
+``` scheme
+> (format #t "~10a|" "hi")
+hi        |
+
+> (format #t "~10@a|" "hi")
+        hi|
+```
+
+**`~N,Df`** prints a floating-point number in a field of width `N` with `D` digits after the decimal point.
+
+``` scheme
+> (format #t "~10,2f" 3.14159)
+      3.14
+```
+
+**`~N,D,Ee`** prints a number in exponential notation in a field of width `N`, with `D` decimal digits and `E` digits in the exponent.
+
+``` scheme
+> (format #t "~12,3,1e" 0.000012345)
+   1.234e-5
+```
+
+**`~&`** emits a newline only if the output is not already at the start of a line. **`~%`** emits an unconditional newline. In practice, `~&` is used at the start of format strings in this library to ensure each row of the table starts on its own line.
+
+**`~{...~}`** is the iteration directive. It consumes one argument from the argument list, which must be a flat list, and consumes elements of the list as arguments to the directives in the body.
+
+``` scheme
+> (format #t "~{~a ~}" '(a b c))
+a b c 
+```
+
+**`~:{...~}`** is similar but iterates over a list of sublists. Each sublist provides the arguments for one iteration of the body.
+
+``` scheme
+> (format #t "~:{~& ~a ~a~}" '((a 1) (b 2) (c 3)))
+ a 1
+ b 2
+ c 3
+```
+
+This distinction between `~{~}` and `~:{~}` is central to how `dataframe-display` works, as we'll see below.
+
+### dataframe-display
+
+`dataframe-display` prints a formatted table showing the dataframe dimensions, column names, column types, and up to `n` rows of values.
+
+``` scheme
+(define dataframe-display
+  (case-lambda
+    [(df) (df-display-helper df 10 76 7)]
+    [(df n) (df-display-helper df n 76 7)]
+    [(df n total-width) (df-display-helper df n total-width 7)]
+    [(df n total-width min-width) (df-display-helper df n total-width min-width)]))
+```
+
+The defaults are 10 rows, a total width of 76 characters, and a minimum column width of 7. If a dataframe has more columns than fit in `total-width`, the extra columns are omitted and listed in a footer.
+
+``` scheme
+> (define df
+    (make-df*
+     (Boolean #t #f #t)
+     (Char #\y #\e #\s)
+     (String "these" "are" "strings")
+     (Symbol 'these 'are 'symbols)
+     (Exact 1/2 1/3 1/4)
+     (Integer 1 -2 3)
+     (Expt 1000000.0 -123456.0 1.2346e-6)
+     (Dec4 132.1 -157.0 10.234)
+     (Dec2 12.14 -9.54 100.01)
+     (Other '(1 2 3) '#(a b) '#(1 2))))
+
+> (dataframe-display df)
+
+ dim: 3 rows x 10 cols
+  Boolean    Char  String  Symbol   Exact Integer      Expt    Dec4 
+   <bool>    <chr>   <str>   <sym>   <num>   <num>     <num>   <num> 
+        #t       y   these   these     1/2      1.  1.000e6  132.1000 
+        #f       e     are     are     1/3     -2. -1.235e5 -157.0000 
+        #t       s strings symbols     1/4      3.  1.235e-6  10.2340 
+ Columns not displayed: Dec2, Other
+```
+
+The output has four components. The first line shows the full dimensions. Then the column names and types, each right-aligned in a field sized to accommodate the widest value in that column. The table rows follow, with numeric columns formatted using `~f` or `~e` depending on the magnitude of the values. Any columns that don't fit within `total-width` are listed in the footer.
+
+#### Building the format strings
+
+The most intricate part of `dataframe-display` is `build-format-parts`, which constructs three separate format strings (header row, the types row, and the table) by iterating over columns left to right and accumulating directives as long as the column fits within `total-width`.
+
+The header and types rows use `~{...~}` because they iterate over a flat list of names or type strings. The table uses `~:{...~}` because it iterates over a list of rows (sublists).
+
+The format strings are built up incrementally. For each column, a width-part is computed (e.g., `"~10"`) and combined with `"@a "` for the header and types rows, or with a numeric directive suffix for the table. For example, a floating-point column of width 10 with 4 decimal places contributes `"~10,4f "` to the table format string and `"~10@a "` to the header and types format strings.
+
+Here is a simplified illustration of what the final format strings look like for a dataframe with one string column and one numeric column:
+
+``` scheme
+;; header:  "~& ~{~8@a ~10@a ~}"  applied to  (Name Score)
+;; types:   "~& ~{~8@a ~10@a ~}"  applied to  ("<str>" "<num>")
+;; table:   "~:{~& ~8@a ~10,4f ~}" applied to  (("Alice" 98.5) ("Bob" 72.1))
+```
+
+The `~& ` at the start of each format string ensures each row begins on a new line. The `~}` or `~}` closes the iteration. The values are assembled in `format-df`:
+
+``` scheme
+(define (format-df df-names df-types ls-vals dim total-width min-width)
+  (let* ([prep-vals (map prepare-non-numbers ls-vals)]
+         [parts (build-format-parts df-names df-types prep-vals total-width min-width 2)])
+    (format #t " dim: ~d rows x ~d cols" (car dim) (cdr dim))
+    (format #t (cadr (assoc 'header parts)) (caddr (assoc 'header parts)))
+    (format #t (cadr (assoc 'types parts))  (caddr (assoc 'types parts)))
+    (format #t (cadr (assoc 'table parts))  (caddr (assoc 'table parts)))
+    (newline)
+    (display (cdr (assoc 'footer parts)))))
+```
+
+Each call to `format` here takes the format string (the `cadr` of the alist entry) and the corresponding list of values (the `caddr`).
+
+#### Numeric formatting
+
+For columns containing only numbers, `dataframe-display` chooses between floating-point (`~f`) and exponential (`~e`) notation based on the magnitude of the values. The logic is in `compute-decimal`, which returns the number of decimal places to use. If any value in the column is assigned the maximum decimal count (the threshold for "very large or very small"), the whole column is displayed in exponential notation; otherwise floating-point is used.
+
+``` scheme
+(define (compute-decimal x sigfig e e-dec)
+  (let ([default 4]
+        [x (abs x)])
+    (cond [(or (< e -3) (> e 5)) e-dec]  ;; exponential notation
+          [(integer? x) 0]
+          [(> e 3) 2]                    ;; fewer decimals for large numbers
+          [(and (< x 1) (> sigfig default)) sigfig]
+          [else default])))
+```
+
+The `e` argument is the base-10 exponent (order of magnitude) of the value, computed via `compute-expt`. So a value like `1000000.0` has `e = 6`, which exceeds the threshold of 5 and triggers exponential notation for the entire column.
+
+Column widths for numeric columns are computed separately from non-numeric ones. For a floating-point column, the width is `neg + sig + dec + pad`, where `neg` is 1 if any value is negative (to accommodate the minus sign), `sig` is the number of digits left of the decimal point, `dec` is the number of decimal places, and `pad` is spacing between columns.
+
+#### Non-numeric values
+
+Columns that are not purely numeric, or that contain exact fractions like `1/3`, are handled by `prepare-non-numbers`. Compound objects like lists, vectors, and hashtables are replaced with placeholder strings such as `<list>` or `<vector>`. Primitive non-numeric values (booleans, characters, strings, symbols) are displayed with `~a`.
+
+Exact fractions are routed through `compute-object-width` rather than `compute-num-width` because their string representation (e.g., `"1/3"`) has a width that is easier to measure directly.
+
+### dataframe-glimpse
+
+`dataframe-glimpse` provides a transposed summary of the dataframe: one row per column, showing the column name, type, and as many values as fit across the screen. It is inspired by `dplyr::glimpse` in R, which is useful for dataframes with many columns that don't fit comfortably in a standard tabular display.
+
+``` scheme
+(define dataframe-glimpse
+  (case-lambda
+    [(df) (df-glimpse-helper df 76)]
+    [(df total-width) (df-glimpse-helper df total-width)]))
+```
+
+``` scheme
+> (dataframe-glimpse df)
+
+ dim: 3 rows x 10 cols
+ Boolean  <bool>  #t #f #t
+ Char     <chr>   y e s
+ String   <str>   these are strings
+ Symbol   <sym>   these are symbols
+ Exact    <num>   1/2 1/3 1/4
+ Integer  <num>   1 -2 3
+ Expt     <num>   1000000.0 -123456.0 1.2346e-6
+ Dec4     <num>   132.1 -157.0 10.234
+ Dec2     <num>   12.14 -9.54 100.01
+ Other    <other> <list> <vector> <vector>
+```
+
+Unlike `dataframe-display`, glimpse shows all columns regardless of width, since each column occupies its own row. The values for each column are rendered as a truncated flat list (without parentheses) by `prepare-lst`, which appends values separated by spaces until the remaining width is exhausted, then appends `", ..."` to signal truncation.
+
+#### The glimpse format string
+
+The glimpse format string is built by `glimpse-format-string` and uses `~:{...~}` to iterate over a list of `(name type values-string)` triples. Each iteration prints one column's row.
+
+``` scheme
+(define (glimpse-format-string name-width type-width list-width)
+  (let* ([nw (number->string name-width)]
+         [tw (number->string type-width)]
+         [lw (number->string list-width)])
+    (string-append "~:{~& ~" nw "a ~" tw "a ~" lw "a ~}")))
+```
+
+Notice that `~Na` is used here (without `@`), producing left-aligned output. This gives each column's name, type, and values left-aligned in their respective fields because it is a row-oriented display where values are a freeform list rather than values in a fixed-width column.
+
+The three field widths are computed from the data: `name-width` is the width of the longest column name (minimum 7), `type-width` is the width of the longest type string (minimum 7), and `list-width` is whatever space remains after subtracting the other two from `total-width`.
+
+The `(name type values-string)` triples are assembled by `build-format-list` and passed as a single argument to the `~:{...~}` directive:
+
+``` scheme
+(define (build-format-list df-names df-types list-str)
+  (map (lambda (n t ls) (list n t ls)) df-names df-types list-str))
+```
+
+For example, on a terminal 76 characters wide, `glimpse-format-string` might produce the string `"~:{~& ~9a ~7a ~57a ~}"`, which is then applied to the list of triples in a single `format` call.
+
+### Conclusions
+
+Implementing `dataframe-display` and `dataframe-glimpse` turned out to require the most complex code in the dataframe library. Getting the column widths right across different numeric types, handling exponential versus floating-point notation, and fitting columns within a total width all interact in ways that took considerable trial and error to get right. The design of `dataframe-display` was directly inspired by the way tibbles print in R. Tibbles show the dimensions, column types below the names, and truncate to a fixed number of rows by default. `dataframe-glimpse` follows `dplyr::glimpse` in transposing the view so that every column appears on its own line, making wide dataframes much easier to inspect at a glance.
