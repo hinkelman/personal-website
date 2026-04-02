@@ -1,7 +1,7 @@
 ---
 title: "Visualizing Scheme library procedures with an interactive network graph in R"
 date: 2021-06-05
-date-modified: 2024-03-26
+date-modified: 2026-04-02
 categories: ["Scheme", "dataframe", "R", "Shiny"]
 ---
 
@@ -57,14 +57,18 @@ The following two procedures are used to extract the procedure names from `examp
 ``` scheme
 ;; get all procedure definitions
 (define (get-defs lst)
-  (filter (lambda (x) (and (pair? x) (symbol=? (car x) 'define))) lst))
+  (filter (lambda (x)
+            (and (pair? x)
+                 (or (symbol=? (car x) 'define)
+                     (symbol=? (car x) 'define-syntax))))
+          lst))
 
 ;; name is the procedure name
 ;; def is one element of the list from get-defs
 (define (get-name def)
-  (if (pair? (cadr def))
+  (if (and (pair? (cadr def)) (not (symbol=? (car def) 'define-syntax)))
       (caadr def)
-      ;; cadr version for definitions using lambda or case-lambda
+      ;; cadr version for definitions using lambda, case-lambda, and define-syntax
       (cadr def)))
 ```
 
@@ -136,8 +140,7 @@ output$networkGraph <- renderVisNetwork({
 
 ## Conclusions
 
-Here are a few observations from the network graph:
+Here are a couple of observations from the network graph:
 
-* `get-edges` doesn't handle macros, e.g., `dataframe-modify*`, so those are represented as disconnected points.
 * Unsurprisingly, a few procedures are called by a lot of other procedures, e.g., `make-dataframe`, `dataframe-slist`, `check-dataframe`.
 * A few procedures (`make-series`, `make-dataframe`, etc.) are created automatically as part of defining the record types. I added them to the list of procedure names by appending the list of exported procedure names to the list of extracted procedure names (and removing duplicates from the appended list).
