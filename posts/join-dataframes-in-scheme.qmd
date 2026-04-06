@@ -1,0 +1,246 @@
+---
+title: "Join dataframes in Scheme"
+date: 2026-04-05
+categories: ["Scheme", "dataframe", "R", "dplyr"]
+---
+
+This post is part of a series on the [`dataframe` library](https://hinkelman.github.io/dataframe/) for Scheme (R6RS). In this post, I will contrast functions for joining dataframes from the `dataframe` library with the [`dplyr` package](https://dplyr.tidyverse.org) for R.
+
+### Set up
+
+First, let's create a couple of dataframes in both languages.
+
+``` r
+library(dplyr)
+
+df1 <- data.frame(name = c("Alice", "Bob", "Carol"),
+                  age = c(30, 25, 35))
+
+df2 <- data.frame(name = c("Bob", "Carol", "Dave"),
+                  dept = c("Sales", "Engineering", "Marketing"))
+```
+
+``` scheme
+(import (dataframe))
+
+(define df1
+  (make-df* (name "Alice" "Bob" "Carol")
+            (age 30 25 35)))
+
+(define df2
+  (make-df* (name "Bob" "Carol" "Dave")
+            (dept "Sales" "Engineering" "Marketing")))
+```
+
+### Left join
+
+In R, `left_join` keeps all rows from the left dataframe and adds matching columns from the right dataframe, filling `NA` for non-matches.
+
+``` r
+> left_join(df1, df2)
+   name age        dept
+1 Alice  30        <NA>
+2   Bob  25       Sales
+3 Carol  35 Engineering
+```
+
+`dataframe-left-join` works similarly. When `join-names` is `#f` or omitted, the join columns are auto-detected from the common column names. Because Scheme doesn't have explicit missing values, `'na` is used by default, but a different fill value can be specified.
+
+``` scheme
+> (dataframe-display (dataframe-left-join df1 df2))
+
+ dim: 3 rows x 3 cols
+    name     age        dept 
+   <str>   <num>       <str> 
+   Alice      30.         na 
+     Bob      25.      Sales 
+   Carol      35. Engineering 
+```
+
+### Inner join
+
+`inner_join` keeps only rows that have matches in both dataframes.
+
+``` r
+> inner_join(df1, df2)
+   name age        dept
+1   Bob  25       Sales
+2 Carol  35 Engineering
+```
+
+`dataframe-inner-join` works the same way.
+
+``` scheme
+> (dataframe-display (dataframe-inner-join df1 df2))
+
+ dim: 2 rows x 3 cols
+    name     age        dept 
+   <str>   <num>       <str> 
+     Bob      25.      Sales 
+   Carol      35. Engineering 
+```
+
+### Full join
+
+`full_join` keeps all rows from both dataframes, filling missing values where there is no match.
+
+``` r
+> full_join(df1, df2)
+   name age        dept
+1 Alice  30        <NA>
+2   Bob  25       Sales
+3 Carol  35 Engineering
+4  Dave  NA   Marketing
+```
+
+`dataframe-full-join` fills missing values with `'na` by default.
+
+``` scheme
+> (dataframe-display (dataframe-full-join df1 df2))
+
+ dim: 4 rows x 3 cols
+    name     age        dept 
+   <str>   <num>       <str> 
+   Alice      30.         na 
+     Bob      25.      Sales 
+   Carol      35. Engineering 
+    Dave       na   Marketing 
+```
+
+### Joining on different column names
+
+In `dplyr`, when the join columns have different names in each dataframe, you specify the mapping with a named vector.
+
+``` r
+> df3 <- data.frame(person = c("Bob", "Carol", "Dave"),
+                    dept = c("Sales", "Engineering", "Marketing"))
+
+> left_join(df1, df3, by = c("name" = "person"))
+   name age        dept
+1 Alice  30        <NA>
+2   Bob  25       Sales
+3 Carol  35 Engineering
+```
+
+In the `dataframe` library, the `join-names` argument accepts a list of pairs mapping column names from `df1` to `df3`.
+
+``` scheme
+> (define df3
+    (make-df* (person "Bob" "Carol" "Dave")
+              (dept "Sales" "Engineering" "Marketing")))
+
+> (dataframe-display
+   (dataframe-left-join df1 df3 '((name . person))))
+
+ dim: 3 rows x 3 cols
+    name     age        dept 
+   <str>   <num>       <str> 
+   Alice      30.         na 
+     Bob      25.      Sales 
+   Carol      35. Engineering 
+```
+
+The `join-names` argument supports three forms: `#f` (or omitted) for auto-detecting common names, a list of symbols for same-named columns (e.g., `'(name dept)`), and a list of pairs for differently-named columns (e.g., `'((name . person))`).
+
+### Left join all
+
+`left_join` only takes two dataframes at a time. To left join a list of dataframes, you could use `purrr::reduce`.
+
+``` r
+purrr::reduce(list(df1, df2), left_join)
+```
+
+`dataframe-left-join-all` takes a list of dataframes and sequentially left joins them.
+
+``` scheme
+(dataframe-display (dataframe-left-join-all (list df1 df2)))
+```
+
+### Implementation
+
+All four join procedures follow the same overall strategy: split both dataframes by the join columns, match groups between the two sets of splits, and then bind the results back together.
+
+``` scheme
+(define dataframe-left-join
+  (case-lambda
+    [(df1 df2)
+     (dataframe-left-join df1 df2 #f 'na)]
+    [(df1 df2 join-names)
+     (dataframe-left-join df1 df2 join-names 'na)]
+    [(df1 df2 join-names fill-value)
+     (let* ([who "(dataframe-left-join df1 df2 join-names fill-value)"]
+            [names-pair (parse-join-names df1 df2 join-names)]
+            [names1 (car names-pair)]
+            [names2 (cadr names-pair)]
+            [df2-aligned (align-df2 df2 names2 names1 who)])
+       (check-join df1 df2-aligned names1 who)
+       (let ([slists1 (dataframe-split-helper df1 names1 who)]
+             [slists2 (dataframe-split-helper df2-aligned names1 who)])
+         (dataframe-bind-all
+          (df-left-join-helper slists1 slists2 names1 fill-value))))]))
+```
+
+First, `parse-join-names` resolves the three supported forms of `join-names` into a pair of name lists, one for each dataframe. When `join-names` is `#f`, it finds the column names common to both dataframes. If the join columns have different names, `align-df2` renames the columns in `df2` to match `df1` so the rest of the join machinery can work with a single set of names.
+
+Both dataframes are then split into groups by the join columns using `dataframe-split-helper`. The split produces a list of slists (lists of series), one per unique combination of join-column values.
+
+#### Matching groups
+
+The core of each join variant is a helper that iterates over the groups from `df1` and looks for matching groups in `df2`. A group's identity is determined by `get-join-group`, which extracts the values from the first row of the join columns (all rows have the same values because the slist was split on those columns).
+
+``` scheme
+(define (get-join-group slist join-names)
+  (apply append (map series-lst (slist-ref slist '(0) join-names))))
+```
+
+For the left join, each group from `df1` is checked against an association list built from `df2`'s groups. If a match is found, the two groups are combined with `join-match`. If not, the non-join columns from `df2` are filled with `fill-value` via `join-no-match`.
+
+``` scheme
+(define (df-left-join-helper slists1 slists2 join-names fill-value)
+  (let* ([grps2 (map (lambda (x) (get-join-group x join-names)) slists2)]
+         [grps2-slists2 (map cons grps2 slists2)])
+    (map (lambda (slist)
+           (let* ([grp (get-join-group slist join-names)]
+                  [grp-match (assoc grp grps2-slists2)])
+             (if grp-match
+                 (join-match slist (cdr grp-match) join-names)
+                 (join-no-match slist (car slists2) join-names fill-value))))
+         slists1)))
+```
+
+The inner join helper is similar but simply drops groups from `df1` that have no match, using a `loop` with an accumulator rather than `map`. The full join helper additionally tracks which `df2` groups have been matched and appends the unmatched ones at the end, with the `df1` non-join columns filled.
+
+#### Combining matched groups
+
+When two groups match, `join-match` drops the join columns from `slist2` (to avoid duplication) and appends the remaining columns. If the two groups have different numbers of rows, the shorter one is repeated to match the longer one.
+
+``` scheme
+(define (join-match slist1 slist2 join-names)
+  (let* ([n1 (series-length (car slist1))]
+         [n2 (series-length (car slist2))]
+         [slist2-drop (slist-drop slist2 join-names)]
+         [slist1-new (if (>= n1 n2)
+                         slist1
+                         (slist-repeat-rows slist1 n2 'times))]
+         [slist2-new (if (>= n2 n1)
+                         slist2-drop
+                         (slist-repeat-rows slist2-drop n1 'times))])
+    (make-dataframe (append slist1-new slist2-new))))
+```
+
+This row-repeating behavior is how the library handles many-to-many relationships within a group. If `df1` has 2 rows for a given group and `df2` has 3, the `df1` rows are repeated to length 3 (and vice versa). This is a simpler approach than producing a full cross product.
+
+When there is no match, `join-no-match` retains all columns from the unmatched slist and fills the non-join columns from the other dataframe with `fill-value`.
+
+``` scheme
+(define (join-no-match slist1 slist2 join-names fill-value)
+  (let* ([n (series-length (car slist1))]
+         [slist2-names (map series-name slist2)]
+         [slist2-names-sel (not-in slist2-names join-names)])
+    (make-dataframe
+     (append slist1 (slist-fill-missing slist2-names-sel n fill-value)))))
+```
+
+### Conclusions
+
+The join procedures follow the same split-apply-combine pattern used by other procedures in the `dataframe` library. Splitting both dataframes by join columns reduces the problem to matching and combining small groups, which makes the logic for each join variant straightforward. The `parse-join-names` and `align-df2` steps handle the bookkeeping of resolving column name differences before the main join logic runs. The design is inspired by the `dplyr` family of join functions, though the handling of many-to-many matches uses row repetition rather than a full cross product.
