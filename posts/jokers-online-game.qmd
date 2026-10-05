@@ -1,0 +1,23 @@
+---
+title: "Jokers online game"
+date: 2026-10-04
+categories: ["Elixir", "Claude", "AI"]
+---
+
+My family has always liked to play card or board games when we gather. For many years, our favorite game has been a card and board game called Jokers. The original board was a gift to my parents. Later, I bought my own [board](https://www.etsy.com/listing/1593974002/jokers-board-46-player-deluxe-jokers), which was expensive and not quite as nice as my parents' board. 
+
+Several years ago I thought it would be a fun challenge to create an online version of the game. I had dabbled in Elixir and thought it would be a good choice for this project. In 2024, I finally started putting some of my initial code on GitHub, but I was struggling to fully work out the game logic, which I thought would be the easier part, and I was thoroughly intimidated by trying to figure out how to eventually incorporate that game logic into a Phoenix LiveView app. That [repo](https://github.com/hinkelman/jokers) sat untouched for two years before I finally decided to turn Claude loose on it.
+
+I have complicated feelings about AI (broadly defined). I have environmental and ethical concerns about the technology, desire for governmental regulation, fears of economic disruption, sadness about the potential irrelevance of skills that I've spent years developing, uncertainty about my professional future, and (uninformed) certainty that we are in an AI bubble. Up until earlier this year, I had concluded that AI was too often wrong or misleading to be useful. However, after being told that Claude was getting really good by coworkers, I had a bout of enthusiastic use last spring (despite all of my negative emotions about the technology), followed by a period of 4-5 months of hardly using it, and then another bout of heavier use in the last couple months. 
+
+This Jokers project has been a mind-blowing experience. I'm highly skeptical that I would have ever been able to produce something as functional and polished as what Claude has produced (see screenshots below). [My skeptism about my ability to complete this project stems partly from my lack of training in software development.]{.aside} I've heard it said many times that the people who love AI are builders. Programming is a means for them to implement their ideas. The people who dislike AI are the ones who love to craft elegant, reliable code and maybe are less interested in the end product. As someone who isn't sitting on pile of ideas for software projects, I would put myself more in the latter category. With my own code, particularly in R, I often write something quickly to get the job done and then revise it to the point where I find it more readable and maybe even elegant. I quite enjoy that process of revising the code. In fact, one of my first positive experiences with Claude was asking it to refactor some particularly messy R code that I had written and quite liking the abstractions that it used to clean up the code.
+
+With this Jokers project, though, I have felt the joy of being a builder. I might have missed out on a lot of learning and the satisfaction of building it myself, but, in this case, that was not as important as creating the final product. My family now has an online version of this game that we can play even when we are not gathering in person, which typically only happens once per year. We have now had a few evenings of playing the game together and identifying areas of improvement, which have been quickly implemented via requests to Claude. 
+
+I have no idea if the code is fragile and unmaintable. It has worked extremely well in our first few game sessions. If the AI bubble pops, and token prices go through the roof, will I be able to figure out how to maintain or modify the app without Claude? Will I have any interest in using this codebase as a way to learn Elixir if I can just use AI to write code? Would that be a bad way to learn Elixir if this codebase is a mess? Those are just the practical concerns. I'm still feeling the internal turmoil about any small part I'm playing in fueling this AI beast with all the potentially huge consequences that might be right around the corner.
+
+
+![](/img/Jokers-YourTurn.png)
+
+
+![](/img/Jokers-Waiting.png)
