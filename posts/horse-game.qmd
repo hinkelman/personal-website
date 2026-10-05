@@ -1,8 +1,8 @@
 ---
 title: "Horse racing game win probability"
 date: "2024-10-26"
-date-modified: "2026-09-30"
-categories: ["R", "Shiny"]
+date-modified: "2026-10-05"
+categories: ["R", "Shiny", "Elm", "AI"]
 ---
 
 When gathering with family, we like to play yard, card, and board games. On a recent visit, one of the favorite games was the [Across the Board Kentucky Derby Horse Racing Game](https://www.scheels.com/p/79830436058/). The game produced a lot of cheers and jeers and provided a fun diversion with no skill and little concentration required. After losing a little money, though, I lost interest in playing the game and decided to write some R code to simulate the game and generate win probabilities.
