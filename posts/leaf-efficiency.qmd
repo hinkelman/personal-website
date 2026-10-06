@@ -1,0 +1,29 @@
+---
+title: "Nissan LEAF efficiency"
+date: 2026-10-05
+categories: ["EV"]
+---
+
+About a year ago I bought a short-range, low-tech EV (2024 Nissan LEAF S). In that time, I've put on about 10,000 miles and really love the car. My only bad experience was a trip from Sacramento to Redding in late November 2025. I described that trip in an update to [this post](/posts/electric-vehicles-california.qmd), but the gist is that the cold temperatures (for this part of California) and charging station locations (probably should not have taken I-5) meant that I faced a trade-off between making several long stops or driving slowly with the heat off to make fewer stops. On the way to Redding, I made three stops but drove normally in a comfortable cabin. On the way home, I made only one stop but drove below the speed limit and was uncomfortable in a cold car. After that trip, I was questioning whether I made the right decision to buy the car. 
+
+I was already in the habit of resetting the drive computer during my drives around Sacramento to see how efficiently I was driving, so I decided to start recording the data displayed by the drive computer in a Google form. I recorded the average efficiency, average speed, total distance, and climate control setting. I collect data in the course of my typical driving with the drive computer reset when I leave and with the data recorded when I arrive, but, in my initial enthusiasm, I also made trips specifically with the purpose of collecting data at different speeds. For this analysis, I only used data from drives that were 3-30 miles long (78% of all data). [Remember this is a low-tech EV.]{.aside} 
+
+This is not a highly scientific process. There is a lot of noise in the data from my driving habits and different driving conditions. Moreover, there are lots of different ways you can drive to get different average speeds, i.e., the average speed doesn't represent a trip with a constant speed. Despite the noisiness, the data are representative of my driving experience.
+
+My primary interest was in how speed and climate control affected efficiency. I'm sure there are equations that could be used to describe these relationships more precisely, but I was interested in my real-world results. I also know that the expected relationship is non-linear, but my current dataset doesn't support that, so I just drew straight lines for now.
+
+![](/img/EfficiencyVsSpeed.png)
+
+These results mostly matched my expectations with lower efficiency at high speeds and A/C being more efficient than heat, but I was surprised by how relatively flat the line was for heat. To avoid those extra stops on that trip home from Redding last November, it really was necessary for me to both turn off the heat and slow down. If I had been making that trip in the summer, I might have been able to get by with just slowing down if I wanted to spare myself a stop or two. [My car has a PTC heater rather than a more efficient heat pump and doesn't have heated seats or steering wheel, which are more efficient than heating the cabin.]{.aside}
+
+The other key observation is that my car is outperforming the reported efficiency. The EPA rating for this car is 111 MPGe combined, which is roughly 3.3 mi/kWh. Only 4% of my observations fell below that value. Notably, my car is highly efficient when tooling around city streets with no climate control. 5.5 mi/kWh is roughly 185 MPGe. And this is not from hypermiling. Just my normal driving.  
+
+The main reason that I wasn't able to fit non-linear relationships is the relative lack of observations at intermediate speeds. Most of my driving is done on either the city streets of Sacramento or the regional freeways. I'm continuing to collect this data, though, and I might be able to gradually even out the distribution.
+
+![](/img/SpeedHistogram.png)
+
+I was also curious if there was evidence that I drove differently when it was colder, for example, where using the heater was an indicator of colder temperatures. I think the plot below is reasonably good evidence that my driving was mostly the same across the different climate control settings. In the future, I may gather air temperature data for these trips to see how well my use of climate control lines up with the outside temperature. Another factor in the higher efficiency when not using climate control is that the battery is most efficient when experiencing the same temperatures that make me less likely to use climate control.
+
+![](/img/SpeedVsDistance.png)
+
+In my [last EV post](/posts/electric-vehicles-california.qmd), I wasn't willing to go so far as to say that I would only buy EVs in the future, but I have arrived at that conclusion now. I greatly prefer the driving experience and the convenience of charging at home. My Nissan LEAF is one of the least capable EVs on the market and it still meets my needs greater than 95% of the time. That November trip to Redding and back was a bad experience, but that was only 340 miles out of 10,000 miles driven, and I know better now how to make it a not bad experience (won't go so far as to say good experience). There have only been a few other times where my short-range EV was a minor inconvenience. There are trade-offs here, too, because the short range comes from having a smaller battery, but that also makes the car lighter and more efficient.
