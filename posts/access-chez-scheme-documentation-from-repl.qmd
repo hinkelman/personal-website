@@ -1,11 +1,11 @@
 ---
 title: "Access Chez Scheme documentation from the REPL"
 date: 2020-01-01
-date-modified: 2026-09-26
+date-modified: 2026-10-07
 categories: ["Scheme", "chez-docs"]
 ---
 
-In the process of learning Chez Scheme, I missed R's ability to quickly pull up documentation from the console via [`help` or `?`](https://www.r-project.org/help.html). I was interested in the idea of trying to format the contents of the [Chez Scheme User's Guide (CSUG)](https://cisco.github.io/ChezScheme/csug10.0/) and [The Scheme Programming Language (TSPL)](https://www.scheme.com/tspl4/) for display in the REPL (similar to [Clojure Docs](https://clojuredocs.org/clojure.repl/doc)). That was a bigger task than I wanted to tackle and the first version of [`chez-docs`](https://github.com/hinkelman/chez-docs) simply opened links to the relevant sections of CSUG and TSPL from the REPL. Eventually, I more fully scraped the HTML documentation pages and displayed more information in the REPL while still providing the option to open a link to the online documentation.
+In the process of learning Chez Scheme, I missed R's ability to quickly pull up documentation from the console via [`help` or `?`](https://www.r-project.org/help.html). I was interested in the idea of trying to format the contents of the [Chez Scheme User's Guide (CSUG)](https://cisco.github.io/ChezScheme/csug10.3.0/) and [The Scheme Programming Language (TSPL)](https://www.scheme.com/tspl4/) for display in the REPL (similar to [Clojure Docs](https://clojuredocs.org/clojure.repl/doc)). That was a bigger task than I wanted to tackle and the first version of [`chez-docs`](https://github.com/hinkelman/chez-docs) simply opened links to the relevant sections of CSUG and TSPL from the REPL. Eventually, I more fully scraped the HTML documentation pages and displayed more information in the REPL while still providing the option to open a link to the online documentation.
 
 The initial web scraping was all done in R, but I eventually moved all of that code to Chez Scheme. The scraping code lives in a separate library, [`chez-docs-scrape`](https://github.com/hinkelman/chez-docs-scrape), and a short script, `scrape-script.ss`, runs the whole process. Neither CSUG nor TSPL provides a `sitemap.xml`, so `crawl-index` downloads each site's `index.html`, parses it with `html->sxml` from the `wak` library, and uses `sxpath` to extract every `href`. The fragments (`#...`) and leading `./` are stripped from the hrefs, which are then filtered to local `.html` pages and deduplicated. `download-pages` shells out to `curl` for each page and pauses for one second between requests.
 
@@ -22,7 +22,28 @@ Before parsing each downloaded HTML page, `read-and-clean` uses `irregex` to fix
     (open-string-input-port step3)))
 ```
 
-For each cleaned page, `sxpath` is used to extract `<p>` elements and walk through them looking for `formdef` blocks, the marked-up sections in the documentation that describe each procedure. Everything between a `formdef` and the next `formdef`, header, or footer is collected as the documentation for that anchor. Each `<p>` element is converted to plain text by `render-sxml`, which recursively walks the SXML tree. HTML entities (e.g., `&nbsp;`, `&lt;`, `&eacute;`) are translated with a lookup table, inline images are replaced with their text equivalents (e.g., math GIFs become `=>`, `->`, `λ`, `∞`), attribute subtrees are skipped, `<br>` becomes a newline, list items are rendered as `*` bullets, definition details are indented, superscripts are prefixed with `^`, and tables are replaced with `[table not shown]`.
+For each cleaned page, `sxpath` is used to extract `<p>` elements and walk through them looking for `formdef` blocks, the marked-up sections in the documentation that describe each procedure. Everything between a `formdef` and the next `formdef`, header, or footer is collected as the documentation for that anchor.
+
+Originally, each `<p>` element was converted directly to a plain-text string. That threw away the markup (e.g., code, metavariables, and links) that would be needed to display the documentation with any formatting. Now, `sxml->doc` recursively walks the SXML tree and converts each `<p>` element into a small semantic tree that keeps only the markup worth rendering. A doc node is either a string or a tagged list.
+
+``` scheme
+;;   (code node ...)         <tt>
+;;   (var node ...)          <i>, <it> (metavariables)
+;;   (bold node ...)         <b>
+;;   (sub node ...)          <sub>
+;;   (sup node ...)          <sup>
+;;   (link href node ...)    <a href=...>
+;;   (math string)           gif images and <=, >= entities
+;;   (br)                    <br>
+;;   (ul node ...)           <ul>
+;;   (li node ...)           <li>
+;;   (dt node ...)           <dt>
+;;   (dd node ...)           <dd>
+;;   (table row ...)         <table>, where row is (row cell ...)
+;;                           and cell is (cell node ...)
+```
+
+Tags not in that list (e.g., `p`, `span`, `div`) are spliced into their parent, attribute subtrees are skipped, and adjacent strings are merged to keep the tree compact. HTML entities (e.g., `&nbsp;`, `&lt;`, `&eacute;`) are translated with a lookup table, and inline images are replaced with their text equivalents (e.g., math GIFs become `=>`, `->`, `λ`, `∞`).
 
 The trickiest part was whitespace. The line breaks and indentation in the HTML source are invisible in a browser, but they show up as stray newlines and spaces in plain text. Before rendering the children of a node, `normalize-children` cleans them up in five steps.
 
@@ -35,7 +56,7 @@ The trickiest part was whitespace. The line breaks and indentation in the HTML s
     (normalize-inter-sibling-whitespace step4)))
 ```
 
-`strip-embedded-newlines` removes the trailing newline from each string and, when the string isn't the last child, inserts an empty-string sentinel in its place. `collapse-br-clusters` drops the sentinels adjacent to `<br>` nodes. `drop-leading-noise` and `drop-trailing-noise` trim empty strings, empty anchors, and dangling `<br>` nodes from the ends of the list. Finally, `normalize-inter-sibling-whitespace` replaces any sentinel sitting between two pieces of content with a single space and trims the leading indentation from the string that follows it. The result is a nested list keyed by source and anchor.
+`strip-embedded-newlines` removes the trailing newline from each string and, when the string isn't the last child, inserts an empty-string sentinel in its place. `collapse-br-clusters` drops the sentinels adjacent to `<br>` nodes. `drop-leading-noise` and `drop-trailing-noise` trim empty strings, empty anchors, and dangling `<br>` nodes from the ends of the list. Finally, `normalize-inter-sibling-whitespace` replaces any sentinel sitting between two pieces of content with a single space and trims the leading indentation from the string that follows it. The result is a nested list keyed by source and anchor, where each anchor is followed by a list of paragraphs and each paragraph is a list of doc nodes.
 
 The script writes the summary table and the documentation to `summary-data.scm` and `chez-docs-data.scm`, respectively. The `chez-docs` library loads these data files directly using `include`, which requires `summary-data.scm` and `chez-docs-data.scm` to be in the same directory as the library file.
 
@@ -49,7 +70,7 @@ The main procedure in `chez-docs` is `doc`, which uses `case-lambda` to handle o
     [(proc action source) (doc-helper proc action source)]))
 ```
 
-`doc-helper` validates arguments, then calls `get-doc` to look up the documentation text for `proc` in the given source. `get-doc` uses `get-anchor` to map the procedure name to its anchor via `summary-data`, then looks up the full documentation text in `chez-docs-data`. If `proc` isn't found, `doc-helper` raises an error that suggests the closest match based on a fuzzy search (Levenshtein distance) of all procedure names.
+`doc-helper` validates arguments, then calls `get-doc` to look up the documentation text for `proc` in the given source. `get-doc` uses `get-anchor` to map the procedure name to its anchor via `summary-data`, then looks up the full documentation text in `chez-docs-data`. If `proc` isn't found, `doc-helper` raises an error that suggests the closest match based on a fuzzy search (Levenshtein distance) of all procedure names. If `proc` is documented only in the other book, the error says so instead, e.g., `(doc "fxsll" 'display 'tspl)` reports `fxsll not found in tspl but is found in csug`.
 
 ``` scheme
 (define (get-doc proc source)
@@ -84,13 +105,33 @@ THE SCHEME PROGRAMMING LANGUAGE
 
 ``` scheme
 (define (action-helper proc doc action source)
-  (let ([srclu '((csug "\nCHEZ SCHEME USER'S GUIDE\n\n")
-                 (tspl "\nTHE SCHEME PROGRAMMING LANGUAGE\n\n"))])
+  (let ([srclu '((csug "CHEZ SCHEME USER'S GUIDE")
+                 (tspl "THE SCHEME PROGRAMMING LANGUAGE"))])
     (when (not (symbol=? action 'open))
-      (display (cadr (assoc source srclu)))
-      (for-each display doc))
+      (let ([render (current-renderer source)])
+        (display (string-append "\n" (render (list (list 'bold (cadr (assoc source srclu)))))
+                                "\n\n"))
+        (for-each (lambda (para) (display (string-append (render para) "\n\n"))) doc)))
     (when (not (symbol=? action 'display))
       (launch-doc-link proc source))))
+```
+
+Because the data is now a doc tree rather than plain strings, rendering happens in `chez-docs`. `current-renderer` returns a procedure, built by `make-renderer`, that walks a list of doc nodes and returns a string. The style is controlled by the `doc-style` parameter, which defaults to `'plain`. Plain rendering produces the same ASCII text as the original string-based scrape: `<br>` becomes a newline, list items are rendered as `*` bullets, definition details are indented, and superscripts are prefixed with `^`. Tables, which were previously replaced with `[table not shown]`, are now laid out in aligned columns.
+
+``` scheme
+(define doc-style
+  (make-parameter
+   'plain
+   (lambda (x)
+     (unless (memq x '(plain rich))
+       (assertion-violation "(doc-style style)" "style not one of 'plain, 'rich" x))
+     x)))
+```
+
+Setting `(doc-style 'rich)` uses ANSI escape codes to render labels in bold, metavariables in italics, and code in cyan. It also substitutes Unicode symbols, e.g., `⇒` for `=>`, `≤` for `<=`, `obj₁` for `obj1`, and `•` for list bullets. Cross-references become [OSC 8 hyperlinks](https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda) to the online documentation, which are clickable in terminals that support them. The links in the HTML are relative to the page, so they are resolved against each book's base URL, which is taken from the summary data so that it follows the scraped version of the docs. If the [`NO_COLOR`](https://no-color.org) environment variable is set, the escape codes (including hyperlinks) are omitted but the Unicode symbols are kept. To use rich output in every session, add `(doc-style 'rich)` to your `.chezschemerc` file after `(import (chez-docs))`, or use `parameterize` to change the style for a single call.
+
+``` scheme
+> (parameterize ([doc-style 'rich]) (doc "eq?"))
 ```
 
 `(machine-type)` is used to determine the system-specific string, `open-string`, for use in the system call. If the machine type isn't recognized, an error is raised that includes the URL so that you can open it yourself.
