@@ -11,12 +11,13 @@ The initial web scraping was all done in R, but I eventually moved all of that c
 
 The CSUG Summary of Forms page links to both CSUG and TSPL and is used to build a lookup table mapping each procedure name (the key) to its anchor and URL. The HTML is parsed with `html->sxml` and `sxpath` is used to extract the table rows (after dropping the column headers and horizontal rule in the first two rows). The key is the first token of the form with parentheses removed, and relative CSUG URLs are expanded to full URLs. Rows are split by source, and two edge cases are handled manually: `alias` appears twice in CSUG as both a procedure and a keyword for `import`. The keyword version is dropped. `let` appears twice in TSPL pointing to two different anchors. One is renamed `"named let"`.
 
-Before parsing each downloaded HTML page, `read-and-clean` uses `irregex` to fix a couple of problems in the source HTML that `html->sxml` doesn't handle well. Stray `<p>` tags that immediately precede a `<p>`, `<li>`, or `<ul>` tag are removed. Some `<dl>` blocks omit the closing `</dt>` before `<dd>`, which causes `html->sxml` to nest `<dd>` inside `<dt>` rather than treating them as siblings, so the missing `</dt>` tags are inserted (and any resulting `</dt></dt>` is collapsed back to a single `</dt>`).
+Before parsing each downloaded HTML page, `read-and-clean` uses `irregex` to fix a couple of problems in the source HTML that `html->sxml` doesn't handle well. Stray `<p>` tags that immediately precede a `<p>`, `<li>`, or `<ul>` tag are removed, as are stray `<p>` tags before an anchored list item (e.g., `<p><a name="g32"></a><li>`), which otherwise leave the `<li>` unclosed and nest the rest of the page inside it (as in `foreign.html` in CSUG 10.3). Some `<dl>` blocks omit the closing `</dt>` before `<dd>`, which causes `html->sxml` to nest `<dd>` inside `<dt>` rather than treating them as siblings, so the missing `</dt>` tags are inserted (and any resulting `</dt></dt>` is collapsed back to a single `</dt>`).
 
 ``` scheme
 (define (read-and-clean path)
   (let* ([raw     (call-with-input-file path get-string-all)]
-         [step1   (irregex-replace/all "<p>[ \t\r\n]*(?=<(p|li|ul)>)" raw "")]
+         [step0   (irregex-replace/all "<p>[ \t\r\n]*(?=<a name=\"[^\"]*\"></a><li>)" raw "")]
+         [step1   (irregex-replace/all "<p>[ \t\r\n]*(?=<(p|li|ul)>)" step0 "")]
          [step2   (irregex-replace/all "<dd>" step1 "</dt><dd>")]
          [step3   (irregex-replace/all "</dt></dt>" step2 "</dt>")])
     (open-string-input-port step3)))
